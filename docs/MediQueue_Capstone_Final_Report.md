@@ -16,7 +16,7 @@
 | **Hospital TV Display Screen** | **[https://mediqueue-25vl.onrender.com/display](https://mediqueue-25vl.onrender.com/display)** | Public high-contrast departure board for waiting rooms |
 | **Reporting & Analytics Hub** | **[https://mediqueue-25vl.onrender.com/admin/reports](https://mediqueue-25vl.onrender.com/admin/reports)** | Attendance KPIs, CSV export, email report dispatch |
 | **In-App Documentation Hub** | **[https://mediqueue-25vl.onrender.com/docs](https://mediqueue-25vl.onrender.com/docs)** | Dual-track technical & step-by-step non-technical guides |
-| **GitHub Source Code** | **[https://github.com/mhiskall282/ug-swe-exams](https://github.com/mhiskall282/ug-swe-exams)** | Version control, Dockerfile, Render blueprint, test suite |
+| **GitHub Source Code** | **[https://github.com/mhiskall282/MediQueue](https://github.com/mhiskall282/MediQueue)** | Version control, Dockerfile, Render blueprint, test suite |
 
 ---
 

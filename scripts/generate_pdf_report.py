@@ -158,7 +158,7 @@ def build_pdf(filename="docs/MediQueue_Capstone_Final_Report.pdf"):
         [Paragraph("<b>Live Web Application:</b>", table_cell), Paragraph("<font color='#4f46e5'>https://mediqueue-25vl.onrender.com</font>", table_cell)],
         [Paragraph("<b>Hospital TV Display Screen:</b>", table_cell), Paragraph("<font color='#4f46e5'>https://mediqueue-25vl.onrender.com/display</font>", table_cell)],
         [Paragraph("<b>In-App Documentation Hub:</b>", table_cell), Paragraph("<font color='#4f46e5'>https://mediqueue-25vl.onrender.com/docs</font>", table_cell)],
-        [Paragraph("<b>GitHub Source Repository:</b>", table_cell), Paragraph("<font color='#4f46e5'>https://github.com/mhiskall282/ug-swe-exams</font>", table_cell)],
+        [Paragraph("<b>GitHub Source Repository:</b>", table_cell), Paragraph("<font color='#4f46e5'>https://github.com/mhiskall282/MediQueue</font>", table_cell)],
         [Paragraph("<b>Automated Test Suite:</b>", table_cell), Paragraph("<b>57 PHPUnit Tests / 234 Assertions (100% Pass)</b>", table_cell)],
         [Paragraph("<b>Technology Stack:</b>", table_cell), Paragraph("Laravel 12, PHP 8.2, Tailwind CSS v4, Managed PostgreSQL, Vite 7", table_cell)],
         [Paragraph("<b>Clinical Subsystems:</b>", table_cell), Paragraph("5-Tier Triage, Ward Beds, Advance Appointments, On-Call Roster, Lab Loopback, Trauma Protocol", table_cell)],
@@ -381,7 +381,7 @@ def build_pdf(filename="docs/MediQueue_Capstone_Final_Report.pdf"):
         [Paragraph("Hospital TV Departure Screen", table_cell), Paragraph("<font color='#4f46e5'>https://mediqueue-25vl.onrender.com/display</font>", table_cell)],
         [Paragraph("In-App Documentation Hub", table_cell), Paragraph("<font color='#4f46e5'>https://mediqueue-25vl.onrender.com/docs</font>", table_cell)],
         [Paragraph("Reporting & Analytics Portal", table_cell), Paragraph("<font color='#4f46e5'>https://mediqueue-25vl.onrender.com/admin/reports</font>", table_cell)],
-        [Paragraph("GitHub Source Repository", table_cell), Paragraph("<font color='#4f46e5'>https://github.com/mhiskall282/ug-swe-exams</font>", table_cell)],
+        [Paragraph("GitHub Source Repository", table_cell), Paragraph("<font color='#4f46e5'>https://github.com/mhiskall282/MediQueue</font>", table_cell)],
     ]
     t_sub = Table(sub_data, colWidths=[160, 355])
     t_sub.setStyle(TableStyle([

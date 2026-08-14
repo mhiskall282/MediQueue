@@ -410,7 +410,7 @@
                         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                         Hospital TV Screen
                     </a>
-                    <a href="https://github.com/mhiskall282/ug-swe-exams" target="_blank" class="hover:text-indigo-600 transition-colors">GitHub Source</a>
+                    <a href="https://github.com/mhiskall282/MediQueue" target="_blank" class="hover:text-indigo-600 transition-colors">GitHub Source</a>
                 </div>
                 <p class="text-xs text-slate-400">
                     Advanced Software Engineering Capstone &copy; {{ date('Y') }}

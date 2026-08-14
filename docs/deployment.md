@@ -38,7 +38,7 @@ MediQueue is packaged as a self-contained container with PHP 8.2-FPM and Nginx m
    ```
 2. Log in to [Render Dashboard](https://dashboard.render.com).
 3. Click **New +** → **Blueprint**.
-4. Connect your GitHub repository (`ug-swe-exams`).
+4. Connect your GitHub repository (`MediQueue`).
 5. Render will automatically detect `render.yaml` and provision both:
    - **Managed PostgreSQL Database** (`mediqueue-db`): Dedicated PostgreSQL instance with internal network access.
    - **Web Service** (`mediqueue`): Dockerized Laravel app automatically connected to the database.
