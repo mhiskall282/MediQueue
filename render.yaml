@@ -21,7 +21,7 @@ services:
       - key: APP_DEBUG
         value: false
       - key: APP_KEY
-        generateValue: true
+        value: base64:kCkNSwihlFVDA97qozR5yDW83gBJlkiYC0DOJ3UP7Aw=
       - key: APP_URL
         value: https://mediqueue.onrender.com
       # Managed PostgreSQL Database Connections
