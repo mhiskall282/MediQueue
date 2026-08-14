@@ -2,7 +2,7 @@ databases:
   - name: mediqueue-db
     databaseName: mediqueue
     user: mediqueue_user
-    plan: starter
+    plan: basic-256mb
     region: singapore
     ipAllowList: [] # internal connections only
 
