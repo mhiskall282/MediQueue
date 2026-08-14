@@ -38,6 +38,16 @@ class QueueEntry extends Model
     public const TRIAGE_BLUE   = 'BLUE';     // Priority 5: Non-Urgent (240 min target)
 
     /**
+     * Clinical Referral & Inter-Departmental Workflow Stages
+     */
+    public const STAGE_INITIAL_TRIAGE       = 'INITIAL_TRIAGE';
+    public const STAGE_IN_CONSULTATION      = 'IN_CONSULTATION';
+    public const STAGE_SENT_TO_LAB          = 'SENT_TO_LAB';
+    public const STAGE_LAB_COMPLETED        = 'LAB_COMPLETED';
+    public const STAGE_RETURNED_FOR_REVIEW  = 'RETURNED_FOR_REVIEW';
+    public const STAGE_DISCHARGED           = 'DISCHARGED';
+
+    /**
      * Active statuses — entries still in the queue flow.
      */
     public const ACTIVE_STATUSES = ['WAITING', 'CALLED', 'IN_SERVICE'];
@@ -53,7 +63,7 @@ class QueueEntry extends Model
     public const VALID_TRANSITIONS = [
         'WAITING'    => ['CALLED', 'CANCELLED'],
         'CALLED'     => ['IN_SERVICE', 'SKIPPED', 'CANCELLED'],
-        'IN_SERVICE' => ['COMPLETED'],
+        'IN_SERVICE' => ['COMPLETED', 'WAITING'],
         'SKIPPED'    => ['CALLED', 'CANCELLED'],
         'COMPLETED'  => [],   // Terminal
         'CANCELLED'  => [],   // Terminal
@@ -64,14 +74,21 @@ class QueueEntry extends Model
      */
     protected $fillable = [
         'patient_id',
+        'hospital_id',
         'service_id',
         'served_by',
+        'referring_staff_id',
         'queue_number',
         'sequence_number',
         'status',
         'priority',
         'triage_level',
         'triage_notes',
+        'is_emergency_unconscious',
+        'clinical_workflow_stage',
+        'clinical_notes',
+        'lab_orders',
+        'lab_results',
         'allocated_bed_id',
         'joined_at',
         'called_at',
@@ -116,6 +133,11 @@ class QueueEntry extends Model
     public function servedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'served_by');
+    }
+
+    public function referringStaff(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'referring_staff_id');
     }
 
     public function allocatedBed(): BelongsTo

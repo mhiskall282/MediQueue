@@ -2,27 +2,12 @@
 
 namespace Database\Seeders;
 
+use App\Models\DoctorRoster;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
-/**
- * UserSeeder — Creates default accounts for demonstration.
- *
- * IMPORTANT: These credentials are for DEMONSTRATION ONLY.
- * In a real production deployment, change all passwords and never commit
- * actual credentials to version control.
- *
- * Demo Credentials:
- * ------------------
- * Admin:    admin@mediqueue.test     / password
- * Staff:    dr.sarah@mediqueue.test  / password
- * Staff:    nurse.james@mediqueue.test / password
- * Staff:    dr.chen@mediqueue.test   / password
- * Patient:  john.doe@example.com    / password
- * Patient:  jane.smith@example.com  / password
- * Patient:  ali.hassan@example.com  / password
- */
 class UserSeeder extends Seeder
 {
     public function run(): void
@@ -31,35 +16,52 @@ class UserSeeder extends Seeder
         User::updateOrCreate(
             ['email' => 'admin@mediqueue.test'],
             [
-                'name'     => 'System Administrator',
-                'password' => Hash::make('password'),
-                'role'     => 'admin',
-                'phone'    => '+601234567890',
-                'is_active'=> true,
+                'hospital_id'    => 'MED-ADM-00001',
+                'name'           => 'System Administrator',
+                'password'       => Hash::make('password'),
+                'role'           => 'admin',
+                'specialization' => 'Healthcare Information Systems',
+                'phone'          => '+601234567890',
+                'is_active'      => true,
             ]
         );
 
-        // Staff accounts
+        // Staff accounts with Medical Specializations & On-Call Status
         $staffAccounts = [
             [
-                'name'  => 'Dr. Sarah Ahmad',
-                'email' => 'dr.sarah@mediqueue.test',
-                'phone' => '+601234567891',
+                'hospital_id'             => 'MED-DOC-00101',
+                'name'                    => 'Dr. Sarah Ahmad',
+                'email'                   => 'dr.sarah@mediqueue.test',
+                'phone'                   => '+601234567891',
+                'specialization'          => 'Emergency Medicine & Trauma Care',
+                'is_on_call'              => true,
+                'on_call_shift'           => '24H_TRAUMA',
+                'emergency_contact_phone' => '+601234567891',
             ],
             [
-                'name'  => 'Nurse James Wong',
-                'email' => 'nurse.james@mediqueue.test',
-                'phone' => '+601234567892',
+                'hospital_id'             => 'MED-NUR-00201',
+                'name'                    => 'Nurse James Wong',
+                'email'                   => 'nurse.james@mediqueue.test',
+                'phone'                   => '+601234567892',
+                'specialization'          => 'Critical Care & Triage Assessment',
+                'is_on_call'              => true,
+                'on_call_shift'           => 'DAY_SHIFT',
+                'emergency_contact_phone' => '+601234567892',
             ],
             [
-                'name'  => 'Dr. Chen Wei',
-                'email' => 'dr.chen@mediqueue.test',
-                'phone' => '+601234567893',
+                'hospital_id'             => 'MED-DOC-00102',
+                'name'                    => 'Dr. Chen Wei',
+                'email'                   => 'dr.chen@mediqueue.test',
+                'phone'                   => '+601234567893',
+                'specialization'          => 'Cardiology & Intensive Care',
+                'is_on_call'              => true,
+                'on_call_shift'           => 'NIGHT_EMERGENCY',
+                'emergency_contact_phone' => '+601234567893',
             ],
         ];
 
         foreach ($staffAccounts as $staff) {
-            User::updateOrCreate(
+            $user = User::updateOrCreate(
                 ['email' => $staff['email']],
                 array_merge($staff, [
                     'password' => Hash::make('password'),
@@ -67,15 +69,25 @@ class UserSeeder extends Seeder
                     'is_active'=> true,
                 ])
             );
+
+            // Create Doctor Roster for today
+            DoctorRoster::firstOrCreate(
+                ['doctor_id' => $user->id, 'duty_date' => Carbon::today()],
+                [
+                    'shift_type' => $staff['on_call_shift'] === 'NIGHT_EMERGENCY' ? DoctorRoster::SHIFT_NIGHT : DoctorRoster::SHIFT_ON_CALL_TRAUMA,
+                    'status'     => 'ACTIVE',
+                    'duty_notes' => 'On-duty emergency standby clinician',
+                ]
+            );
         }
 
-        // Patient accounts
+        // Patient accounts with Medical Record Numbers (MRN)
         $patients = [
-            ['name' => 'John Doe',      'email' => 'john.doe@example.com',    'phone' => '+601111234567'],
-            ['name' => 'Jane Smith',    'email' => 'jane.smith@example.com',  'phone' => '+601122345678'],
-            ['name' => 'Ali Hassan',    'email' => 'ali.hassan@example.com',  'phone' => '+601133456789'],
-            ['name' => 'Siti Aminah',   'email' => 'siti.aminah@example.com', 'phone' => '+601144567890'],
-            ['name' => 'Raju Kumar',    'email' => 'raju.kumar@example.com',  'phone' => '+601155678901'],
+            ['hospital_id' => 'MRN-2026-00001', 'name' => 'John Doe',    'email' => 'john.doe@example.com',    'phone' => '+601111234567'],
+            ['hospital_id' => 'MRN-2026-00002', 'name' => 'Jane Smith',  'email' => 'jane.smith@example.com',  'phone' => '+601122345678'],
+            ['hospital_id' => 'MRN-2026-00003', 'name' => 'Ali Hassan',  'email' => 'ali.hassan@example.com',  'phone' => '+601133456789'],
+            ['hospital_id' => 'MRN-2026-00004', 'name' => 'Siti Aminah', 'email' => 'siti.aminah@example.com', 'phone' => '+601144567890'],
+            ['hospital_id' => 'MRN-2026-00005', 'name' => 'Raju Kumar',  'email' => 'raju.kumar@example.com',  'phone' => '+601155678901'],
         ];
 
         foreach ($patients as $patient) {

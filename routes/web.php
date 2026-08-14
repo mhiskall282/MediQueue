@@ -14,6 +14,9 @@ use App\Http\Controllers\Patient\AppointmentController as PatientAppointmentCont
 use App\Http\Controllers\Patient\DashboardController as PatientDashboardController;
 use App\Http\Controllers\Patient\QueueController as PatientQueueController;
 use App\Http\Controllers\Staff\AppointmentController as StaffAppointmentController;
+use App\Http\Controllers\Staff\ClinicalReferralController;
+use App\Http\Controllers\Staff\EmergencyIntakeController;
+use App\Http\Controllers\Staff\OnCallController;
 use App\Http\Controllers\Staff\QueueController as StaffQueueController;
 use App\Http\Controllers\Staff\TriageController as StaffTriageController;
 use Illuminate\Support\Facades\Route;
@@ -121,6 +124,21 @@ Route::prefix('staff')
         // Clinic Appointments Schedule & Check-In Desk
         Route::get('/appointments',                    [StaffAppointmentController::class, 'index'])->name('appointments.index');
         Route::post('/appointments/{appointment}/check-in', [StaffAppointmentController::class, 'checkIn'])->name('appointments.check-in');
+
+        // Clinical Referrals, Lab Investigation Transfer Loops & Patient Discharge
+        Route::post('/referral/{queueEntry}/order-lab',    [ClinicalReferralController::class, 'orderLabAndTransfer'])->name('referral.order-lab');
+        Route::post('/referral/{queueEntry}/complete-lab', [ClinicalReferralController::class, 'completeLabAndReturn'])->name('referral.complete-lab');
+        Route::post('/referral/{queueEntry}/discharge',    [ClinicalReferralController::class, 'discharge'])->name('referral.discharge');
+
+        // Emergency Trauma & Unconscious Patient Rapid Admission Protocol
+        Route::get('/emergency',                                     [EmergencyIntakeController::class, 'index'])->name('emergency.index');
+        Route::post('/emergency/unconscious-intake',                  [EmergencyIntakeController::class, 'unconsciousIntake'])->name('emergency.unconscious-intake');
+        Route::post('/emergency/{queueEntry}/link-permanent-id',     [EmergencyIntakeController::class, 'linkPermanentId'])->name('emergency.link-permanent-id');
+
+        // Doctor On-Call Duty Rostering & Paging
+        Route::get('/on-call',                         [OnCallController::class, 'index'])->name('oncall.index');
+        Route::post('/on-call/{doctor}/toggle',        [OnCallController::class, 'toggleOnCall'])->name('oncall.toggle');
+        Route::post('/on-call/{doctor}/page',          [OnCallController::class, 'pageDoctor'])->name('oncall.page');
 
         // JSON live status polling for staff dashboard
         Route::get('/queue/live-status',               [StaffQueueController::class, 'liveStatus'])->name('queue.live-status');

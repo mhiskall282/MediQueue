@@ -27,9 +27,10 @@
 In conventional outpatient environments, physical queues produce severe waiting room overcrowding, patient anxiety, opaque triage prioritization, and elevated contagion risks. MediQueue replaces physical lines with a resilient, transactional digital queue engine.
 
 ### Key Performance Indicators
-- **Automated Test Pass Rate**: 100% (43 Tests / 160 Assertions)
+- **Automated Test Pass Rate**: 100% (57 Tests / 234 Assertions)
 - **Ticket Collisions**: 0.0s (Pessimistic Concurrency Locking via `lockForUpdate`)
 - **Software Estimation**: Karner's Use Case Points (~90 UCP / 46 Person-Hours)
+- **Clinical Subsystems**: 5-Tier Triage, Ward Beds, Advance Appointments, On-Call Roster, Lab Loopback, Emergency Unconscious Code Red Protocol
 - **Deployment Platform**: Docker Multi-Stage Container on Render Cloud PaaS + Managed PostgreSQL
 
 ---
@@ -45,13 +46,13 @@ MediQueue adopts a **Modular Layered Monolith** architecture (ADR-002). Domain l
 [ Security & Middleware ]   ── RoleMiddleware (patient | staff | admin) + RateLimiter Throttling
            │
            ▼
-[ Application Controllers ] ── Patient, Staff, Admin & Hospital Display Controllers
+[ Application Controllers ] ── Patient, Staff, On-Call, Lab, Emergency & Hospital Display Controllers
            │
            ▼
 [ Core Business Domain ]    ── QueueService (DB Transactions + Pessimistic Row Locking 'lockForUpdate')
            │
            ▼
-[ Data Persistence Tier ]   ── Eloquent Models (User, Service, QueueEntry, Notification, Setting, AuditLog)
+[ Data Persistence Tier ]   ── Eloquent Models (User, Service, QueueEntry, Bed, Appointment, DoctorRoster, AuditLog)
            │
            ▼
 [ Relational Store ]        ── Managed PostgreSQL / SQLite Relational Database

@@ -159,8 +159,9 @@ def build_pdf(filename="docs/MediQueue_Capstone_Final_Report.pdf"):
         [Paragraph("<b>Hospital TV Display Screen:</b>", table_cell), Paragraph("<font color='#4f46e5'>https://mediqueue-25vl.onrender.com/display</font>", table_cell)],
         [Paragraph("<b>In-App Documentation Hub:</b>", table_cell), Paragraph("<font color='#4f46e5'>https://mediqueue-25vl.onrender.com/docs</font>", table_cell)],
         [Paragraph("<b>GitHub Source Repository:</b>", table_cell), Paragraph("<font color='#4f46e5'>https://github.com/mhiskall282/ug-swe-exams</font>", table_cell)],
-        [Paragraph("<b>Automated Test Suite:</b>", table_cell), Paragraph("<b>43 PHPUnit Tests / 160 Assertions (100% Pass)</b>", table_cell)],
+        [Paragraph("<b>Automated Test Suite:</b>", table_cell), Paragraph("<b>57 PHPUnit Tests / 234 Assertions (100% Pass)</b>", table_cell)],
         [Paragraph("<b>Technology Stack:</b>", table_cell), Paragraph("Laravel 12, PHP 8.2, Tailwind CSS v4, Managed PostgreSQL, Vite 7", table_cell)],
+        [Paragraph("<b>Clinical Subsystems:</b>", table_cell), Paragraph("5-Tier Triage, Ward Beds, Advance Appointments, On-Call Roster, Lab Loopback, Trauma Protocol", table_cell)],
         [Paragraph("<b>Author / Candidate:</b>", table_cell), Paragraph("Lead Senior Software Engineering Candidate", table_cell)],
         [Paragraph("<b>Submission Date:</b>", table_cell), Paragraph("August 14, 2026", table_cell)],
     ]
@@ -169,13 +170,13 @@ def build_pdf(filename="docs/MediQueue_Capstone_Final_Report.pdf"):
         ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#f8fafc')),
         ('BOX', (0, 0), (-1, -1), 1, colors.HexColor('#cbd5e1')),
         ('INNERGRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#e2e8f0')),
-        ('TOPPADDING', (0, 0), (-1, -1), 8),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+        ('TOPPADDING', (0, 0), (-1, -1), 7),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 7),
         ('LEFTPADDING', (0, 0), (-1, -1), 12),
         ('RIGHTPADDING', (0, 0), (-1, -1), 12),
     ]))
     story.append(t_cover)
-    story.append(Spacer(1, 40))
+    story.append(Spacer(1, 30))
     story.append(Paragraph("<b>Status:</b> Production Ready, Deployed on Render Cloud PaaS, Fully Tested and Verified.", ParagraphStyle('StatusNotice', fontName='Helvetica-Bold', fontSize=10, textColor=colors.HexColor('#166534'))))
     story.append(PageBreak())
 
@@ -186,15 +187,15 @@ def build_pdf(filename="docs/MediQueue_Capstone_Final_Report.pdf"):
         body_style
     ))
     story.append(Paragraph(
-        "The project was engineered, tested, and containerized within an intensive 48-hour examination scope, delivering complete role-isolated workflows for patients, clinical staff, administrators, and public waiting room screens.",
+        "The project was engineered, tested, and containerized within an intensive 48-hour examination scope, delivering complete role-isolated workflows for patients, clinical staff, on-call doctors, diagnostic labs, trauma teams, administrators, and public hospital screens.",
         body_style
     ))
 
     # Metrics Table
     kpi_data = [
         [
-            Paragraph("<b>43 Tests (100% Pass)</b><br/><font size=7 color='#64748b'>Automated PHPUnit</font>", table_cell),
-            Paragraph("<b>160 Assertions</b><br/><font size=7 color='#64748b'>Zero Test Failures</font>", table_cell),
+            Paragraph("<b>57 Tests (100% Pass)</b><br/><font size=7 color='#64748b'>Automated PHPUnit</font>", table_cell),
+            Paragraph("<b>234 Assertions</b><br/><font size=7 color='#64748b'>Zero Test Failures</font>", table_cell),
             Paragraph("<b>~90 UCP (~46h)</b><br/><font size=7 color='#64748b'>Algorithmic Estimation</font>", table_cell),
             Paragraph("<b>0 Collisions</b><br/><font size=7 color='#64748b'>Pessimistic Concurrency</font>", table_cell),
         ]
@@ -319,7 +320,7 @@ def build_pdf(filename="docs/MediQueue_Capstone_Final_Report.pdf"):
     # ==================== 7. AUTOMATED QUALITY ASSURANCE ====================
     story.append(Paragraph("7. Quality Assurance & Automated Test Results", h1_style))
     story.append(Paragraph(
-        "All 43 automated PHPUnit tests (160 assertions) executed with 100% pass rate:",
+        "All 57 automated PHPUnit tests (234 assertions) executed with 100% pass rate:",
         body_style
     ))
 
@@ -329,15 +330,18 @@ def build_pdf(filename="docs/MediQueue_Capstone_Final_Report.pdf"):
         [Paragraph("<code>AuthorizationTest.php</code>", table_cell), Paragraph("RoleMiddleware, vertical/horizontal privilege isolation", table_cell), Paragraph("28", table_cell), Paragraph("<b>100% PASS</b>", table_cell)],
         [Paragraph("<code>QueueLifecycleTest.php</code>", table_cell), Paragraph("Atomic numbers, lockForUpdate, call/start/complete/skip", table_cell), Paragraph("52", table_cell), Paragraph("<b>100% PASS</b>", table_cell)],
         [Paragraph("<code>AdminEnhancementsTest.php</code>", table_cell), Paragraph("Hospital TV screen, settings, password reset, email dispatch", table_cell), Paragraph("34", table_cell), Paragraph("<b>100% PASS</b>", table_cell)],
+        [Paragraph("<code>ReportControllerTest.php</code>", table_cell), Paragraph("Operational reports, CSV export, email report, chain of custody", table_cell), Paragraph("19", table_cell), Paragraph("<b>100% PASS</b>", table_cell)],
+        [Paragraph("<code>TriageAndBedsTest.php</code>", table_cell), Paragraph("5-tier triage, bed allocation/release, appointment booking", table_cell), Paragraph("22", table_cell), Paragraph("<b>100% PASS</b>", table_cell)],
+        [Paragraph("<code>ClinicalReferralsAndOnCallTest.php</code>", table_cell), Paragraph("Lab transfer loop, doctor review, Code Red trauma intake, paging", table_cell), Paragraph("33", table_cell), Paragraph("<b>100% PASS</b>", table_cell)],
         [Paragraph("<code>SmokeTest.php</code>", table_cell), Paragraph("Guest, patient, staff, admin, /docs 200 HTTP rendering", table_cell), Paragraph("30", table_cell), Paragraph("<b>100% PASS</b>", table_cell)],
     ]
-    t_qa = Table(qa_data, colWidths=[140, 205, 70, 100])
+    t_qa = Table(qa_data, colWidths=[150, 200, 65, 95])
     t_qa.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#f1f5f9')),
         ('BOX', (0, 0), (-1, -1), 1, colors.HexColor('#cbd5e1')),
         ('INNERGRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#e2e8f0')),
-        ('TOPPADDING', (0, 0), (-1, -1), 5),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
+        ('TOPPADDING', (0, 0), (-1, -1), 4),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
     ]))
     story.append(t_qa)
     story.append(PageBreak())

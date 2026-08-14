@@ -16,11 +16,16 @@ class User extends Authenticatable
      * The attributes that are mass assignable.
      */
     protected $fillable = [
+        'hospital_id',
         'name',
         'email',
         'password',
         'role',
         'phone',
+        'specialization',
+        'is_on_call',
+        'on_call_shift',
+        'emergency_contact_phone',
         'is_active',
     ];
 
@@ -41,7 +46,34 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_active' => 'boolean',
+            'is_on_call' => 'boolean',
         ];
+    }
+
+    public function rosters(): HasMany
+    {
+        return $this->hasMany(DoctorRoster::class, 'doctor_id');
+    }
+
+    public function scopeOnCall($query)
+    {
+        return $query->where('role', 'staff')->where('is_on_call', true);
+    }
+
+    public static function boot(): void
+    {
+        parent::boot();
+
+        static::creating(function (User $user) {
+            if (empty($user->hospital_id)) {
+                $prefix = match ($user->role) {
+                    'admin' => 'MED-ADM',
+                    'staff' => 'MED-DOC',
+                    default => 'MRN-2026',
+                };
+                $user->hospital_id = sprintf('%s-%05d', $prefix, rand(10000, 99999));
+            }
+        });
     }
 
     // ================================================================

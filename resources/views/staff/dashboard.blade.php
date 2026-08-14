@@ -4,15 +4,22 @@
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
             <div>
                 <h1 class="text-3xl font-black text-slate-900 tracking-tight">Clinical Operations Console</h1>
-                <p class="text-sm text-slate-500 mt-1">Manage patient triage, queue callouts, consultations, and bed allocations.</p>
+                <p class="text-sm text-slate-500 mt-1">Manage patient triage, lab investigations, doctor review loops, and bed allocations.</p>
             </div>
 
-            <div class="flex flex-wrap items-center gap-3">
-                <a href="{{ route('staff.beds.index') }}" class="btn btn-secondary text-xs sm:text-sm font-bold flex items-center gap-1.5 border-indigo-200 text-indigo-700 bg-indigo-50/50 hover:bg-indigo-100">
-                    <span>🛏️</span> Ward & Bed Manager
+            <div class="flex flex-wrap items-center gap-2.5">
+                <a href="{{ route('staff.emergency.index') }}" class="btn btn-secondary text-xs font-black flex items-center gap-1 border-rose-300 text-rose-700 bg-rose-50 hover:bg-rose-100 shadow-xs">
+                    <span class="w-2 h-2 rounded-full bg-rose-600 animate-ping"></span>
+                    🚨 Emergency Trauma
                 </a>
-                <a href="{{ route('staff.appointments.index') }}" class="btn btn-secondary text-xs sm:text-sm font-bold flex items-center gap-1.5 border-blue-200 text-blue-700 bg-blue-50/50 hover:bg-blue-100">
-                    <span>📅</span> Appointments Desk
+                <a href="{{ route('staff.oncall.index') }}" class="btn btn-secondary text-xs font-bold flex items-center gap-1 border-emerald-200 text-emerald-700 bg-emerald-50/50 hover:bg-emerald-100">
+                    <span>🩺</span> On-Call Doctors
+                </a>
+                <a href="{{ route('staff.beds.index') }}" class="btn btn-secondary text-xs font-bold flex items-center gap-1 border-indigo-200 text-indigo-700 bg-indigo-50/50 hover:bg-indigo-100">
+                    <span>🛏️</span> Beds & Bays
+                </a>
+                <a href="{{ route('staff.appointments.index') }}" class="btn btn-secondary text-xs font-bold flex items-center gap-1 border-blue-200 text-blue-700 bg-blue-50/50 hover:bg-blue-100">
+                    <span>📅</span> Appointments
                 </a>
 
                 {{-- Service Switcher --}}
@@ -90,9 +97,9 @@
                                 No patient currently called. Click <strong>Call Next Patient</strong> to begin consultation.
                             </div>
                         @else
-                            <div class="space-y-4">
+                            <div class="space-y-6">
                                 @foreach($calledEntries as $entry)
-                                    <div class="border border-indigo-100 bg-indigo-50/40 rounded-2xl p-4 shadow-xs">
+                                    <div class="border border-indigo-100 bg-indigo-50/40 rounded-2xl p-5 shadow-xs">
                                         <div class="flex items-center justify-between mb-2">
                                             <span class="text-2xl font-black text-indigo-700 font-mono">{{ $entry->queue_number }}</span>
                                             <span class="badge {{ $entry->status_badge_class }}">{{ $entry->status_label }}</span>
@@ -103,6 +110,7 @@
                                             <span class="badge text-[10px] px-2 py-0.5 {{ $entry->triage_badge_class }}">
                                                 {{ $entry->triage_level }}
                                             </span>
+                                            <span class="text-[10px] font-mono text-slate-500 bg-white px-1.5 py-0.5 rounded border border-slate-200">{{ $entry->hospital_id }}</span>
                                         </div>
 
                                         @if($entry->allocatedBed)
@@ -115,30 +123,62 @@
                                             </div>
                                         @endif
 
-                                        <p class="text-[11px] text-slate-500 mb-3">Called at: {{ $entry->called_at?->format('g:i A') }}</p>
+                                        @if($entry->clinical_workflow_stage === 'RETURNED_FOR_REVIEW')
+                                            <div class="p-2.5 bg-amber-50 rounded-xl border border-amber-200 text-xs mb-3">
+                                                <span class="text-[10px] font-bold text-amber-800 uppercase block mb-1">🔬 Lab Findings Returned</span>
+                                                <p class="text-slate-800">{{ $entry->lab_results }}</p>
+                                            </div>
+                                        @endif
 
                                         {{-- Actions --}}
-                                        <div class="pt-3 border-t border-indigo-100 flex flex-wrap gap-2">
+                                        <div class="pt-3 border-t border-indigo-100 space-y-3">
                                             @if($entry->status === 'CALLED')
-                                                <form method="POST" action="{{ route('staff.queue.start', $entry) }}" class="flex-1">
-                                                    @csrf
-                                                    <button type="submit" class="btn btn-success btn-sm w-full justify-center text-xs">
-                                                        Start Consultation
-                                                    </button>
-                                                </form>
-                                                <form method="POST" action="{{ route('staff.queue.skip', $entry) }}">
-                                                    @csrf
-                                                    <button type="submit" class="btn btn-ghost btn-sm text-amber-700 hover:bg-amber-100 text-xs">
-                                                        Skip
-                                                    </button>
-                                                </form>
+                                                <div class="flex gap-2">
+                                                    <form method="POST" action="{{ route('staff.queue.start', $entry) }}" class="flex-1">
+                                                        @csrf
+                                                        <button type="submit" class="btn btn-success btn-sm w-full justify-center text-xs">
+                                                            Start Consultation
+                                                        </button>
+                                                    </form>
+                                                    <form method="POST" action="{{ route('staff.queue.skip', $entry) }}">
+                                                        @csrf
+                                                        <button type="submit" class="btn btn-ghost btn-sm text-amber-700 hover:bg-amber-100 text-xs">
+                                                            Skip
+                                                        </button>
+                                                    </form>
+                                                </div>
                                             @elseif($entry->status === 'IN_SERVICE')
-                                                <form method="POST" action="{{ route('staff.queue.complete', $entry) }}" class="w-full">
-                                                    @csrf
-                                                    <button type="submit" class="btn btn-primary btn-sm w-full justify-center text-xs font-bold">
-                                                        Complete Consultation
-                                                    </button>
-                                                </form>
+                                                {{-- Refer to Lab Form (Collapse Toggle) --}}
+                                                <details class="group bg-white rounded-xl p-3 border border-indigo-100">
+                                                    <summary class="text-xs font-bold text-indigo-700 cursor-pointer flex items-center justify-between">
+                                                        <span>🧪 Order Lab Investigation & Transfer</span>
+                                                        <span class="text-[10px] text-slate-400">Expand</span>
+                                                    </summary>
+                                                    <form method="POST" action="{{ route('staff.referral.order-lab', $entry) }}" class="mt-3 space-y-2">
+                                                        @csrf
+                                                        <textarea name="clinical_notes" rows="2" class="form-input text-xs" required placeholder="Doctor Consultation Notes & Diagnosis..."></textarea>
+                                                        <input type="text" name="lab_orders" class="form-input text-xs" required placeholder="Tests to perform (e.g. FBC, Lipid Panel, Chest X-Ray)">
+                                                        <button type="submit" class="btn btn-primary btn-sm w-full text-xs font-bold">
+                                                            Transfer to Lab Queue
+                                                        </button>
+                                                    </form>
+                                                </details>
+
+                                                {{-- Complete Consultation & Discharge Form --}}
+                                                <details class="group bg-white rounded-xl p-3 border border-emerald-100">
+                                                    <summary class="text-xs font-bold text-emerald-700 cursor-pointer flex items-center justify-between">
+                                                        <span>📋 Conclude Consultation & Discharge</span>
+                                                        <span class="text-[10px] text-slate-400">Expand</span>
+                                                    </summary>
+                                                    <form method="POST" action="{{ route('staff.referral.discharge', $entry) }}" class="mt-3 space-y-2">
+                                                        @csrf
+                                                        <textarea name="discharge_summary" rows="2" class="form-input text-xs" required placeholder="Final Clinical Summary & Instructions..."></textarea>
+                                                        <input type="text" name="prescriptions" class="form-input text-xs" placeholder="Prescriptions / Medications (Optional)">
+                                                        <button type="submit" class="btn bg-emerald-600 hover:bg-emerald-700 text-white btn-sm w-full text-xs font-bold">
+                                                            Discharge Patient & Dispatch Summary
+                                                        </button>
+                                                    </form>
+                                                </details>
                                             @endif
                                         </div>
                                     </div>
@@ -172,11 +212,14 @@
                                         <tr>
                                             <th>Pos</th>
                                             <th>Ticket #</th>
-                                            <th>Patient Name</th>
+                                            <th>Patient (MRN)</th>
+                                            <th>Stage</th>
                                             <th>Triage Level</th>
                                             <th>Bed / Bay</th>
                                             <th>Joined</th>
-                                            <th>Wait Time</th>
+                                            @if($selectedService->prefix === 'LAB')
+                                                <th>Action</th>
+                                            @endif
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -186,7 +229,12 @@
                                                 <td class="font-black text-indigo-700 font-mono">{{ $entry->queue_number }}</td>
                                                 <td>
                                                     <div class="font-semibold text-slate-900">{{ $entry->patient->name }}</div>
-                                                    <div class="text-[11px] text-slate-400">ID: #{{ $entry->patient_id }}</div>
+                                                    <div class="text-[11px] font-mono text-slate-400">{{ $entry->hospital_id ?? 'MRN Pending' }}</div>
+                                                </td>
+                                                <td>
+                                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700">
+                                                        {{ str_replace('_', ' ', $entry->clinical_workflow_stage) }}
+                                                    </span>
                                                 </td>
                                                 <td>
                                                     {{-- Quick Triage Form --}}
@@ -213,7 +261,24 @@
                                                     @endif
                                                 </td>
                                                 <td class="text-xs text-slate-600">{{ $entry->joined_at->format('g:i A') }}</td>
-                                                <td class="text-xs font-semibold text-slate-700">{{ $entry->joined_at->diffForHumans(null, true) }}</td>
+
+                                                {{-- If in Lab Queue, show instant Lab Results return form --}}
+                                                @if($selectedService->prefix === 'LAB' || $entry->clinical_workflow_stage === 'SENT_TO_LAB')
+                                                    <td>
+                                                        <details class="text-xs">
+                                                            <summary class="text-indigo-600 font-bold cursor-pointer hover:underline">
+                                                                Record Results & Return
+                                                            </summary>
+                                                            <form method="POST" action="{{ route('staff.referral.complete-lab', $entry) }}" class="mt-2 p-2 bg-white rounded border space-y-1">
+                                                                @csrf
+                                                                <input type="text" name="lab_results" class="form-input text-[11px] py-1" required placeholder="Enter Lab Findings...">
+                                                                <button type="submit" class="btn btn-primary btn-sm text-[10px] w-full py-1">
+                                                                    Send to Doctor
+                                                                </button>
+                                                            </form>
+                                                        </details>
+                                                    </td>
+                                                @endif
                                             </tr>
                                         @endforeach
                                     </tbody>

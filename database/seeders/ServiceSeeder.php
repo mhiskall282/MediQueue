@@ -42,9 +42,9 @@ class ServiceSeeder extends Seeder
                 'is_active'            => true,
             ],
             [
-                'name'                 => 'Health Screening',
-                'description'          => 'Annual health screening packages including BMI, blood glucose, and cholesterol checks.',
-                'prefix'               => 'HS',
+                'name'                 => 'Emergency & Trauma Resuscitation',
+                'description'          => 'Rapid trauma stabilization, code red emergency triage, and acute clinical resuscitation.',
+                'prefix'               => 'EMG',
                 'avg_duration_minutes' => 30,
                 'is_active'            => true,
             ],
