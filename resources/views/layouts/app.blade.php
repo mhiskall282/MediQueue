@@ -22,17 +22,17 @@
 <body class="min-h-screen bg-slate-50 font-sans antialiased">
 
     {{-- Navigation --}}
-    <nav class="bg-white border-b border-slate-200 sticky top-0 z-50">
+    <nav class="bg-white/80 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-50 transition-all duration-200 shadow-2xs">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 {{-- Logo --}}
-                <a href="{{ route('home') }}" class="flex items-center gap-2.5 group">
-                    <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-indigo-700 transition-colors">
+                <a href="{{ route('home') }}" class="flex items-center gap-3 group">
+                    <div class="w-9 h-9 bg-gradient-to-tr from-indigo-700 via-indigo-600 to-indigo-500 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md shadow-indigo-500/25 group-hover:scale-105 transition-transform">
                         <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
                         </svg>
                     </div>
-                    <span class="text-lg font-bold text-slate-900 tracking-tight">MediQueue</span>
+                    <span class="text-xl font-black text-slate-900 tracking-tight">MediQueue</span>
                 </a>
 
                 {{-- Nav Links --}}
@@ -175,21 +175,27 @@
     </main>
 
     {{-- Footer --}}
-    <footer class="border-t border-slate-200 bg-white mt-16">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div class="flex items-center gap-2">
-                    <div class="w-6 h-6 bg-indigo-600 rounded flex items-center justify-center">
+    <footer class="border-t border-slate-200/80 bg-white/70 backdrop-blur-md mt-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-6">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-gradient-to-tr from-indigo-700 to-indigo-600 rounded-xl flex items-center justify-center shadow-sm">
                         <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                         </svg>
                     </div>
-                    <span class="text-sm font-semibold text-slate-900">MediQueue</span>
+                    <div>
+                        <span class="text-sm font-bold text-slate-900 block">MediQueue</span>
+                        <span class="text-[11px] text-slate-400">Smart Clinic Queue System</span>
+                    </div>
                 </div>
-                <div class="flex items-center gap-6 text-xs text-slate-500 font-medium">
-                    <a href="{{ route('docs') }}" class="hover:text-indigo-600">Documentation & Guides</a>
-                    <a href="{{ route('display') }}" target="_blank" class="hover:text-indigo-600">Hospital TV Screen</a>
-                    <a href="https://github.com/mhiskall282/ug-swe-exams" target="_blank" class="hover:text-indigo-600">GitHub Source</a>
+                <div class="flex flex-wrap items-center gap-6 text-xs text-slate-600 font-semibold">
+                    <a href="{{ route('docs') }}" class="hover:text-indigo-600 transition-colors">Documentation & Guides</a>
+                    <a href="{{ route('display') }}" target="_blank" class="hover:text-indigo-600 transition-colors flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        Hospital TV Screen
+                    </a>
+                    <a href="https://github.com/mhiskall282/ug-swe-exams" target="_blank" class="hover:text-indigo-600 transition-colors">GitHub Source</a>
                 </div>
                 <p class="text-xs text-slate-400">
                     Advanced Software Engineering Capstone &copy; {{ date('Y') }}
