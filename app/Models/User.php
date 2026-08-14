@@ -312,7 +312,7 @@ class User extends Authenticatable
 
     public function unreadNotificationsCount(): int
     {
-        return $this->notifications()->where('is_read', false)->count();
+        return $this->notifications()->whereNull('read_at')->count();
     }
 
     public function getRoleLabelAttribute(): string
