@@ -13,6 +13,9 @@
 > **📺 Public TV Waiting Display**: **[https://mediqueue-25vl.onrender.com/display](https://mediqueue-25vl.onrender.com/display)**  
 > **📚 In-App Documentation Hub**: **[https://mediqueue-25vl.onrender.com/docs](https://mediqueue-25vl.onrender.com/docs)**  
 > **📑 Final Capstone Examination Report**: [`MediQueue_Capstone_Final_Report.pdf`](MediQueue_Capstone_Final_Report.pdf)
+>
+> **Advanced Software Engineering Capstone Examination Project**  
+> An enterprise-grade, accessible, responsive smart hospital queue management and clinical operations platform designed to eliminate physical waiting lines, streamline emergency triage, manage ward beds, facilitate diagnostic lab referral loops, and maintain HIPAA / ISO-27001 compliance for outpatient healthcare facilities.
 
 ---
 
@@ -113,6 +116,82 @@ Below is the exhaustive index of all HTTP routes, interfaces, and operational en
 
 ---
 
+## 🌟 Key Platform Features
+
+### 📺 Public Departure Hall TV Screen (`/display`)
+- **Hospital Departure-Board Display**: Dedicated TV waiting room screen featuring high-contrast "Now Calling" ticket numbers with animated glow, department status matrix, live clock, and automated 3-second data synchronization.
+- **Web Audio API Audible Chime**: Synthesized *Ding-Dong* audio tone that chimes automatically when any clinician calls a new patient.
+
+### 👤 Outpatient Self-Service Portal
+- **One-Click Queue Registration**: Select clinic service and receive an instant, atomic queue ticket (e.g. `GC-001`).
+- **Live Status Monitoring**: Real-time position tracking (`#1 in line`, `People ahead: 0`), estimated wait times, and department status via lightweight asynchronous polling.
+- **In-App & Email Notifications**: Automated transactional emails and in-app alerts when tickets are issued, called, in-service, completed, or cancelled.
+- **Queue History**: Review past clinic visits with timestamps and consultation wait durations.
+
+### 🩺 Clinical Staff Operations Console
+- **Focused Queue Control**: Single-click "Call Next Patient" honoring sequence numbers and urgent triage priorities.
+- **Consultation State Workflow**: Seamless progression through `WAITING` → `CALLED` → `IN_SERVICE` → `COMPLETED`.
+- **Handling Edge Cases**: "Skip" no-show patients and "Recall" them back into active consultation.
+- **5-Tier Manchester Emergency Triage**: Acuity scoring (🔴 P1 Immediate Resuscitation, 🟠 P2 Very Urgent, 🟡 P3 Priority, 🟢 P4 Standard, 🔵 P5 Routine).
+- **Ward & Resuscitation Bed Allocations**: Real-time bed tracking (AVAILABLE, OCCUPIED, CLEANING, MAINTENANCE) with automatic release upon clinical discharge.
+- **Emergency Trauma Rapid Admission Protocol**: Anonymous intake for unconscious casualties with temporary MRN generation (`EMG-DOE-7821`) and automated on-call doctor paging.
+- **Dual-Loop Diagnostic Laboratory Loop**: Doctor lab ordering, specimen processing, findings entry, and automated loopback to doctor review.
+
+### 👑 System Administration & Security Governance
+- **Medical Staff Licensing Gate & Approvals**: Review applicant practicing licenses (`MDC-GH`, `NMC`, `PC`) with one-click verify and access revocation.
+- **Dynamic Privilege Extension Matrix**: Admin-controlled granular capability overrides (`can_consult`, `can_triage`, `can_execute_lab`, `can_assign_beds`).
+- **HIPAA & ISO-27001 Security Incident Center**: Real-time brute-force rate-limiting, login IP change anomaly detection, and one-click incident resolution.
+- **Reporting & Analytics Desk**: Attendance KPIs, streaming CSV data exports, and formatted PDF clinical summaries.
+- **Immutable Forensic Audit Trail**: Append-only, time-stamped log recording every administrative and operational action with actor, IP, and metadata context.
+
+---
+
+## 🏗️ Architecture & Technology Stack
+
+| Layer | Technology | Specification / Details |
+|---|---|---|
+| **Backend Framework** | Laravel 12 (PHP 8.2+) | Modern MVC, Form Requests, Eloquent ORM, Middleware Pipelines |
+| **Frontend UI** | Blade Components + Tailwind CSS v4 | Curated Slate/Indigo/Emerald palettes, OKLCH tokens, responsive layout |
+| **Asset Pipeline** | Vite 7 | Pre-compiled client bundle (`public/build/`) |
+| **Database** | Relational DB (PostgreSQL / SQLite) | Fully normalized third-normal-form (3NF) relational schema |
+| **State Machine** | Transaction-Safe `QueueService` | Atomic ticketing with pessimistic row locking (`lockForUpdate`) |
+| **Testing** | PHPUnit 11 | 68 Automated Feature & Unit Tests, 276 Assertions (100% Pass) |
+| **Containerization** | Multi-stage Docker | PHP 8.2-FPM + Nginx + Supervisor on Alpine Linux |
+| **Cloud Deployment** | Render.com Blueprint (`render.yaml`) | Automated deployment with Managed PostgreSQL database instance |
+
+---
+
+## 📋 Software Requirements Specification (SRS) Summary
+
+### Functional Requirements Coverage
+- **FR-AUTH**: Authentication, granular clinical RBAC, mandatory first-time password reset, and self-onboarding.
+- **FR-QUE**: Atomic ticket generation, FIFO and Manchester acuity prioritized queue calling, state transitions.
+- **FR-TRIAGE**: 5-Tier Manchester Emergency Triage acuity assessment with priority queue elevation.
+- **FR-BED**: Hospital ward, bay, and resuscitation bed allocation and automatic release on discharge.
+- **FR-LAB**: Diagnostic laboratory referral orders, specimen processing, and automated physician review loop.
+- **FR-EMG**: Anonymous rapid trauma admission protocol for unconscious casualties with temporary MRN generation.
+- **FR-SEC**: HIPAA and ISO-27001 security telemetry, brute-force rate-limiting, login IP tracking, and audit logging.
+- **FR-NOT**: Multi-channel transactional notifications via Zoho Mail SMTP with UGMC hospital branding.
+
+---
+
+## ⏱️ Software Effort Estimation (Use Case Points — UCP)
+
+Calculated prior to implementation using Gustav Karner's algorithmic Use Case Points formula:
+
+$$\text{UCP} = (\text{UAW} + \text{UUCW}) \times \text{TCF} \times \text{ECF}$$
+
+| Metric | Value | Details |
+|---|---|---|
+| **Unadjusted Actor Weight (UAW)** | **14** | 1 Simple, 2 Average, 3 Complex Actors |
+| **Unadjusted Use Case Weight (UUCW)** | **150** | 14 Core Use Cases (4 Simple, 6 Average, 4 Complex) |
+| **Unadjusted Use Case Points (UUCP)** | **164** | $\text{UAW} + \text{UUCW}$ |
+| **Technical Complexity Factor (TCF)** | **0.935** | 13 Technical Factors assessed ($T_1 \dots T_{13}$) |
+| **Environmental Complexity Factor (ECF)**| **0.590** | 8 Environmental Factors assessed ($E_1 \dots E_8$) |
+| **Adjusted Use Case Points (UCP)** | **~90 UCP** | Fits comfortably within individual 48-hour examination scope |
+
+---
+
 ## 🔑 Demo Seeded Evaluation Credentials
 
 | Role | Name | Email | Password | Assigned Hospital ID |
@@ -170,23 +249,35 @@ Configuration: phpunit.xml
 ................................................................. 65 / 68 ( 95%)
 ...                                                               68 / 68 (100%)
 
-Time: 00:07.447, Memory: 54.00 MB
+Time: 00:13.389, Memory: 54.00 MB
 OK (68 tests, 276 assertions)
 ```
 
 ---
 
-## 🚢 Docker & Production Cloud Deployment
+## 🚢 Docker & Cloud Deployment
 
-### Docker Compose Local Deployment
+### Docker Compose Local Execution
 ```bash
 docker compose up -d --build
 ```
 
-### Render.com Cloud Deployment
+### Render.com Cloud Blueprint
 1. Connect **[https://github.com/mhiskall282/MediQueue](https://github.com/mhiskall282/MediQueue)** on Render.
 2. Select **Blueprint** (`render.yaml`).
-3. Click **Apply** to automatically provision PostgreSQL and the web application.
+3. Click **Apply** to automatically provision PostgreSQL and deploy the web service.
+
+---
+
+## 📚 Examination & Software Engineering Documentation
+
+Comprehensive engineering artifacts and documentation are available in `docs/`:
+
+- 📋 [**Software Requirements Specification (SRS)**](docs/SRS.md) — Complete functional, non-functional, clinical, and security specifications.
+- 📐 [**System Analysis & Design (SAD)**](docs/system-design.md) — Architectural diagrams, ERD, Use Case diagrams, and Sequence models.
+- ⏱️ [**Software Effort Estimation**](docs/estimation/estimation.md) — Algorithmic Use Case Points (UCP) estimation calculation.
+- 🚢 [**Production Deployment Guide**](docs/deployment.md) — Docker, Nginx, and Render cloud deployment architecture.
+- 📑 [**Academic Capstone Final Report**](MediQueue_Capstone_Final_Report.pdf) — Complete academic examination capstone document.
 
 ---
 
