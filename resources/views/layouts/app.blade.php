@@ -54,6 +54,9 @@
                             <a href="{{ route('admin.audit.index') }}" class="nav-item {{ request()->routeIs('admin.audit.*') ? 'nav-item-active' : '' }}">
                                 Audit
                             </a>
+                            <a href="{{ route('admin.reports.index') }}" class="nav-item {{ request()->routeIs('admin.reports.*') ? 'nav-item-active' : '' }}">
+                                Reports
+                            </a>
                             <a href="{{ route('display') }}" target="_blank" class="nav-item text-indigo-600 font-semibold flex items-center gap-1">
                                 <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                                 TV Screen
@@ -62,8 +65,14 @@
                                 Docs
                             </a>
                         @elseif(auth()->user()->isStaff())
-                            <a href="{{ route('staff.dashboard') }}" class="nav-item {{ request()->routeIs('staff.*') ? 'nav-item-active' : '' }}">
-                                Queue Management
+                            <a href="{{ route('staff.dashboard') }}" class="nav-item {{ request()->routeIs('staff.dashboard') ? 'nav-item-active' : '' }}">
+                                Clinical Console
+                            </a>
+                            <a href="{{ route('staff.beds.index') }}" class="nav-item {{ request()->routeIs('staff.beds.*') ? 'nav-item-active' : '' }}">
+                                Beds & Bays
+                            </a>
+                            <a href="{{ route('staff.appointments.index') }}" class="nav-item {{ request()->routeIs('staff.appointments.*') ? 'nav-item-active' : '' }}">
+                                Appointments
                             </a>
                             <a href="{{ route('display') }}" target="_blank" class="nav-item text-indigo-600 font-semibold flex items-center gap-1">
                                 <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -78,6 +87,9 @@
                             </a>
                             <a href="{{ route('patient.queue.index') }}" class="nav-item {{ request()->routeIs('patient.queue.*') ? 'nav-item-active' : '' }}">
                                 Join Queue
+                            </a>
+                            <a href="{{ route('patient.appointments.index') }}" class="nav-item {{ request()->routeIs('patient.appointments.*') ? 'nav-item-active' : '' }}">
+                                Appointments
                             </a>
                             <a href="{{ route('patient.history') }}" class="nav-item {{ request()->routeIs('patient.history') ? 'nav-item-active' : '' }}">
                                 History

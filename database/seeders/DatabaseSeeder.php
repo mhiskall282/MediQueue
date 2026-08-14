@@ -28,6 +28,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             ServiceSeeder::class,
             SettingSeeder::class,
+            BedSeeder::class,
             DemoQueueSeeder::class,
         ]);
     }

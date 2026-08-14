@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AuditController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\UserController;
@@ -9,9 +10,12 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\DisplayController;
 use App\Http\Controllers\DocsController;
+use App\Http\Controllers\Patient\AppointmentController as PatientAppointmentController;
 use App\Http\Controllers\Patient\DashboardController as PatientDashboardController;
 use App\Http\Controllers\Patient\QueueController as PatientQueueController;
+use App\Http\Controllers\Staff\AppointmentController as StaffAppointmentController;
 use App\Http\Controllers\Staff\QueueController as StaffQueueController;
+use App\Http\Controllers\Staff\TriageController as StaffTriageController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -22,9 +26,9 @@ use Illuminate\Support\Facades\Route;
 | Route Groups:
 | 1. Public   — Landing page, /docs technical documentation, /display waiting screen
 | 2. Auth     — Login / Register / Logout (Throttle protected)
-| 3. Patient  — Queue joining, status monitoring, history
-| 4. Staff    — Queue operations (call, serve, complete, skip, recall)
-| 5. Admin    — Services, users, password reset, settings, audit log
+| 3. Patient  — Join queue, live tracking, appointments, history
+| 4. Staff    — Queue operations, emergency triage, hospital beds, appointment check-in
+| 5. Admin    — Service catalogue, user management, clinic settings, audit, reports
 |
 */
 
@@ -33,13 +37,20 @@ use Illuminate\Support\Facades\Route;
 // ============================================================
 
 Route::get('/', function () {
-    return view('landing');
+    if (auth()->check()) {
+        return match (auth()->user()->role) {
+            'admin'   => redirect()->route('admin.dashboard'),
+            'staff'   => redirect()->route('staff.dashboard'),
+            default   => redirect()->route('patient.dashboard'),
+        };
+    }
+    return view('welcome');
 })->name('home');
 
-// Interactive Documentation Hub
+// Interactive In-App Documentation Hub
 Route::get('/docs', [DocsController::class, 'index'])->name('docs');
 
-// Hospital / Clinic Public Waiting Room Display TV Screen
+// Hospital Waiting Room TV Public Screen
 Route::get('/display',      [DisplayController::class, 'index'])->name('display');
 Route::get('/display/data', [DisplayController::class, 'data'])->name('display.data');
 
@@ -48,15 +59,13 @@ Route::get('/display/data', [DisplayController::class, 'data'])->name('display.d
 // ============================================================
 
 Route::middleware('guest')->group(function () {
-    Route::get('/login',    [LoginController::class, 'create'])->name('login');
-    Route::post('/login',   [LoginController::class, 'store'])->middleware('throttle:10,1');
-    Route::get('/register', [RegisterController::class, 'create'])->name('register');
-    Route::post('/register',[RegisterController::class, 'store'])->middleware('throttle:10,1');
+    Route::get('/login',     [LoginController::class, 'create'])->name('login');
+    Route::post('/login',    [LoginController::class, 'store'])->middleware('throttle:10,1');
+    Route::get('/register',  [RegisterController::class, 'create'])->name('register');
+    Route::post('/register', [RegisterController::class, 'store'])->middleware('throttle:5,1');
 });
 
-Route::post('/logout', [LoginController::class, 'destroy'])
-    ->middleware('auth')
-    ->name('logout');
+Route::post('/logout', [LoginController::class, 'destroy'])->middleware('auth')->name('logout');
 
 // ============================================================
 // 3. Patient Routes
@@ -80,6 +89,12 @@ Route::prefix('patient')
 
         // JSON polling endpoint for live updates
         Route::get('/queue/{queueEntry}/status.json',  [PatientQueueController::class, 'statusJson'])->name('queue.status.json');
+
+        // Advance Clinic Appointments
+        Route::get('/appointments',                    [PatientAppointmentController::class, 'index'])->name('appointments.index');
+        Route::get('/appointments/create',             [PatientAppointmentController::class, 'create'])->name('appointments.create');
+        Route::post('/appointments',                   [PatientAppointmentController::class, 'store'])->name('appointments.store');
+        Route::post('/appointments/{appointment}/cancel', [PatientAppointmentController::class, 'cancel'])->name('appointments.cancel');
     });
 
 // ============================================================
@@ -96,6 +111,16 @@ Route::prefix('staff')
         Route::post('/queue/{queueEntry}/complete',    [StaffQueueController::class, 'complete'])->name('queue.complete');
         Route::post('/queue/{queueEntry}/skip',        [StaffQueueController::class, 'skip'])->name('queue.skip');
         Route::post('/queue/{queueEntry}/recall',      [StaffQueueController::class, 'recall'])->name('queue.recall');
+
+        // Emergency Triage & Bed Allocation
+        Route::post('/queue/{queueEntry}/triage',       [StaffTriageController::class, 'updateTriage'])->name('queue.triage');
+        Route::post('/queue/{queueEntry}/allocate-bed', [StaffTriageController::class, 'allocateBed'])->name('queue.allocate-bed');
+        Route::post('/queue/{queueEntry}/release-bed',  [StaffTriageController::class, 'releaseBed'])->name('queue.release-bed');
+        Route::get('/beds',                            [StaffTriageController::class, 'bedsIndex'])->name('beds.index');
+
+        // Clinic Appointments Schedule & Check-In Desk
+        Route::get('/appointments',                    [StaffAppointmentController::class, 'index'])->name('appointments.index');
+        Route::post('/appointments/{appointment}/check-in', [StaffAppointmentController::class, 'checkIn'])->name('appointments.check-in');
 
         // JSON live status polling for staff dashboard
         Route::get('/queue/live-status',               [StaffQueueController::class, 'liveStatus'])->name('queue.live-status');
@@ -127,8 +152,14 @@ Route::prefix('admin')
         Route::post('/users/{user}/reset-password',       [UserController::class, 'resetPassword'])->name('users.reset-password');
 
         // Clinic & System Settings
-        Route::get('/settings',  [SettingController::class, 'index'])->name('settings.index');
-        Route::put('/settings',  [SettingController::class, 'update'])->name('settings.update');
+        Route::get('/settings',                           [SettingController::class, 'index'])->name('settings.index');
+        Route::put('/settings',                           [SettingController::class, 'update'])->name('settings.update');
+
+        // Clinical Reports, CSV Export, Email Dispatch, and Forensic Investigation
+        Route::get('/reports',                             [ReportController::class, 'index'])->name('reports.index');
+        Route::get('/reports/export',                      [ReportController::class, 'exportCsv'])->name('reports.export');
+        Route::post('/reports/email',                      [ReportController::class, 'emailReport'])->name('reports.email');
+        Route::get('/reports/investigate/{queueEntry}',    [ReportController::class, 'investigate'])->name('reports.investigate');
 
         // Audit log
         Route::get('/audit', [AuditController::class, 'index'])->name('audit.index');

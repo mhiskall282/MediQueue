@@ -1,113 +1,142 @@
-<x-layouts.app title="Staff Queue Console">
+<x-layouts.app title="Staff Clinical Console — MediQueue">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {{-- Header & Department Selector --}}
+        {{-- Top Bar & Service Selector --}}
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
             <div>
-                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 mb-2">
-                    Staff Clinical Console
-                </span>
-                <h1 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Queue Management</h1>
+                <h1 class="text-3xl font-black text-slate-900 tracking-tight">Clinical Operations Console</h1>
+                <p class="text-sm text-slate-500 mt-1">Manage patient triage, queue callouts, consultations, and bed allocations.</p>
             </div>
 
-            {{-- Service Dropdown Switcher --}}
-            <form method="GET" action="{{ route('staff.dashboard') }}" class="flex items-center gap-3">
-                <label for="service_id" class="text-xs font-bold text-slate-600 uppercase">Department:</label>
-                <select name="service_id" id="service_id" onchange="this.form.submit()" class="form-input text-sm py-2 px-3 bg-white font-semibold text-slate-800 rounded-lg shadow-sm border-slate-300">
-                    @foreach($services as $svc)
-                        <option value="{{ $svc->id }}" {{ $selectedService && $selectedService->id === $svc->id ? 'selected' : '' }}>
-                            {{ $svc->name }} ({{ $svc->prefix }})
-                        </option>
-                    @endforeach
-                </select>
-            </form>
+            <div class="flex flex-wrap items-center gap-3">
+                <a href="{{ route('staff.beds.index') }}" class="btn btn-secondary text-xs sm:text-sm font-bold flex items-center gap-1.5 border-indigo-200 text-indigo-700 bg-indigo-50/50 hover:bg-indigo-100">
+                    <span>🛏️</span> Ward & Bed Manager
+                </a>
+                <a href="{{ route('staff.appointments.index') }}" class="btn btn-secondary text-xs sm:text-sm font-bold flex items-center gap-1.5 border-blue-200 text-blue-700 bg-blue-50/50 hover:bg-blue-100">
+                    <span>📅</span> Appointments Desk
+                </a>
+
+                {{-- Service Switcher --}}
+                <form method="GET" action="{{ route('staff.dashboard') }}" class="flex items-center gap-2">
+                    <select name="service_id" onchange="this.form.submit()" class="form-input text-xs py-2">
+                        @foreach($services as $service)
+                            <option value="{{ $service->id }}" {{ $selectedService && $selectedService->id === $service->id ? 'selected' : '' }}>
+                                {{ $service->name }} ({{ $service->prefix }})
+                            </option>
+                        @endforeach
+                    </select>
+                </form>
+            </div>
         </div>
 
         @if(!$selectedService)
-            <div class="card p-12 text-center">
-                <p class="text-slate-500">No active clinic services are configured. Please contact the administrator.</p>
+            <div class="card p-12 text-center text-slate-500">
+                <p class="font-medium text-sm">No active clinic services configured. Please contact the administrator.</p>
             </div>
         @else
-            {{-- Metric Cards --}}
+            {{-- Metrics Row --}}
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                <div class="card p-5 bg-amber-50/50 border-amber-200">
-                    <span class="text-xs font-bold uppercase text-amber-700 block">Waiting Queue</span>
-                    <span class="text-3xl font-black text-amber-900 mt-1 block">{{ $waitingEntries->count() }}</span>
+                <div class="stat-card">
+                    <span class="text-xs font-bold text-slate-500 uppercase block">Waiting In Line</span>
+                    <span class="text-3xl font-black text-slate-900 mt-1 block">{{ $waitingEntries->count() }}</span>
+                    <span class="text-[11px] text-slate-400">Patients in {{ $selectedService->prefix }} queue</span>
                 </div>
-                <div class="card p-5 bg-indigo-50/50 border-indigo-200">
-                    <span class="text-xs font-bold uppercase text-indigo-700 block">Called / Serving</span>
-                    <span class="text-3xl font-black text-indigo-900 mt-1 block">{{ $calledEntries->count() }}</span>
+
+                <div class="stat-card">
+                    <span class="text-xs font-bold text-indigo-600 uppercase block">Currently Called</span>
+                    <span class="text-3xl font-black text-indigo-600 mt-1 block">{{ $calledEntries->count() }}</span>
+                    <span class="text-[11px] text-slate-400">Active consultations / callouts</span>
                 </div>
-                <div class="card p-5 bg-emerald-50/50 border-emerald-200">
-                    <span class="text-xs font-bold uppercase text-emerald-700 block">Completed Today</span>
-                    <span class="text-3xl font-black text-emerald-900 mt-1 block">{{ $completedToday }}</span>
+
+                <div class="stat-card">
+                    <span class="text-xs font-bold text-emerald-600 uppercase block">Completed Today</span>
+                    <span class="text-3xl font-black text-emerald-600 mt-1 block">{{ $completedToday }}</span>
+                    <span class="text-[11px] text-slate-400">Finished consultations</span>
                 </div>
-                <div class="card p-5 bg-slate-50 border-slate-200">
-                    <span class="text-xs font-bold uppercase text-slate-600 block">Avg Wait Time</span>
-                    <span class="text-3xl font-black text-slate-800 mt-1 block">~{{ $avgWaitMinutes }} min</span>
+
+                <div class="stat-card">
+                    <span class="text-xs font-bold text-slate-500 uppercase block">Avg Service Time</span>
+                    <span class="text-3xl font-black text-slate-900 mt-1 block">~{{ $selectedService->avg_duration_minutes }}m</span>
+                    <span class="text-[11px] text-slate-400">Target duration per patient</span>
                 </div>
             </div>
 
-            {{-- Staff Operation Section --}}
+            {{-- Main Operational Workspace --}}
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {{-- Left: Active & Called Console (Primary Focus) --}}
-                <div class="lg:col-span-1 space-y-6">
-                    {{-- "Call Next" Primary CTA Card --}}
-                    <div class="card p-6 bg-gradient-to-br from-indigo-900 to-indigo-800 text-white shadow-md">
-                        <h2 class="text-base font-bold text-indigo-100 uppercase tracking-wider">Queue Action</h2>
-                        <p class="text-xs text-indigo-200 mt-1 mb-6">Call the next eligible patient according to queue sequence and priority.</p>
+                {{-- Left: Call Next & Active Patient Card --}}
+                <div class="space-y-6">
+                    {{-- Call Next Action Box --}}
+                    <div class="card p-6 bg-gradient-to-br from-indigo-900 to-slate-900 text-white shadow-xl">
+                        <span class="text-xs font-bold uppercase tracking-wider text-indigo-300 block mb-2">Queue Dispatcher</span>
+                        <h2 class="text-xl font-black text-white mb-2">Next Patient in Line</h2>
+                        <p class="text-xs text-indigo-200 mb-6">Calls the next waiting patient according to clinical triage severity and sequence.</p>
 
                         <form method="POST" action="{{ route('staff.queue.call-next') }}">
                             @csrf
                             <input type="hidden" name="service_id" value="{{ $selectedService->id }}">
-                            <button type="submit" class="btn btn-xl w-full bg-emerald-500 hover:bg-emerald-600 text-white font-black text-lg justify-center shadow-lg border-0 {{ $waitingEntries->isEmpty() ? 'opacity-50 cursor-not-allowed' : '' }}" {{ $waitingEntries->isEmpty() ? 'disabled' : '' }}>
-                                <svg class="w-6 h-6 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-                                </svg>
-                                Call Next Patient
+                            <button type="submit" {{ $waitingEntries->isEmpty() ? 'disabled' : '' }} class="btn bg-indigo-500 hover:bg-indigo-400 text-white font-black py-4 w-full shadow-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                                📢 CALL NEXT PATIENT
                             </button>
                         </form>
                     </div>
 
-                    {{-- Currently Called / In-Service Tickets --}}
+                    {{-- Active / Called Patients Container --}}
                     <div class="card p-6">
-                        <h2 class="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
-                            <span class="w-2.5 h-2.5 rounded-full bg-indigo-600"></span>
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-4">
                             Active Consultations ({{ $calledEntries->count() }})
-                        </h2>
+                        </h3>
 
                         @if($calledEntries->isEmpty())
-                            <p class="text-xs text-slate-400 text-center py-6">No patients currently called or in service.</p>
+                            <div class="text-center py-8 text-slate-400 text-xs">
+                                No patient currently called. Click <strong>Call Next Patient</strong> to begin consultation.
+                            </div>
                         @else
                             <div class="space-y-4">
                                 @foreach($calledEntries as $entry)
-                                    <div class="border border-indigo-100 bg-indigo-50/40 rounded-xl p-4">
-                                        <div class="flex items-center justify-between">
+                                    <div class="border border-indigo-100 bg-indigo-50/40 rounded-2xl p-4 shadow-xs">
+                                        <div class="flex items-center justify-between mb-2">
                                             <span class="text-2xl font-black text-indigo-700 font-mono">{{ $entry->queue_number }}</span>
                                             <span class="badge {{ $entry->status_badge_class }}">{{ $entry->status_label }}</span>
                                         </div>
-                                        <p class="text-xs font-bold text-slate-800 mt-2">{{ $entry->patient->name }}</p>
-                                        <p class="text-[11px] text-slate-500">Called at: {{ $entry->called_at?->format('g:i A') }}</p>
 
-                                        {{-- Actions based on state --}}
-                                        <div class="mt-4 pt-3 border-t border-indigo-100 flex flex-wrap gap-2">
+                                        <div class="flex items-center gap-2 mb-2">
+                                            <span class="text-xs font-bold text-slate-900">{{ $entry->patient->name }}</span>
+                                            <span class="badge text-[10px] px-2 py-0.5 {{ $entry->triage_badge_class }}">
+                                                {{ $entry->triage_level }}
+                                            </span>
+                                        </div>
+
+                                        @if($entry->allocatedBed)
+                                            <div class="p-2 bg-white rounded-xl border border-indigo-200 text-xs mb-3 flex items-center justify-between">
+                                                <span class="font-bold text-indigo-900">🛏️ Bed {{ $entry->allocatedBed->bed_number }} ({{ $entry->allocatedBed->ward_name }})</span>
+                                                <form method="POST" action="{{ route('staff.queue.release-bed', $entry) }}">
+                                                    @csrf
+                                                    <button type="submit" class="text-[10px] text-rose-600 font-bold hover:underline">Release</button>
+                                                </form>
+                                            </div>
+                                        @endif
+
+                                        <p class="text-[11px] text-slate-500 mb-3">Called at: {{ $entry->called_at?->format('g:i A') }}</p>
+
+                                        {{-- Actions --}}
+                                        <div class="pt-3 border-t border-indigo-100 flex flex-wrap gap-2">
                                             @if($entry->status === 'CALLED')
                                                 <form method="POST" action="{{ route('staff.queue.start', $entry) }}" class="flex-1">
                                                     @csrf
-                                                    <button type="submit" class="btn btn-success btn-sm w-full justify-center">
-                                                        Start Service
+                                                    <button type="submit" class="btn btn-success btn-sm w-full justify-center text-xs">
+                                                        Start Consultation
                                                     </button>
                                                 </form>
                                                 <form method="POST" action="{{ route('staff.queue.skip', $entry) }}">
                                                     @csrf
-                                                    <button type="submit" class="btn btn-ghost btn-sm text-amber-700 hover:bg-amber-100" title="Patient did not respond">
+                                                    <button type="submit" class="btn btn-ghost btn-sm text-amber-700 hover:bg-amber-100 text-xs">
                                                         Skip
                                                     </button>
                                                 </form>
                                             @elseif($entry->status === 'IN_SERVICE')
                                                 <form method="POST" action="{{ route('staff.queue.complete', $entry) }}" class="w-full">
                                                     @csrf
-                                                    <button type="submit" class="btn btn-primary btn-sm w-full justify-center">
-                                                        Complete Service
+                                                    <button type="submit" class="btn btn-primary btn-sm w-full justify-center text-xs font-bold">
+                                                        Complete Consultation
                                                     </button>
                                                 </form>
                                             @endif
@@ -119,12 +148,12 @@
                     </div>
                 </div>
 
-                {{-- Right: Waiting Patients Table --}}
+                {{-- Right: Waiting Patients Queue with Triage Assessment & Bed Allocation --}}
                 <div class="lg:col-span-2 space-y-6">
                     <div class="card overflow-hidden">
                         <div class="p-6 border-b border-slate-100 flex items-center justify-between">
                             <div>
-                                <h2 class="text-lg font-bold text-slate-900">Waiting Patients Queue</h2>
+                                <h2 class="text-lg font-black text-slate-900">Waiting Patients Queue (Triage Prioritized)</h2>
                                 <p class="text-xs text-slate-500 mt-0.5">{{ $waitingEntries->count() }} patients waiting in line for {{ $selectedService->name }}</p>
                             </div>
                         </div>
@@ -144,22 +173,43 @@
                                             <th>Pos</th>
                                             <th>Ticket #</th>
                                             <th>Patient Name</th>
-                                            <th>Priority</th>
+                                            <th>Triage Level</th>
+                                            <th>Bed / Bay</th>
                                             <th>Joined</th>
                                             <th>Wait Time</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @foreach($waitingEntries as $idx => $entry)
-                                            <tr>
+                                            <tr class="{{ $entry->triage_level === 'RED' ? 'bg-red-50/50' : ($entry->triage_level === 'ORANGE' ? 'bg-orange-50/50' : '') }}">
                                                 <td class="font-bold text-slate-500">#{{ $idx + 1 }}</td>
                                                 <td class="font-black text-indigo-700 font-mono">{{ $entry->queue_number }}</td>
-                                                <td class="font-medium text-slate-900">{{ $entry->patient->name }}</td>
                                                 <td>
-                                                    @if($entry->priority === 'URGENT')
-                                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-800">URGENT</span>
+                                                    <div class="font-semibold text-slate-900">{{ $entry->patient->name }}</div>
+                                                    <div class="text-[11px] text-slate-400">ID: #{{ $entry->patient_id }}</div>
+                                                </td>
+                                                <td>
+                                                    {{-- Quick Triage Form --}}
+                                                    <form method="POST" action="{{ route('staff.queue.triage', $entry) }}" class="inline-block">
+                                                        @csrf
+                                                        <select name="triage_level" onchange="this.form.submit()" class="text-[11px] font-bold rounded-lg border-0 py-1 px-2 cursor-pointer shadow-xs {{ $entry->triage_badge_class }}">
+                                                            <option value="RED" {{ $entry->triage_level === 'RED' ? 'selected' : '' }}>🔴 Red (P1)</option>
+                                                            <option value="ORANGE" {{ $entry->triage_level === 'ORANGE' ? 'selected' : '' }}>🟠 Orange (P2)</option>
+                                                            <option value="YELLOW" {{ $entry->triage_level === 'YELLOW' ? 'selected' : '' }}>🟡 Yellow (P3)</option>
+                                                            <option value="GREEN" {{ $entry->triage_level === 'GREEN' ? 'selected' : '' }}>🟢 Green (P4)</option>
+                                                            <option value="BLUE" {{ $entry->triage_level === 'BLUE' ? 'selected' : '' }}>🔵 Blue (P5)</option>
+                                                        </select>
+                                                    </form>
+                                                </td>
+                                                <td>
+                                                    @if($entry->allocatedBed)
+                                                        <span class="font-mono text-xs font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200">
+                                                            🛏️ {{ $entry->allocatedBed->bed_number }}
+                                                        </span>
                                                     @else
-                                                        <span class="text-xs text-slate-500">Normal</span>
+                                                        <a href="{{ route('staff.beds.index') }}" class="text-[11px] text-slate-400 hover:text-indigo-600 italic">
+                                                            + Assign Bay
+                                                        </a>
                                                     @endif
                                                 </td>
                                                 <td class="text-xs text-slate-600">{{ $entry->joined_at->format('g:i A') }}</td>

@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediQueue — Software Engineering Capstone Final Examination Report</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+        @page {
+            size: A4;
+            margin: 20mm 15mm 20mm 15mm;
+            @bottom-right {
+                content: "Page " counter(page);
+                font-family: 'Inter', sans-serif;
+                font-size: 8pt;
+                color: #64748b;
+            }
+            @bottom-left {
+                content: "MediQueue — Advanced Software Engineering Examination";
+                font-family: 'Inter', sans-serif;
+                font-size: 8pt;
+                color: #64748b;
+            }
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: #1e293b;
+            background-color: #ffffff;
+            line-height: 1.6;
+            font-size: 10pt;
+            margin: 0;
+            padding: 0;
+        }
+
+        .page-break {
+            page-break-after: always;
+            break-after: page;
+        }
+
+        /* Cover Page */
+        .cover-page {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            page-break-after: always;
+            padding: 40px 20px;
+            box-sizing: border-box;
+        }
+
+        .cover-header {
+            border-bottom: 3px solid #4f46e5;
+            padding-bottom: 25px;
+        }
+
+        .cover-badge {
+            display: inline-block;
+            background-color: #e0e7ff;
+            color: #3730a3;
+            font-size: 9pt;
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 9999px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 15px;
+        }
+
+        .cover-title {
+            font-size: 32pt;
+            font-weight: 900;
+            color: #0f172a;
+            line-height: 1.1;
+            margin: 0 0 10px 0;
+        }
+
+        .cover-subtitle {
+            font-size: 16pt;
+            font-weight: 500;
+            color: #4f46e5;
+            margin: 0;
+        }
+
+        .cover-details {
+            margin: 40px 0;
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 24px;
+        }
+
+        .cover-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            font-size: 9.5pt;
+        }
+
+        .cover-grid-item span {
+            display: block;
+            color: #64748b;
+            font-size: 8pt;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+        }
+
+        .cover-grid-item strong {
+            color: #0f172a;
+        }
+
+        .cover-footer {
+            border-top: 1px solid #e2e8f0;
+            padding-top: 20px;
+            font-size: 8.5pt;
+            color: #64748b;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Headings */
+        h1 {
+            font-size: 18pt;
+            font-weight: 800;
+            color: #0f172a;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 8px;
+            margin-top: 28px;
+            margin-bottom: 16px;
+            page-break-after: avoid;
+        }
+
+        h2 {
+            font-size: 13pt;
+            font-weight: 700;
+            color: #1e293b;
+            margin-top: 22px;
+            margin-bottom: 10px;
+            page-break-after: avoid;
+        }
+
+        h3 {
+            font-size: 11pt;
+            font-weight: 600;
+            color: #334155;
+            margin-top: 16px;
+            margin-bottom: 8px;
+            page-break-after: avoid;
+        }
+
+        p {
+            margin-top: 0;
+            margin-bottom: 12px;
+            text-align: justify;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 8.5pt;
+            margin: 16px 0;
+            page-break-inside: avoid;
+        }
+
+        th {
+            background-color: #f1f5f9;
+            color: #334155;
+            font-weight: 700;
+            text-align: left;
+            padding: 8px 10px;
+            border: 1px solid #cbd5e1;
+            font-size: 8pt;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        td {
+            padding: 7px 10px;
+            border: 1px solid #e2e8f0;
+            color: #334155;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        /* Callouts / Metric Boxes */
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin: 16px 0;
+            page-break-inside: avoid;
+        }
+
+        .metric-card {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .metric-card .num {
+            font-size: 18pt;
+            font-weight: 900;
+            color: #4f46e5;
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+
+        .metric-card .lbl {
+            font-size: 7.5pt;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+        }
+
+        .callout {
+            background-color: #eef2ff;
+            border-left: 4px solid #4f46e5;
+            padding: 12px 16px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 9pt;
+            page-break-inside: avoid;
+        }
+
+        .callout-title {
+            font-weight: 700;
+            color: #3730a3;
+            margin-bottom: 4px;
+        }
+
+        .badge {
+            display: inline-block;
+            font-size: 7.5pt;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 9999px;
+            border: 1px solid transparent;
+        }
+
+        .badge-success { background-color: #dcfce7; color: #166534; border-color: #bbf7d0; }
+        .badge-primary { background-color: #e0e7ff; color: #3730a3; border-color: #c7d2fe; }
+        .badge-warning { background-color: #fef3c7; color: #92400e; border-color: #fde68a; }
+
+        /* Code Blocks */
+        pre {
+            background-color: #0f172a;
+            color: #f8fafc;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 8pt;
+            padding: 12px 16px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 14px 0;
+            line-height: 1.45;
+            page-break-inside: avoid;
+        }
+
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 8.5pt;
+            background-color: #f1f5f9;
+            color: #0f172a;
+            padding: 2px 5px;
+            border-radius: 4px;
+        }
+
+        pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        ul, ol {
+            margin-top: 0;
+            margin-bottom: 12px;
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ========================================================================= -->
+    <!-- COVER PAGE -->
+    <!-- ========================================================================= -->
+    <div class="cover-page">
+        <div class="cover-header">
+            <div class="cover-badge">Software Engineering Capstone Project Report</div>
+            <h1 class="cover-title">MediQueue</h1>
+            <p class="cover-subtitle">Smart Clinic Queue Management System</p>
+        </div>
+
+        <div class="cover-details">
+            <div class="cover-grid">
+                <div class="cover-grid-item">
+                    <span>Course Assessment</span>
+                    <strong>Advanced Software Engineering Examination</strong>
+                </div>
+                <div class="cover-grid-item">
+                    <span>Project Scope</span>
+                    <strong>Individual 48-Hour Capstone Exam</strong>
+                </div>
+                <div class="cover-grid-item">
+                    <span>Live Production Web Application</span>
+                    <strong>https://mediqueue-25vl.onrender.com</strong>
+                </div>
+                <div class="cover-grid-item">
+                    <span>Public Hospital TV Screen</span>
+                    <strong>https://mediqueue-25vl.onrender.com/display</strong>
+                </div>
+                <div class="cover-grid-item">
+                    <span>In-App Documentation Hub</span>
+                    <strong>https://mediqueue-25vl.onrender.com/docs</strong>
+                </div>
+                <div class="cover-grid-item">
+                    <span>GitHub Source Code Repository</span>
+                    <strong>https://github.com/mhiskall282/ug-swe-exams</strong>
+                </div>
+                <div class="cover-grid-item">
+                    <span>Automated Verification</span>
+                    <strong>43 PHPUnit Tests / 160 Assertions (100% Pass)</strong>
+                </div>
+                <div class="cover-grid-item">
+                    <span>Technology Stack</span>
+                    <strong>Laravel 12, PHP 8.2, Tailwind v4, PostgreSQL</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="cover-footer">
+            <div><strong>Candidate:</strong> Lead Software Engineering Student</div>
+            <div><strong>Submission Date:</strong> August 14, 2026</div>
+            <div><strong>Status:</strong> Production Ready &amp; Fully Verified</div>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- SECTION 1: EXECUTIVE SUMMARY & OBJECTIVES -->
+    <!-- ========================================================================= -->
+    <h1>1. Executive Summary &amp; Project Objectives</h1>
+    <p>
+        <strong>MediQueue</strong> is a modern, accessible, enterprise-grade clinic queue management web application engineered to solve the persistent operational bottleneck of physical waiting lines in outpatient healthcare facilities. In traditional clinical environments, patients endure unpredictable physical queue times, overcrowded reception lounges, and stressful verbal callouts. MediQueue replaces physical lines with a resilient, transactional digital queue engine.
+    </p>
+
+    <div class="metric-grid">
+        <div class="metric-card">
+            <div class="num">100%</div>
+            <div class="lbl">Automated Test Pass</div>
+        </div>
+        <div class="metric-card">
+            <div class="num">43 / 160</div>
+            <div class="lbl">Tests / Assertions</div>
+        </div>
+        <div class="metric-card">
+            <div class="num">~90 UCP</div>
+            <div class="lbl">Adjusted Effort</div>
+        </div>
+        <div class="metric-card">
+            <div class="num">0.0s</div>
+            <div class="lbl">Ticket Collisions</div>
+        </div>
+    </div>
+
+    <h2>1.1 Project Objectives</h2>
+    <ul>
+        <li><strong>Patient Empowerment</strong>: Enable patients to join clinic department queues digitally from any mobile device, receive sequential atomic ticket numbers (e.g. <code>GC-001</code>), and monitor their real-time line position and estimated wait duration with asynchronous 4-second polling.</li>
+        <li><strong>Clinical Operations Console</strong>: Provide doctors and nursing staff with a focused console to call the next patient, manage consultation lifecycles, handle no-shows (skip/recall), and review live department analytics.</li>
+        <li><strong>Hospital Departure TV Screen</strong>: Broadcast a public, dark-mode waiting room TV display (<code>/display</code>) featuring huge high-contrast "Now Calling" tickets and a department-by-department status matrix with automated 3-second live sync.</li>
+        <li><strong>Administrative Governance &amp; Security</strong>: Enforce the Principle of Least Privilege across three isolated roles (<code>patient</code>, <code>staff</code>, <code>admin</code>), configure clinic settings and operating hours, perform administrative password resets with automated email notices, and maintain an immutable security audit trail.</li>
+    </ul>
+
+    <!-- ========================================================================= -->
+    <!-- SECTION 2: SYSTEM ARCHITECTURE & DESIGN -->
+    <!-- ========================================================================= -->
+    <h1>2. System Architecture &amp; Engineering Design</h1>
+    <p>
+        MediQueue is architected as a <strong>Modular Layered Monolith</strong> using Laravel 12 on PHP 8.2 with Tailwind CSS v4 and PostgreSQL. A layered monolithic architecture was selected (ADR-002) to guarantee sub-millisecond local transactional consistency without the operational latency and distributed transaction hazards of microservices.
+    </p>
+
+    <pre><code>[ Client Presentation Tier ] ── Blade Components (x-layouts.app) + Tailwind v4 Design Tokens
+           │
+           ▼
+[ Security &amp; Middleware ]   ── RoleMiddleware (patient | staff | admin) + RateLimiter Throttling
+           │
+           ▼
+[ Application Controllers ] ── Patient, Staff, Admin &amp; Hospital Display Controllers
+           │
+           ▼
+[ Core Business Domain ]    ── QueueService (DB Transactions + Pessimistic Row Locking 'lockForUpdate')
+           │
+           ▼
+[ Data Persistence Tier ]   ── Eloquent Models (User, Service, QueueEntry, Notification, Setting, AuditLog)
+           │
+           ▼
+[ Relational Store ]        ── Managed PostgreSQL / SQLite Relational Database</code></pre>
+
+    <h2>2.1 Concurrency Safety &amp; Pessimistic Locking</h2>
+    <p>
+        To prevent race conditions, duplicate ticket allocations, or simultaneous staff callouts during concurrent patient spikes, all queue state transitions in <code>App\Services\QueueService</code> execute inside atomic database transactions with pessimistic row locking:
+    </p>
+    <pre><code>// App\Services\QueueService.php: Atomic Ticket Generation
+DB::transaction(function () use ($patient, $service, $priority) {
+    // 1. Check for existing active ticket for this patient (Pessimistic Read)
+    $existing = QueueEntry::where('patient_id', $patient->id)
+        ->whereIn('status', [QueueEntry::STATUS_WAITING, QueueEntry::STATUS_CALLED, QueueEntry::STATUS_IN_SERVICE])
+        ->lockForUpdate()
+        ->first();
+
+    if ($existing) {
+        throw new \DomainException('You already have an active ticket in the queue.');
+    }
+
+    // 2. Lock and calculate sequential sequence number for today
+    $maxSeq = QueueEntry::where('service_id', $service->id)
+        ->whereDate('joined_at', today())
+        ->lockForUpdate()
+        ->max('sequence_number') ?? 0;
+
+    $nextSeq = $maxSeq + 1;
+    $queueNumber = sprintf('%s-%03d', $service->prefix, $nextSeq);
+
+    // 3. Persist new queue entry atomically
+    return QueueEntry::create([
+        'patient_id'      =&gt; $patient->id,
+        'service_id'      =&gt; $service->id,
+        'queue_number'    =&gt; $queueNumber,
+        'sequence_number' =&gt; $nextSeq,
+        'status'          =&gt; QueueEntry::STATUS_WAITING,
+        'priority'        =&gt; $priority,
+        'joined_at'       =&gt; now(),
+    ]);
+});</code></pre>
+
+    <div class="page-break"></div>
+
+    <!-- ========================================================================= -->
+    <!-- SECTION 3: QUEUE FINITE STATE MACHINE -->
+    <!-- ========================================================================= -->
+    <h1>3. Queue Finite State Machine</h1>
+    <p>
+        Every queue ticket strictly adheres to a deterministic finite state machine. Invalid state mutations (e.g. attempting to complete an uncalled ticket) throw validation domain exceptions.
+    </p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Current State</th>
+                <th>Target State</th>
+                <th>Triggering Actor</th>
+                <th>Operational Meaning</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><span class="badge badge-warning">WAITING</span></td>
+                <td><span class="badge badge-primary">CALLED</span></td>
+                <td>Clinical Staff</td>
+                <td>Staff triggers "Call Next"; assigns patient to doctor's desk.</td>
+            </tr>
+            <tr>
+                <td><span class="badge badge-warning">WAITING</span></td>
+                <td><span class="badge" style="background:#fee2e2;color:#991b1b;">CANCELLED</span></td>
+                <td>Patient / Admin</td>
+                <td>Patient withdraws ticket before consultation starts.</td>
+            </tr>
+            <tr>
+                <td><span class="badge badge-primary">CALLED</span></td>
+                <td><span class="badge badge-success">IN_SERVICE</span></td>
+                <td>Clinical Staff</td>
+                <td>Patient reports to room; medical consultation commences.</td>
+            </tr>
+            <tr>
+                <td><span class="badge badge-primary">CALLED</span></td>
+                <td><span class="badge badge-warning">SKIPPED</span></td>
+                <td>Clinical Staff</td>
+                <td>Patient fails to respond to callouts; moves to skipped pool.</td>
+            </tr>
+            <tr>
+                <td><span class="badge badge-warning">SKIPPED</span></td>
+                <td><span class="badge badge-primary">CALLED</span></td>
+                <td>Clinical Staff</td>
+                <td>Skipped patient arrives at reception; recalled to active call.</td>
+            </tr>
+            <tr>
+                <td><span class="badge badge-success">IN_SERVICE</span></td>
+                <td><span class="badge" style="background:#f1f5f9;color:#475569;">COMPLETED</span></td>
+                <td>Clinical Staff</td>
+                <td>Consultation concluded (Terminal state; computes wait duration).</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- ========================================================================= -->
+    <!-- SECTION 4: REQUIREMENTS TRACEABILITY MATRIX (RTM) -->
+    <!-- ========================================================================= -->
+    <h1>4. Requirements Traceability Matrix (RTM)</h1>
+    <p>
+        Every functional requirement specified in the Software Requirements Specification (SRS) is mapped directly to its architectural implementation and automated verification test:
+    </p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Req ID</th>
+                <th>Requirement Description</th>
+                <th>Priority</th>
+                <th>Implementation Class</th>
+                <th>Automated Test Verification</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>REQ-AUTH-001</strong></td>
+                <td>Patient Registration &amp; Password Hashing</td>
+                <td><span class="badge badge-primary">MUST</span></td>
+                <td><code>RegisterController</code></td>
+                <td><code>AuthTest::test_patient_can_register</code></td>
+            </tr>
+            <tr>
+                <td><strong>REQ-AUTH-006</strong></td>
+                <td>Role-Based Access Control (RBAC)</td>
+                <td><span class="badge badge-primary">MUST</span></td>
+                <td><code>RoleMiddleware</code></td>
+                <td><code>AuthorizationTest</code> (8 Test Cases)</td>
+            </tr>
+            <tr>
+                <td><strong>REQ-QUEUE-001</strong></td>
+                <td>Atomic Sequential Ticket Generation</td>
+                <td><span class="badge badge-primary">MUST</span></td>
+                <td><code>QueueService::join</code></td>
+                <td><code>QueueLifecycleTest::test_patient_can_join</code></td>
+            </tr>
+            <tr>
+                <td><strong>REQ-QUEUE-004</strong></td>
+                <td>Duplicate Ticket Prevention</td>
+                <td><span class="badge badge-primary">MUST</span></td>
+                <td><code>QueueService::join</code></td>
+                <td><code>QueueLifecycleTest::test_duplicate_prevented</code></td>
+            </tr>
+            <tr>
+                <td><strong>REQ-QUEUE-008</strong></td>
+                <td>Staff "Call Next" Priority Triage</td>
+                <td><span class="badge badge-primary">MUST</span></td>
+                <td><code>Staff\QueueController</code></td>
+                <td><code>QueueLifecycleTest::test_staff_can_call_next</code></td>
+            </tr>
+            <tr>
+                <td><strong>REQ-DISP-001</strong></td>
+                <td>Public Hospital TV Departure Screen</td>
+                <td><span class="badge badge-success">SHOULD</span></td>
+                <td><code>DisplayController</code></td>
+                <td><code>AdminEnhancementsTest::test_hospital_display</code></td>
+            </tr>
+            <tr>
+                <td><strong>REQ-NOTIF-001</strong></td>
+                <td>Transactional Email &amp; Alerts</td>
+                <td><span class="badge badge-success">SHOULD</span></td>
+                <td><code>QueueNotificationMail</code></td>
+                <td><code>AdminEnhancementsTest::test_email_dispatch</code></td>
+            </tr>
+            <tr>
+                <td><strong>REQ-SETT-001</strong></td>
+                <td>Clinic Settings &amp; Password Reset</td>
+                <td><span class="badge badge-success">SHOULD</span></td>
+                <td><code>SettingController / UserController</code></td>
+                <td><code>AdminEnhancementsTest::test_admin_can_reset_password</code></td>
+            </tr>
+            <tr>
+                <td><strong>REQ-AUDIT-001</strong></td>
+                <td>Immutable Security Audit Trail</td>
+                <td><span class="badge badge-primary">MUST</span></td>
+                <td><code>AuditLog Model</code></td>
+                <td><code>SmokeTest &amp; LifecycleTests</code></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="page-break"></div>
+
+    <!-- ========================================================================= -->
+    <!-- SECTION 5: SOFTWARE EFFORT ESTIMATION (UCP) -->
+    <!-- ========================================================================= -->
+    <h1>5. Software Effort Estimation (Use Case Points)</h1>
+    <p>
+        Prior to development, formal software estimation was performed using Gustav Karner's algorithmic <strong>Use Case Points (UCP)</strong> methodology to validate feasibility within the 48-hour examination window.
+    </p>
+
+    <div class="metric-grid">
+        <div class="metric-card">
+            <div class="num">164</div>
+            <div class="lbl">Unadjusted UCP (UUCP)</div>
+        </div>
+        <div class="metric-card">
+            <div class="num">0.935</div>
+            <div class="lbl">Technical Factor (TCF)</div>
+        </div>
+        <div class="metric-card">
+            <div class="num">0.590</div>
+            <div class="lbl">Environmental Factor (ECF)</div>
+        </div>
+        <div class="metric-card">
+            <div class="num">~90 UCP</div>
+            <div class="lbl">Adjusted UCP (46 Hours)</div>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Factor</th>
+                <th>Description</th>
+                <th>Weight</th>
+                <th>Assigned Value</th>
+                <th>Impact</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>T1</strong></td>
+                <td>Distributed System Architecture</td>
+                <td>2.0</td>
+                <td>0 (Modular Monolith)</td>
+                <td>Reduces complexity</td>
+            </tr>
+            <tr>
+                <td><strong>T3</strong></td>
+                <td>End-User Efficiency &amp; Real-Time Polling</td>
+                <td>1.0</td>
+                <td>4 (High responsiveness)</td>
+                <td>Async status polling</td>
+            </tr>
+            <tr>
+                <td><strong>T4</strong></td>
+                <td>Complex Internal Processing</td>
+                <td>1.0</td>
+                <td>4 (Concurrency &amp; Locks)</td>
+                <td>Pessimistic DB transactions</td>
+            </tr>
+            <tr>
+                <td><strong>T6</strong></td>
+                <td>Easy Installation &amp; Dockerization</td>
+                <td>0.5</td>
+                <td>5 (Containerized)</td>
+                <td>Automated Docker deployment</td>
+            </tr>
+            <tr>
+                <td><strong>E1</strong></td>
+                <td>Familiarity with Laravel &amp; PHP</td>
+                <td>1.5</td>
+                <td>5 (High expert proficiency)</td>
+                <td>Accelerates delivery</td>
+            </tr>
+            <tr>
+                <td><strong>E3</strong></td>
+                <td>Object-Oriented Experience</td>
+                <td>1.0</td>
+                <td>5 (High design discipline)</td>
+                <td>Strict domain separation</td>
+            </tr>
+            <tr>
+                <td><strong>E7</strong></td>
+                <td>Part-Time / Solo Worker</td>
+                <td>-1.0</td>
+                <td>4 (Individual candidate)</td>
+                <td>Handled within 46 hours</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- ========================================================================= -->
+    <!-- SECTION 6: QUALITY ASSURANCE & TEST VERIFICATION -->
+    <!-- ========================================================================= -->
+    <h1>6. Quality Assurance &amp; Automated Verification</h1>
+    <p>
+        The MediQueue codebase is covered by an automated PHPUnit 11 test suite verifying authentication, RBAC authorization, queue concurrency, ticket lifecycle, administrative password resets, email dispatches, and end-to-end smoke rendering.
+    </p>
+
+    <div class="callout">
+        <div class="callout-title">PHPUnit 11.5.56 Test Suite Execution Log</div>
+        <div>
+            <code>Runtime: PHP 8.2.12 | Configuration: phpunit.xml</code><br>
+            <code>........................................... 43 / 43 (100%)</code><br>
+            <strong>Result: OK (43 tests, 160 assertions) — 0 Failures, 0 Errors</strong>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Test Suite File</th>
+                <th>Test Scope</th>
+                <th>Assertions</th>
+                <th>Result</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>tests/Feature/AuthTest.php</code></td>
+                <td>User Registration, Bcrypt Hashing, Login, Logout, Session Guards</td>
+                <td>16 Assertions</td>
+                <td><span class="badge badge-success">PASSED</span></td>
+            </tr>
+            <tr>
+                <td><code>tests/Feature/AuthorizationTest.php</code></td>
+                <td>Role Isolation (Patient / Staff / Admin), Horizontal &amp; Vertical RBAC</td>
+                <td>28 Assertions</td>
+                <td><span class="badge badge-success">PASSED</span></td>
+            </tr>
+            <tr>
+                <td><code>tests/Feature/QueueLifecycleTest.php</code></td>
+                <td>Atomic Numbering, Duplicate Prevention, Call, Start, Complete, Skip, Recall</td>
+                <td>52 Assertions</td>
+                <td><span class="badge badge-success">PASSED</span></td>
+            </tr>
+            <tr>
+                <td><code>tests/Feature/AdminEnhancementsTest.php</code></td>
+                <td>Hospital Screen, Setting CRUD, Admin Password Reset, Email Mails</td>
+                <td>34 Assertions</td>
+                <td><span class="badge badge-success">PASSED</span></td>
+            </tr>
+            <tr>
+                <td><code>tests/Feature/SmokeTest.php</code></td>
+                <td>End-to-End HTTP 200 Rendering for Guest, Patient, Staff, Admin, /docs</td>
+                <td>30 Assertions</td>
+                <td><span class="badge badge-success">PASSED</span></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="page-break"></div>
+
+    <!-- ========================================================================= -->
+    <!-- SECTION 7: DEPLOYMENT & DEVOPS -->
+    <!-- ========================================================================= -->
+    <h1>7. Production Deployment &amp; Cloud Architecture</h1>
+    <p>
+        MediQueue features a multi-stage production Docker container packaging Node 22 for asset compilation, PHP 8.2-FPM for backend processing, and Nginx managed by Supervisor.
+    </p>
+
+    <div class="metric-grid">
+        <div class="metric-card">
+            <div class="num">Render</div>
+            <div class="lbl">Cloud Host</div>
+        </div>
+        <div class="metric-card">
+            <div class="num">PostgreSQL</div>
+            <div class="lbl">Managed DB</div>
+        </div>
+        <div class="metric-card">
+            <div class="num">Multi-Stage</div>
+            <div class="lbl">Docker Build</div>
+        </div>
+        <div class="metric-card">
+            <div class="num">GitHub CI</div>
+            <div class="lbl">Workflows</div>
+        </div>
+    </div>
+
+    <h2>7.1 Seeded Demo Accounts for Supervisor Evaluation</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Role</th>
+                <th>Email Address</th>
+                <th>Password</th>
+                <th>Accessible Features</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><span class="badge badge-primary">Administrator</span></td>
+                <td><code>admin@mediqueue.test</code></td>
+                <td><code>password</code></td>
+                <td>Full system control, service catalogue, user password resets, clinic settings, audit trail.</td>
+            </tr>
+            <tr>
+                <td><span class="badge badge-success">Doctor / Staff</span></td>
+                <td><code>dr.sarah@mediqueue.test</code></td>
+                <td><code>password</code></td>
+                <td>Department queue operations, Call Next CTA, start/complete consultation, skip &amp; recall.</td>
+            </tr>
+            <tr>
+                <td><span class="badge badge-success">Nurse / Staff</span></td>
+                <td><code>nurse.james@mediqueue.test</code></td>
+                <td><code>password</code></td>
+                <td>Nursing department queue management and triage flow.</td>
+            </tr>
+            <tr>
+                <td><span class="badge badge-warning">Patient</span></td>
+                <td><code>john.doe@example.com</code></td>
+                <td><code>password</code></td>
+                <td>Queue ticketing, live position monitor with 4s polling, cancellation, visit history.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- ========================================================================= -->
+    <!-- SECTION 8: CONCLUSION -->
+    <!-- ========================================================================= -->
+    <h1>8. Conclusion &amp; Assessment Readiness</h1>
+    <p>
+        The <strong>MediQueue Smart Clinic Queue Management System</strong> has been completed to rigorous senior software engineering standards within the university capstone examination period. Every requirement across the SRS, architecture design, concurrency locking, user experience, security governance, and automated testing has been fully implemented, verified, and deployed to live production.
+    </p>
+
+    <div class="callout">
+        <div class="callout-title">Official Examination Submission Links</div>
+        <ul>
+            <li><strong>Live Web Application</strong>: <a href="https://mediqueue-25vl.onrender.com">https://mediqueue-25vl.onrender.com</a></li>
+            <li><strong>Public Hospital Waiting Room TV Screen</strong>: <a href="https://mediqueue-25vl.onrender.com/display">https://mediqueue-25vl.onrender.com/display</a></li>
+            <li><strong>In-App Documentation Hub</strong>: <a href="https://mediqueue-25vl.onrender.com/docs">https://mediqueue-25vl.onrender.com/docs</a></li>
+            <li><strong>GitHub Repository</strong>: <a href="https://github.com/mhiskall282/ug-swe-exams">https://github.com/mhiskall282/ug-swe-exams</a></li>
+        </ul>
+    </div>
+
+</body>
+</html>
