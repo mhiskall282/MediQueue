@@ -1,0 +1,27 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: mediqueue:latest
+    container_name: mediqueue-app
+    restart: unless-stopped
+    ports:
+      - "8000:80"
+    environment:
+      - APP_NAME=MediQueue
+      - APP_ENV=production
+      - APP_DEBUG=false
+      - APP_URL=http://localhost:8000
+      - DB_CONNECTION=sqlite
+      - DB_DATABASE=/var/www/html/database/database.sqlite
+      - SESSION_DRIVER=file
+      - QUEUE_CONNECTION=sync
+      - CACHE_STORE=file
+    volumes:
+      - mediqueue_storage:/var/www/html/storage
+      - mediqueue_database:/var/www/html/database
+
+volumes:
+  mediqueue_storage:
+  mediqueue_database:
