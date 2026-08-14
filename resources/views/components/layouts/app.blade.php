@@ -16,13 +16,209 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
 
+    <!-- Chart.js for Visual Analytics & Real-Time KPIs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('styles')
 </head>
-<body class="min-h-screen bg-slate-50 font-sans antialiased">
+<body class="min-h-screen bg-slate-50 font-sans antialiased text-slate-900">
 
-    {{-- Navigation --}}
-    <nav class="bg-white/80 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-50 transition-all duration-200 shadow-2xs">
+@if(auth()->check() && (auth()->user()->isAdmin() || auth()->user()->isStaff()))
+    {{-- ============================================================ --}}
+    {{-- ADMIN & STAFF LEFT SIDEBAR LAYOUT                           --}}
+    {{-- ============================================================ --}}
+    <div class="min-h-screen flex flex-col md:flex-row">
+        {{-- Left Sidebar --}}
+        <aside class="w-full md:w-72 bg-slate-900 text-slate-300 flex-shrink-0 flex flex-col justify-between border-r border-slate-800 z-40 shadow-xl">
+            <div>
+                {{-- Brand Header --}}
+                <div class="h-16 px-6 flex items-center justify-between border-b border-slate-800/80 bg-slate-950/60">
+                    <a href="{{ route('home') }}" class="flex items-center gap-3 group">
+                        <div class="w-9 h-9 bg-gradient-to-tr from-indigo-500 via-indigo-600 to-indigo-700 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md shadow-indigo-500/20 group-hover:scale-105 transition-transform">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <span class="text-lg font-black text-white tracking-tight block">MediQueue</span>
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-400 block -mt-1">
+                                {{ auth()->user()->isAdmin() ? 'Hospital Admin Portal' : 'Clinical Console' }}
+                            </span>
+                        </div>
+                    </a>
+                </div>
+
+                {{-- Grouped Navigation Menu --}}
+                <nav class="p-4 space-y-6 overflow-y-auto max-h-[calc(100vh-140px)]">
+                    {{-- 1. Executive & Analytics --}}
+                    @if(auth()->user()->isAdmin())
+                        <div>
+                            <span class="px-3 text-[10px] font-black uppercase tracking-wider text-slate-500 block mb-2">
+                                Executive & Analytics
+                            </span>
+                            <div class="space-y-1">
+                                <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all {{ request()->routeIs('admin.dashboard') ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
+                                    <span>📊</span> Admin Overview
+                                </a>
+                                <a href="{{ route('admin.reports.index') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all {{ request()->routeIs('admin.reports.*') ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
+                                    <span>📈</span> Clinical Reports & KPIs
+                                </a>
+                                <a href="{{ route('admin.audit.index') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all {{ request()->routeIs('admin.audit.*') ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
+                                    <span>🛡️</span> Forensic Audit Trail
+                                </a>
+                            </div>
+                        </div>
+                    @endif
+
+                    {{-- 2. Clinical Operations --}}
+                    <div>
+                        <span class="px-3 text-[10px] font-black uppercase tracking-wider text-slate-500 block mb-2">
+                            Clinical Operations
+                        </span>
+                        <div class="space-y-1">
+                            <a href="{{ route('staff.dashboard') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all {{ request()->routeIs('staff.dashboard') ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
+                                <span>🩺</span> Clinical Queue Console
+                            </a>
+                            <a href="{{ route('staff.emergency.index') }}" class="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all {{ request()->routeIs('staff.emergency.*') ? 'bg-rose-600 text-white shadow-sm' : 'text-rose-400 hover:text-rose-200 hover:bg-rose-950/30' }}">
+                                <div class="flex items-center gap-2.5">
+                                    <span>🚨</span> Emergency Trauma
+                                </div>
+                                <span class="text-[9px] font-black px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30">CODE RED</span>
+                            </a>
+                            <a href="{{ route('staff.oncall.index') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all {{ request()->routeIs('staff.oncall.*') ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
+                                <span>👨‍⚕️</span> Doctor On-Call Board
+                            </a>
+                            <a href="{{ route('staff.beds.index') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all {{ request()->routeIs('staff.beds.*') ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
+                                <span>🛏️</span> Ward & Bed Allocation
+                            </a>
+                            <a href="{{ route('staff.appointments.index') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all {{ request()->routeIs('staff.appointments.*') ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
+                                <span>📅</span> Clinic Appointments
+                            </a>
+                        </div>
+                    </div>
+
+                    {{-- 3. Hospital Administration --}}
+                    @if(auth()->user()->isAdmin())
+                        <div>
+                            <span class="px-3 text-[10px] font-black uppercase tracking-wider text-slate-500 block mb-2">
+                                Hospital Administration
+                            </span>
+                            <div class="space-y-1">
+                                <a href="{{ route('admin.services.index') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all {{ request()->routeIs('admin.services.*') ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
+                                    <span>🏢</span> Service Catalogue
+                                </a>
+                                <a href="{{ route('admin.users.index') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all {{ request()->routeIs('admin.users.*') ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
+                                    <span>👥</span> Medical Staff & Users
+                                </a>
+                                <a href="{{ route('admin.settings.index') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all {{ request()->routeIs('admin.settings.*') ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
+                                    <span>⚙️</span> Clinic & System Settings
+                                </a>
+                            </div>
+                        </div>
+                    @endif
+
+                    {{-- 4. Public & Docs --}}
+                    <div>
+                        <span class="px-3 text-[10px] font-black uppercase tracking-wider text-slate-500 block mb-2">
+                            Monitors & Architecture
+                        </span>
+                        <div class="space-y-1">
+                            <a href="{{ route('display') }}" target="_blank" class="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-emerald-400 hover:text-emerald-300 hover:bg-emerald-950/30 transition-all">
+                                <div class="flex items-center gap-2.5">
+                                    <span>📺</span> Hospital TV Screen
+                                </div>
+                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                            </a>
+                            <a href="{{ route('docs') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all {{ request()->routeIs('docs') ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
+                                <span>📖</span> In-App Docs Hub
+                            </a>
+                        </div>
+                    </div>
+                </nav>
+            </div>
+
+            {{-- Sidebar Footer: User Profile & Logout --}}
+            <div class="p-4 border-t border-slate-800/80 bg-slate-950/40">
+                <div class="flex items-center justify-between gap-3">
+                    <div class="min-w-0 flex-1">
+                        <div class="flex items-center gap-1.5">
+                            <span class="font-bold text-xs text-white truncate block">{{ auth()->user()->name }}</span>
+                            <span class="badge text-[9px] px-1.5 py-0.2 {{ auth()->user()->isAdmin() ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' }}">
+                                {{ strtoupper(auth()->user()->role) }}
+                            </span>
+                        </div>
+                        <span class="text-[10px] font-mono text-slate-400 truncate block">{{ auth()->user()->hospital_id ?? auth()->user()->email }}</span>
+                    </div>
+
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="p-2 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-950/30 transition-colors" title="Sign Out">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                            </svg>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </aside>
+
+        {{-- Right Main Content Area --}}
+        <div class="flex-1 flex flex-col min-w-0 overflow-x-hidden">
+            {{-- Top Operational Bar --}}
+            <header class="h-16 bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-30 px-4 sm:px-8 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <span class="text-xs font-semibold text-slate-500">Hospital Operational Portal</span>
+                    <span class="text-slate-300">&bull;</span>
+                    <div class="flex items-center gap-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        Live System Synchronized
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4 text-xs">
+                    <span class="hidden sm:inline-block font-mono text-slate-500">{{ date('l, M d, Y') }}</span>
+                    <a href="{{ route('display') }}" target="_blank" class="btn btn-secondary btn-sm text-xs font-bold text-indigo-700">
+                        <span>📺</span> TV Screen
+                    </a>
+                </div>
+            </header>
+
+            {{-- Flash Messages --}}
+            @if(session('success'))
+                <div class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+                    <div class="alert alert-success" role="alert">
+                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <span>{{ session('success') }}</span>
+                    </div>
+                </div>
+            @endif
+
+            @if(session('error'))
+                <div class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+                    <div class="alert alert-error" role="alert">
+                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <span>{{ session('error') }}</span>
+                    </div>
+                </div>
+            @endif
+
+            {{-- Page Slot --}}
+            <main class="flex-1 p-2 sm:p-4 md:p-6 lg:p-8">
+                {{ $slot }}
+            </main>
+        </div>
+    </div>
+
+@else
+    {{-- ============================================================ --}}
+    {{-- PATIENT & PUBLIC TOP NAVBAR LAYOUT                           --}}
+    {{-- ============================================================ --}}
+    <nav class="bg-white/80 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-50 shadow-2xs">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 {{-- Logo --}}
@@ -38,116 +234,58 @@
                 {{-- Nav Links --}}
                 <div class="hidden md:flex items-center gap-1">
                     @auth
-                        @if(auth()->user()->isAdmin())
-                            <a href="{{ route('admin.dashboard') }}" class="nav-item {{ request()->routeIs('admin.dashboard') ? 'nav-item-active' : '' }}">
-                                Dashboard
-                            </a>
-                            <a href="{{ route('admin.services.index') }}" class="nav-item {{ request()->routeIs('admin.services.*') ? 'nav-item-active' : '' }}">
-                                Services
-                            </a>
-                            <a href="{{ route('admin.users.index') }}" class="nav-item {{ request()->routeIs('admin.users.*') ? 'nav-item-active' : '' }}">
-                                Users
-                            </a>
-                            <a href="{{ route('admin.settings.index') }}" class="nav-item {{ request()->routeIs('admin.settings.*') ? 'nav-item-active' : '' }}">
-                                Settings
-                            </a>
-                            <a href="{{ route('admin.audit.index') }}" class="nav-item {{ request()->routeIs('admin.audit.*') ? 'nav-item-active' : '' }}">
-                                Audit
-                            </a>
-                            <a href="{{ route('admin.reports.index') }}" class="nav-item {{ request()->routeIs('admin.reports.*') ? 'nav-item-active' : '' }}">
-                                Reports
-                            </a>
-                            <a href="{{ route('display') }}" target="_blank" class="nav-item text-indigo-600 font-semibold flex items-center gap-1">
-                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                                TV Screen
-                            </a>
-                            <a href="{{ route('docs') }}" class="nav-item {{ request()->routeIs('docs') ? 'nav-item-active' : '' }}">
-                                Docs
-                            </a>
-                        @elseif(auth()->user()->isStaff())
-                            <a href="{{ route('staff.dashboard') }}" class="nav-item {{ request()->routeIs('staff.dashboard') ? 'nav-item-active' : '' }}">
-                                Clinical Console
-                            </a>
-                            <a href="{{ route('staff.beds.index') }}" class="nav-item {{ request()->routeIs('staff.beds.*') ? 'nav-item-active' : '' }}">
-                                Beds & Bays
-                            </a>
-                            <a href="{{ route('staff.appointments.index') }}" class="nav-item {{ request()->routeIs('staff.appointments.*') ? 'nav-item-active' : '' }}">
-                                Appointments
-                            </a>
-                            <a href="{{ route('display') }}" target="_blank" class="nav-item text-indigo-600 font-semibold flex items-center gap-1">
-                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                                TV Screen
-                            </a>
-                            <a href="{{ route('docs') }}" class="nav-item {{ request()->routeIs('docs') ? 'nav-item-active' : '' }}">
-                                Docs
-                            </a>
-                        @else
-                            <a href="{{ route('patient.dashboard') }}" class="nav-item {{ request()->routeIs('patient.dashboard') ? 'nav-item-active' : '' }}">
-                                Dashboard
-                            </a>
-                            <a href="{{ route('patient.queue.index') }}" class="nav-item {{ request()->routeIs('patient.queue.*') ? 'nav-item-active' : '' }}">
-                                Join Queue
-                            </a>
-                            <a href="{{ route('patient.appointments.index') }}" class="nav-item {{ request()->routeIs('patient.appointments.*') ? 'nav-item-active' : '' }}">
-                                Appointments
-                            </a>
-                            <a href="{{ route('patient.history') }}" class="nav-item {{ request()->routeIs('patient.history') ? 'nav-item-active' : '' }}">
-                                History
-                            </a>
-                            <a href="{{ route('display') }}" target="_blank" class="nav-item text-indigo-600 font-semibold flex items-center gap-1">
-                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                                Live Board
-                            </a>
-                            <a href="{{ route('docs') }}" class="nav-item {{ request()->routeIs('docs') ? 'nav-item-active' : '' }}">
-                                Docs
-                            </a>
-                        @endif
+                        <a href="{{ route('patient.dashboard') }}" class="nav-item {{ request()->routeIs('patient.dashboard') ? 'nav-item-active' : '' }}">
+                            Dashboard
+                        </a>
+                        <a href="{{ route('patient.queue.index') }}" class="nav-item {{ request()->routeIs('patient.queue.*') ? 'nav-item-active' : '' }}">
+                            Join Queue
+                        </a>
+                        <a href="{{ route('patient.appointments.index') }}" class="nav-item {{ request()->routeIs('patient.appointments.*') ? 'nav-item-active' : '' }}">
+                            Appointments
+                        </a>
+                        <a href="{{ route('patient.history') }}" class="nav-item {{ request()->routeIs('patient.history') ? 'nav-item-active' : '' }}">
+                            History
+                        </a>
+                        <a href="{{ route('display') }}" target="_blank" class="nav-item text-indigo-600 font-semibold flex items-center gap-1">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                            Live Board
+                        </a>
+                        <a href="{{ route('docs') }}" class="nav-item {{ request()->routeIs('docs') ? 'nav-item-active' : '' }}">
+                            Docs
+                        </a>
                     @else
                         <a href="{{ route('docs') }}" class="nav-item {{ request()->routeIs('docs') ? 'nav-item-active' : '' }}">
                             Docs & Architecture
                         </a>
                         <a href="{{ route('display') }}" target="_blank" class="nav-item text-indigo-600 font-semibold flex items-center gap-1">
                             <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                            Live Screen
+                            TV Waiting Screen
                         </a>
                     @endauth
                 </div>
 
-                {{-- Right side --}}
+                {{-- Right Auth Buttons --}}
                 <div class="flex items-center gap-3">
                     @auth
-                        {{-- Notification Bell --}}
-                        @if(auth()->user()->isPatient())
-                            @php $unread = auth()->user()->unreadNotificationsCount(); @endphp
-                            <a href="{{ route('patient.dashboard') }}" class="relative p-2 rounded-lg text-slate-500 hover:bg-slate-100 transition-colors">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-                                </svg>
-                                @if($unread > 0)
-                                    <span class="absolute -top-0.5 -right-0.5 w-4 h-4 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">{{ $unread > 9 ? '9+' : $unread }}</span>
-                                @endif
-                            </a>
-                        @endif
-
-                        {{-- User Menu --}}
-                        <div class="flex items-center gap-2.5">
-                            <div class="hidden sm:block text-right">
-                                <p class="text-sm font-medium text-slate-900 leading-tight">{{ auth()->user()->name }}</p>
-                                <p class="text-xs text-slate-500">{{ auth()->user()->role_label }}</p>
+                        <div class="hidden sm:flex items-center gap-2 text-right">
+                            <div>
+                                <span class="text-xs font-bold text-slate-800 block">{{ auth()->user()->name }}</span>
+                                <span class="text-[10px] font-mono text-slate-400 block">{{ auth()->user()->hospital_id ?? 'Patient' }}</span>
                             </div>
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
-                                <button type="submit" class="btn btn-secondary btn-sm">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-                                    </svg>
-                                    Logout
-                                </button>
-                            </form>
                         </div>
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit" class="btn btn-secondary btn-sm text-xs">
+                                Sign Out
+                            </button>
+                        </form>
                     @else
-                        <a href="{{ route('login') }}" class="btn btn-ghost btn-sm">Sign In</a>
-                        <a href="{{ route('register') }}" class="btn btn-primary btn-sm">Get Started</a>
+                        <a href="{{ route('login') }}" class="btn btn-secondary btn-sm text-xs font-bold">
+                            Log In
+                        </a>
+                        <a href="{{ route('register') }}" class="btn btn-primary btn-sm text-xs font-bold shadow-xs">
+                            Get Started
+                        </a>
                     @endauth
                 </div>
             </div>
@@ -166,17 +304,13 @@
         </div>
     @endif
 
-    @if($errors->any())
+    @if(session('error'))
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
             <div class="alert alert-error" role="alert">
                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
-                <div>
-                    @foreach($errors->all() as $error)
-                        <p>{{ $error }}</p>
-                    @endforeach
-                </div>
+                <span>{{ session('error') }}</span>
             </div>
         </div>
     @endif
@@ -215,6 +349,7 @@
             </div>
         </div>
     </footer>
+@endif
 
     @stack('scripts')
 </body>
