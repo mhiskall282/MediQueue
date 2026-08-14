@@ -21,6 +21,23 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('styles')
+
+    <style>
+        /* Smooth custom scrollbar for Left Navigation Sidebar */
+        .sidebar-scrollbar::-webkit-scrollbar {
+            width: 5px;
+        }
+        .sidebar-scrollbar::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.6);
+        }
+        .sidebar-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(71, 85, 105, 0.5);
+            border-radius: 4px;
+        }
+        .sidebar-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(99, 102, 241, 0.8);
+        }
+    </style>
 </head>
 <body class="min-h-screen bg-slate-50 font-sans antialiased text-slate-900">
 
@@ -29,11 +46,27 @@
     {{-- ADMIN & STAFF LEFT SIDEBAR LAYOUT                           --}}
     {{-- ============================================================ --}}
     <div class="min-h-screen flex flex-col md:flex-row">
+        {{-- Mobile Top Bar --}}
+        <div class="md:hidden bg-slate-950 text-white p-4 flex items-center justify-between border-b border-slate-800 z-50 sticky top-0">
+            <a href="{{ route('home') }}" class="flex items-center gap-2.5">
+                <div class="w-7 h-7 bg-indigo-600 rounded-lg flex items-center justify-center font-bold text-xs">🏥</div>
+                <span class="font-black text-sm tracking-tight">MediQueue</span>
+            </a>
+            <button onclick="toggleMobileSidebar()" class="p-2 rounded-lg bg-slate-900 text-slate-300 hover:text-white border border-slate-800" aria-label="Toggle Navigation">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
+        </div>
+
+        {{-- Mobile Overlay Backdrop --}}
+        <div id="mobileBackdrop" onclick="toggleMobileSidebar()" class="fixed inset-0 bg-slate-950/70 backdrop-blur-xs z-40 hidden md:hidden transition-opacity"></div>
+
         {{-- Left Sidebar --}}
-        <aside class="w-full md:w-72 bg-slate-900 text-slate-300 flex-shrink-0 flex flex-col justify-between border-r border-slate-800 z-40 shadow-xl">
-            <div>
+        <aside id="mainSidebar" class="fixed md:sticky top-0 left-0 h-screen w-72 bg-slate-900 text-slate-300 flex-shrink-0 flex flex-col justify-between border-r border-slate-800 z-50 shadow-2xl transition-transform duration-300 -translate-x-full md:translate-x-0">
+            <div class="flex flex-col h-full overflow-hidden">
                 {{-- Brand Header --}}
-                <div class="h-16 px-6 flex items-center justify-between border-b border-slate-800/80 bg-slate-950/60">
+                <div class="h-16 px-6 flex items-center justify-between border-b border-slate-800/80 bg-slate-950/60 flex-shrink-0">
                     <a href="{{ route('home') }}" class="flex items-center gap-3 group">
                         <div class="w-9 h-9 bg-gradient-to-tr from-indigo-500 via-indigo-600 to-indigo-700 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md shadow-indigo-500/20 group-hover:scale-105 transition-transform">
                             <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -43,14 +76,18 @@
                         <div>
                             <span class="text-lg font-black text-white tracking-tight block">MediQueue</span>
                             <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-400 block -mt-1">
-                                {{ auth()->user()->isAdmin() ? 'Hospital Admin Portal' : 'Clinical Console' }}
+                                {{ auth()->user()->isAdmin() ? 'Hospital Admin' : 'Clinical Console' }}
                             </span>
                         </div>
                     </a>
+
+                    <button onclick="toggleMobileSidebar()" class="md:hidden text-slate-400 hover:text-white p-1">
+                        &times;
+                    </button>
                 </div>
 
-                {{-- Grouped Navigation Menu --}}
-                <nav class="p-4 space-y-6 overflow-y-auto max-h-[calc(100vh-140px)]">
+                {{-- Grouped Navigation Menu with Smooth Scrollbar --}}
+                <nav class="p-4 space-y-6 overflow-y-auto sidebar-scrollbar flex-1">
                     {{-- 1. Executive & Analytics --}}
                     @if(auth()->user()->isAdmin())
                         <div>
@@ -118,7 +155,7 @@
                         </div>
                     @endif
 
-                    {{-- 4. Public & Docs --}}
+                    {{-- 4. Public Monitors & Docs --}}
                     <div>
                         <span class="px-3 text-[10px] font-black uppercase tracking-wider text-slate-500 block mb-2">
                             Monitors & Architecture
@@ -136,29 +173,29 @@
                         </div>
                     </div>
                 </nav>
-            </div>
 
-            {{-- Sidebar Footer: User Profile & Logout --}}
-            <div class="p-4 border-t border-slate-800/80 bg-slate-950/40">
-                <div class="flex items-center justify-between gap-3">
-                    <div class="min-w-0 flex-1">
-                        <div class="flex items-center gap-1.5">
-                            <span class="font-bold text-xs text-white truncate block">{{ auth()->user()->name }}</span>
-                            <span class="badge text-[9px] px-1.5 py-0.2 {{ auth()->user()->isAdmin() ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' }}">
-                                {{ strtoupper(auth()->user()->role) }}
-                            </span>
+                {{-- Sidebar Footer: User Profile & Logout --}}
+                <div class="p-4 border-t border-slate-800/80 bg-slate-950/60 flex-shrink-0">
+                    <div class="flex items-center justify-between gap-3">
+                        <div class="min-w-0 flex-1">
+                            <div class="flex items-center gap-1.5">
+                                <span class="font-bold text-xs text-white truncate block">{{ auth()->user()->name }}</span>
+                                <span class="badge text-[9px] px-1.5 py-0.2 {{ auth()->user()->isAdmin() ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' }}">
+                                    {{ strtoupper(auth()->user()->role) }}
+                                </span>
+                            </div>
+                            <span class="text-[10px] font-mono text-slate-400 truncate block">{{ auth()->user()->hospital_id ?? auth()->user()->email }}</span>
                         </div>
-                        <span class="text-[10px] font-mono text-slate-400 truncate block">{{ auth()->user()->hospital_id ?? auth()->user()->email }}</span>
-                    </div>
 
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit" class="p-2 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-950/30 transition-colors" title="Sign Out">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-                            </svg>
-                        </button>
-                    </form>
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit" class="p-2 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-950/30 transition-colors" title="Sign Out">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                                </svg>
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </aside>
@@ -208,11 +245,28 @@
             @endif
 
             {{-- Page Slot --}}
-            <main class="flex-1 p-2 sm:p-4 md:p-6 lg:p-8">
+            <main class="flex-1 p-3 sm:p-5 md:p-6 lg:p-8">
                 {{ $slot }}
             </main>
         </div>
     </div>
+
+    <script>
+        function toggleMobileSidebar() {
+            const sidebar = document.getElementById('mainSidebar');
+            const backdrop = document.getElementById('mobileBackdrop');
+            if (sidebar && backdrop) {
+                const isHidden = sidebar.classList.contains('-translate-x-full');
+                if (isHidden) {
+                    sidebar.classList.remove('-translate-x-full');
+                    backdrop.classList.remove('hidden');
+                } else {
+                    sidebar.classList.add('-translate-x-full');
+                    backdrop.classList.add('hidden');
+                }
+            }
+        }
+    </script>
 
 @else
     {{-- ============================================================ --}}
@@ -327,7 +381,7 @@
                 <div class="flex items-center gap-3">
                     <div class="w-8 h-8 bg-gradient-to-tr from-indigo-700 to-indigo-600 rounded-xl flex items-center justify-center shadow-sm">
                         <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012 2"/>
                         </svg>
                     </div>
                     <div>
