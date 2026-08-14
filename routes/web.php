@@ -122,6 +122,8 @@ Route::prefix('staff')
     ->name('staff.')
     ->group(function () {
         Route::get('/dashboard',                       [StaffQueueController::class, 'dashboard'])->name('dashboard');
+        Route::get('/onboarding',                      [\App\Http\Controllers\Staff\OnboardingController::class, 'show'])->name('onboarding');
+        Route::put('/onboarding',                      [\App\Http\Controllers\Staff\OnboardingController::class, 'update'])->name('onboarding.update');
         Route::post('/queue/call-next',                [StaffQueueController::class, 'callNext'])->name('queue.call-next');
         Route::post('/queue/{queueEntry}/start',       [StaffQueueController::class, 'startService'])->name('queue.start');
         Route::post('/queue/{queueEntry}/complete',    [StaffQueueController::class, 'complete'])->name('queue.complete');

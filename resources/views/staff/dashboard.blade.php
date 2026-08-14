@@ -24,6 +24,9 @@
                 <a href="{{ route('staff.messages.index') }}" class="btn btn-secondary text-xs font-bold flex items-center gap-1 border-purple-200 text-purple-700 bg-purple-50/50 hover:bg-purple-100">
                     <span>💬</span> Messages
                 </a>
+                <a href="{{ route('staff.onboarding') }}" class="btn btn-secondary text-xs font-bold flex items-center gap-1 border-slate-200 text-slate-700 bg-slate-50 hover:bg-slate-100">
+                    <span>🪪</span> Credentials
+                </a>
 
                 {{-- Service Switcher --}}
                 <form method="GET" action="{{ route('staff.dashboard') }}" class="flex items-center ml-1">

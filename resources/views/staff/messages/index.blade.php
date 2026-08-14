@@ -57,7 +57,7 @@
                                 <option value="">— None / General Operational Message —</option>
                                 @foreach($activeTickets as $ticket)
                                     <option value="{{ $ticket->id }}">
-                                        {{ $ticket->queue_number }} ({{ $ticket->service->name }}) — {{ $ticket->user->name }}
+                                        {{ $ticket->queue_number }} ({{ $ticket->service->name }}) — {{ $ticket->patient ? $ticket->patient->name : 'Patient' }}
                                     </option>
                                 @endforeach
                             </select>
@@ -119,7 +119,7 @@
                                                 {{ $msg->urgency }}
                                             </span>
                                             <span class="text-xs font-bold text-slate-900">
-                                                From: {{ $msg->sender->name }} ({{ $msg->sender->role_title }})
+                                                From: {{ $msg->sender ? $msg->sender->name : 'System' }} ({{ $msg->sender ? $msg->sender->role_title : 'Clinician' }})
                                             </span>
                                         </div>
                                         <span class="text-[11px] text-slate-400">
@@ -132,7 +132,7 @@
                                     @if($msg->queueEntry)
                                         <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 text-[11px] text-slate-700 font-mono">
                                             <span>🎫 Attached Ticket:</span>
-                                            <strong>{{ $msg->queueEntry->queue_number }}</strong> ({{ $msg->queueEntry->service->name }}) &bull; Patient: {{ $msg->queueEntry->user->name }}
+                                            <strong>{{ $msg->queueEntry->queue_number }}</strong> ({{ $msg->queueEntry->service ? $msg->queueEntry->service->name : 'Clinic' }}) &bull; Patient: {{ $msg->queueEntry->patient ? $msg->queueEntry->patient->name : 'Patient' }}
                                         </div>
                                     @endif
 

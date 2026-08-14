@@ -22,7 +22,7 @@ class ClinicalMessageController extends Controller
     {
         $user = Auth::user();
 
-        $receivedMessages = ClinicalMessage::with(['sender', 'queueEntry.service'])
+        $receivedMessages = ClinicalMessage::with(['sender', 'recipient', 'queueEntry.service', 'queueEntry.patient'])
             ->where(function ($q) use ($user) {
                 $q->where('recipient_id', $user->id)
                   ->orWhereNull('recipient_id'); // Broadcasts to all clinical staff
@@ -30,7 +30,7 @@ class ClinicalMessageController extends Controller
             ->orderByDesc('created_at')
             ->paginate(15);
 
-        $sentMessages = ClinicalMessage::with(['recipient', 'queueEntry.service'])
+        $sentMessages = ClinicalMessage::with(['recipient', 'queueEntry.service', 'queueEntry.patient'])
             ->where('sender_id', $user->id)
             ->orderByDesc('created_at')
             ->limit(10)
@@ -45,7 +45,8 @@ class ClinicalMessageController extends Controller
             User::ROLE_ADMIN,
         ])->where('id', '!=', $user->id)->get();
 
-        $activeTickets = QueueEntry::whereIn('status', [QueueEntry::STATUS_WAITING, QueueEntry::STATUS_CALLED, QueueEntry::STATUS_IN_SERVICE])
+        $activeTickets = QueueEntry::with(['service', 'patient'])
+            ->whereIn('status', [QueueEntry::STATUS_WAITING, QueueEntry::STATUS_CALLED, QueueEntry::STATUS_IN_SERVICE])
             ->orderByDesc('created_at')
             ->limit(30)
             ->get();
