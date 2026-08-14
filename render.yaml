@@ -1,3 +1,11 @@
+databases:
+  - name: mediqueue-db
+    databaseName: mediqueue
+    user: mediqueue_user
+    plan: free
+    region: singapore
+    ipAllowList: [] # internal connections only
+
 services:
   - type: web
     name: mediqueue
@@ -16,16 +24,38 @@ services:
         generateValue: true
       - key: APP_URL
         value: https://mediqueue.onrender.com
+      # Managed PostgreSQL Database Connections
       - key: DB_CONNECTION
-        value: sqlite
+        value: pgsql
+      - key: DB_HOST
+        fromDatabase:
+          name: mediqueue-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: mediqueue-db
+          property: port
       - key: DB_DATABASE
-        value: /var/www/html/database/database.sqlite
+        fromDatabase:
+          name: mediqueue-db
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: mediqueue-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: mediqueue-db
+          property: password
+      # Production Drivers & Caching
       - key: SESSION_DRIVER
         value: file
       - key: CACHE_STORE
         value: file
       - key: QUEUE_CONNECTION
         value: sync
+      - key: MAIL_MAILER
+        value: log
       - key: LOG_CHANNEL
         value: stderr
       - key: LOG_LEVEL

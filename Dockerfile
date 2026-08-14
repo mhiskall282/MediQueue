@@ -22,11 +22,12 @@ RUN apk add --no-cache \
     zip \
     unzip \
     sqlite-dev \
+    postgresql-dev \
     oniguruma-dev \
     libzip-dev
 
-# Install PHP extensions
-RUN docker-php-ext-install pdo pdo_sqlite mbstring exif pcntl bcmath gd zip
+# Install PHP extensions (SQLite, PostgreSQL, MySQL supported)
+RUN docker-php-ext-install pdo pdo_sqlite pdo_pgsql pdo_mysql mbstring exif pcntl bcmath gd zip
 
 # Get Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer

@@ -27,7 +27,7 @@ MediQueue is packaged as a self-contained container with PHP 8.2-FPM and Nginx m
 
 ## 2. Deploying on Render.com
 
-### Method 1: Blueprint Deployment (Recommended)
+### Method 1: Blueprint Deployment with Managed PostgreSQL (Recommended)
 
 1. Push this repository to your GitHub account:
    ```bash
@@ -36,27 +36,29 @@ MediQueue is packaged as a self-contained container with PHP 8.2-FPM and Nginx m
 2. Log in to [Render Dashboard](https://dashboard.render.com).
 3. Click **New +** → **Blueprint**.
 4. Connect your GitHub repository (`ug-swe-exams`).
-5. Render will automatically detect `render.yaml` and configure the web service with:
-   - **Environment**: Docker
-   - **Plan**: Free
-   - **Region**: Singapore (or desired region)
-   - **Auto-generated APP_KEY**
+5. Render will automatically detect `render.yaml` and provision both:
+   - **Managed PostgreSQL Database** (`mediqueue-db`): Dedicated PostgreSQL instance with internal network access.
+   - **Web Service** (`mediqueue`): Dockerized Laravel app automatically connected to the database.
 6. Click **Apply**.
-7. The build will install Node dependencies, compile Vite assets via Tailwind CSS, configure PHP-FPM and Nginx, run migrations, and seed the initial dataset automatically.
+7. The build pipeline will automatically compile Vite assets, install PHP extensions (`pdo_pgsql`), run database migrations, and seed initial demo accounts!
 
 ### Method 2: Manual Web Service Setup
 
-1. Click **New +** → **Web Service**.
-2. Connect your repository.
+1. Click **New +** → **PostgreSQL** to create a database (`mediqueue-db`).
+2. Click **New +** → **Web Service** and connect your repository.
 3. Select **Docker** as the Runtime environment.
-4. Set the following environment variables in Render's dashboard:
+4. Link the database environment variables in Render's dashboard:
    - `APP_NAME`: `MediQueue`
    - `APP_ENV`: `production`
    - `APP_DEBUG`: `false`
    - `APP_KEY`: (Generate using `php artisan key:generate --show` or Render secret generator)
    - `APP_URL`: `https://<your-service-name>.onrender.com`
-   - `DB_CONNECTION`: `sqlite`
-   - `DB_DATABASE`: `/var/www/html/database/database.sqlite`
+   - `DB_CONNECTION`: `pgsql`
+   - `DB_HOST`: (From PostgreSQL internal database host)
+   - `DB_PORT`: `5432`
+   - `DB_DATABASE`: `mediqueue`
+   - `DB_USERNAME`: `mediqueue_user`
+   - `DB_PASSWORD`: (From PostgreSQL password)
    - `SESSION_DRIVER`: `file`
    - `CACHE_STORE`: `file`
    - `QUEUE_CONNECTION`: `sync`

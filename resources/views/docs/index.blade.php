@@ -557,12 +557,14 @@
                         <h3 class="text-xl font-extrabold text-slate-900 mb-4">5. Production Deployment & DevOps</h3>
                         <div class="space-y-4 text-sm text-slate-600">
                             <p>
-                                MediQueue includes a multi-stage production Dockerfile and Render.com blueprint (<code>render.yaml</code>).
+                                MediQueue includes a multi-stage production Dockerfile and automated Render.com Blueprint (<code>render.yaml</code>) that provisions both the <strong>Dockerized Laravel application</strong> and a <strong>Managed PostgreSQL database instance</strong>:
                             </p>
                             <div class="bg-slate-900 text-slate-100 rounded-xl p-4 font-mono text-xs overflow-x-auto space-y-2">
-                                <p class="text-slate-400"># 1. Local execution with Docker</p>
+                                <p class="text-slate-400"># 1. Local execution with Docker Compose</p>
                                 <p class="text-emerald-400">docker compose up -d --build</p>
-                                <p class="text-slate-400"># 2. Execute automated test suite</p>
+                                <p class="text-slate-400"># 2. Deploy to Render via Blueprint</p>
+                                <p class="text-indigo-300">Render Dashboard → New Blueprint → Select repo (Auto-provisions PostgreSQL + App)</p>
+                                <p class="text-slate-400"># 3. Execute automated test suite</p>
                                 <p class="text-emerald-400">php vendor/bin/phpunit</p>
                             </div>
                         </div>
