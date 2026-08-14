@@ -2,7 +2,7 @@ databases:
   - name: mediqueue-db
     databaseName: mediqueue
     user: mediqueue_user
-    plan: free
+    plan: starter
     region: singapore
     ipAllowList: [] # internal connections only
 
@@ -11,7 +11,7 @@ services:
     name: mediqueue
     env: docker
     dockerfilePath: Dockerfile
-    plan: free
+    plan: starter
     region: singapore
     envVars:
       - key: APP_NAME
