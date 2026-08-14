@@ -3,12 +3,15 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\QueueNotificationMail;
 use App\Models\AuditLog;
+use App\Models\Notification;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
 
@@ -38,7 +41,7 @@ class UserController extends Controller
     }
 
     /**
-     * Show the create staff user form.
+     * Show the create user form.
      */
     public function create(): View
     {
@@ -46,7 +49,7 @@ class UserController extends Controller
     }
 
     /**
-     * Create a new staff account.
+     * Create a new user account (patient, staff, or admin).
      */
     public function store(Request $request): RedirectResponse
     {
@@ -54,16 +57,17 @@ class UserController extends Controller
             'name'     => ['required', 'string', 'max:100'],
             'email'    => ['required', 'email', 'max:255', 'unique:users,email'],
             'phone'    => ['nullable', 'string', 'max:20'],
-            'role'     => ['required', 'in:staff,admin'],
+            'role'     => ['required', 'in:patient,staff,admin'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
         $user = User::create([
-            'name'     => $data['name'],
-            'email'    => $data['email'],
-            'phone'    => $data['phone'] ?? null,
-            'role'     => $data['role'],
-            'password' => Hash::make($data['password']),
+            'name'      => $data['name'],
+            'email'     => $data['email'],
+            'phone'     => $data['phone'] ?? null,
+            'role'      => $data['role'],
+            'password'  => Hash::make($data['password']),
+            'is_active' => true,
         ]);
 
         AuditLog::create([
@@ -71,12 +75,115 @@ class UserController extends Controller
             'action'      => 'user.created',
             'entity_type' => 'User',
             'entity_id'   => $user->id,
-            'metadata'    => ['name' => $user->name, 'role' => $user->role],
+            'metadata'    => ['name' => $user->name, 'role' => $user->role, 'email' => $user->email],
+            'ip_address'  => $request->ip(),
+        ]);
+
+        // Send welcome notification & email
+        Notification::create([
+            'user_id' => $user->id,
+            'type'    => 'account.created',
+            'title'   => 'Account Created',
+            'body'    => "Your MediQueue account has been created with the role of {$user->role_label}.",
+        ]);
+
+        try {
+            Mail::to($user->email)->send(
+                new QueueNotificationMail(
+                    $user,
+                    'Welcome to MediQueue',
+                    'Your Account is Ready',
+                    "An administrator has created your MediQueue account with the role of {$user->role_label}. You can now log in using your email address."
+                )
+            );
+        } catch (\Throwable $e) {}
+
+        return redirect()->route('admin.users.index')
+            ->with('success', "User \"{$user->name}\" created with role: {$user->role_label}.");
+    }
+
+    /**
+     * Show user edit form.
+     */
+    public function edit(User $user): View
+    {
+        return view('admin.users.edit', compact('user'));
+    }
+
+    /**
+     * Update user details.
+     */
+    public function update(Request $request, User $user): RedirectResponse
+    {
+        $data = $request->validate([
+            'name'  => ['required', 'string', 'max:100'],
+            'email' => ['required', 'email', 'max:255', "unique:users,email,{$user->id}"],
+            'phone' => ['nullable', 'string', 'max:20'],
+            'role'  => ['required', 'in:patient,staff,admin'],
+        ]);
+
+        if ($user->id === Auth::id() && $data['role'] !== 'admin') {
+            return back()->withErrors(['role' => 'You cannot remove your own admin privileges.']);
+        }
+
+        $oldRole = $user->role;
+        $user->update($data);
+
+        AuditLog::create([
+            'user_id'     => Auth::id(),
+            'action'      => 'user.updated',
+            'entity_type' => 'User',
+            'entity_id'   => $user->id,
+            'metadata'    => ['name' => $user->name, 'role' => $user->role, 'email' => $user->email],
             'ip_address'  => $request->ip(),
         ]);
 
         return redirect()->route('admin.users.index')
-            ->with('success', "User \"{$user->name}\" created with role: {$user->role}.");
+            ->with('success', "User \"{$user->name}\" updated successfully.");
+    }
+
+    /**
+     * Reset a user's password.
+     */
+    public function resetPassword(Request $request, User $user): RedirectResponse
+    {
+        $data = $request->validate([
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        ]);
+
+        $user->update([
+            'password' => Hash::make($data['password']),
+        ]);
+
+        AuditLog::create([
+            'user_id'     => Auth::id(),
+            'action'      => 'user.password_reset',
+            'entity_type' => 'User',
+            'entity_id'   => $user->id,
+            'metadata'    => ['name' => $user->name, 'email' => $user->email],
+            'ip_address'  => $request->ip(),
+        ]);
+
+        Notification::create([
+            'user_id' => $user->id,
+            'type'    => 'auth.password_reset',
+            'title'   => 'Password Reset',
+            'body'    => 'Your account password was updated by the clinic administrator.',
+        ]);
+
+        try {
+            Mail::to($user->email)->send(
+                new QueueNotificationMail(
+                    $user,
+                    'Password Reset Notice',
+                    'Your Password Was Reset',
+                    'Your MediQueue account password has been updated by the clinic administrator. Please log in using your new credentials.'
+                )
+            );
+        } catch (\Throwable $e) {}
+
+        return redirect()->route('admin.users.index')
+            ->with('success', "Password for \"{$user->name}\" has been reset.");
     }
 
     /**
@@ -84,7 +191,6 @@ class UserController extends Controller
      */
     public function toggle(Request $request, User $user): RedirectResponse
     {
-        // Cannot deactivate yourself
         if ($user->id === Auth::id()) {
             return back()->withErrors(['user' => 'You cannot deactivate your own account.']);
         }
@@ -107,7 +213,7 @@ class UserController extends Controller
     }
 
     /**
-     * Update a user's role.
+     * Update a user's role directly from the table.
      */
     public function updateRole(Request $request, User $user): RedirectResponse
     {

@@ -3,9 +3,11 @@
 use App\Http\Controllers\Admin\AuditController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\ServiceController;
+use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\DisplayController;
 use App\Http\Controllers\Patient\DashboardController as PatientDashboardController;
 use App\Http\Controllers\Patient\QueueController as PatientQueueController;
 use App\Http\Controllers\Staff\QueueController as StaffQueueController;
@@ -17,11 +19,11 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 |
 | Route Groups:
-| 1. Public   — Landing page (no auth required)
-| 2. Auth     — Login / Register / Logout
+| 1. Public   — Landing page & Public Hospital Waiting Room Screen
+| 2. Auth     — Login / Register / Logout (Throttle protected)
 | 3. Patient  — Queue joining, status monitoring, history
 | 4. Staff    — Queue operations (call, serve, complete, skip, recall)
-| 5. Admin    — Services, users, audit log, system dashboard
+| 5. Admin    — Services, users, password reset, settings, audit log
 |
 */
 
@@ -33,15 +35,19 @@ Route::get('/', function () {
     return view('landing');
 })->name('home');
 
+// Hospital / Clinic Public Waiting Room Display TV Screen
+Route::get('/display',      [DisplayController::class, 'index'])->name('display');
+Route::get('/display/data', [DisplayController::class, 'data'])->name('display.data');
+
 // ============================================================
 // 2. Authentication Routes
 // ============================================================
 
 Route::middleware('guest')->group(function () {
     Route::get('/login',    [LoginController::class, 'create'])->name('login');
-    Route::post('/login',   [LoginController::class, 'store']);
+    Route::post('/login',   [LoginController::class, 'store'])->middleware('throttle:10,1');
     Route::get('/register', [RegisterController::class, 'create'])->name('register');
-    Route::post('/register',[RegisterController::class, 'store']);
+    Route::post('/register',[RegisterController::class, 'store'])->middleware('throttle:10,1');
 });
 
 Route::post('/logout', [LoginController::class, 'destroy'])
@@ -56,15 +62,15 @@ Route::prefix('patient')
     ->middleware(['auth', 'role:patient'])
     ->name('patient.')
     ->group(function () {
-        // Dashboard
+        // Dashboard & Notifications
         Route::get('/dashboard', [PatientDashboardController::class, 'index'])->name('dashboard');
         Route::get('/history',   [PatientDashboardController::class, 'history'])->name('history');
         Route::post('/notifications/read', [PatientDashboardController::class, 'markNotificationsRead'])->name('notifications.read');
 
-        // Queue operations
+        // Queue operations (Rate limited to prevent queue flooding)
         Route::get('/queue',                           [PatientQueueController::class, 'index'])->name('queue.index');
         Route::get('/queue/service/{service}',         [PatientQueueController::class, 'show'])->name('queue.show');
-        Route::post('/queue',                          [PatientQueueController::class, 'store'])->name('queue.store');
+        Route::post('/queue',                          [PatientQueueController::class, 'store'])->middleware('throttle:30,1')->name('queue.store');
         Route::get('/queue/{queueEntry}/status',       [PatientQueueController::class, 'status'])->name('queue.status');
         Route::post('/queue/{queueEntry}/cancel',      [PatientQueueController::class, 'cancel'])->name('queue.cancel');
 
@@ -102,16 +108,23 @@ Route::prefix('admin')
         // Dashboard
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
-        // Service management
+        // Service catalogue management
         Route::resource('services', ServiceController::class)->only(['index', 'create', 'store', 'edit', 'update']);
         Route::post('/services/{service}/toggle', [ServiceController::class, 'toggle'])->name('services.toggle');
 
-        // User management
-        Route::get('/users',                    [UserController::class, 'index'])->name('users.index');
-        Route::get('/users/create',             [UserController::class, 'create'])->name('users.create');
-        Route::post('/users',                   [UserController::class, 'store'])->name('users.store');
-        Route::post('/users/{user}/toggle',     [UserController::class, 'toggle'])->name('users.toggle');
-        Route::post('/users/{user}/role',       [UserController::class, 'updateRole'])->name('users.role');
+        // User management & administrative password resets
+        Route::get('/users',                              [UserController::class, 'index'])->name('users.index');
+        Route::get('/users/create',                       [UserController::class, 'create'])->name('users.create');
+        Route::post('/users',                             [UserController::class, 'store'])->name('users.store');
+        Route::get('/users/{user}/edit',                  [UserController::class, 'edit'])->name('users.edit');
+        Route::put('/users/{user}',                       [UserController::class, 'update'])->name('users.update');
+        Route::post('/users/{user}/toggle',               [UserController::class, 'toggle'])->name('users.toggle');
+        Route::post('/users/{user}/role',                 [UserController::class, 'updateRole'])->name('users.role');
+        Route::post('/users/{user}/reset-password',       [UserController::class, 'resetPassword'])->name('users.reset-password');
+
+        // Clinic & System Settings
+        Route::get('/settings',  [SettingController::class, 'index'])->name('settings.index');
+        Route::put('/settings',  [SettingController::class, 'update'])->name('settings.update');
 
         // Audit log
         Route::get('/audit', [AuditController::class, 'index'])->name('audit.index');

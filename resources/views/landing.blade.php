@@ -41,8 +41,9 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
                             </svg>
                         </a>
-                        <a href="{{ route('login') }}" class="btn btn-xl bg-white/10 text-white border border-white/20 hover:bg-white/20 backdrop-blur-sm">
-                            Sign In
+                        <a href="{{ route('display') }}" target="_blank" class="btn btn-xl bg-white/10 text-white border border-white/20 hover:bg-white/20 backdrop-blur-sm flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                            Live Hospital Screen
                         </a>
                     @else
                         @if(auth()->user()->isAdmin())
@@ -61,6 +62,10 @@
                                 Join a Queue
                             </a>
                         @endif
+                        <a href="{{ route('display') }}" target="_blank" class="btn btn-xl bg-emerald-500/20 text-emerald-200 border border-emerald-500/30 hover:bg-emerald-500/30 flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                            Hospital Waiting Screen
+                        </a>
                     @endguest
                 </div>
 

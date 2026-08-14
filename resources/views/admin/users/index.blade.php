@@ -74,7 +74,10 @@
                                     @endif
                                 </td>
                                 <td class="text-xs text-slate-500">{{ $user->created_at->format('M d, Y') }}</td>
-                                <td class="text-right">
+                                <td class="text-right space-x-2">
+                                    <a href="{{ route('admin.users.edit', $user) }}" class="btn btn-secondary btn-sm">
+                                        Edit
+                                    </a>
                                     @if($user->id !== auth()->id())
                                         <form method="POST" action="{{ route('admin.users.toggle', $user) }}" class="inline-block" onsubmit="return confirm('Toggle status for this user?');">
                                             @csrf

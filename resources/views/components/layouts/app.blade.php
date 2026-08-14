@@ -39,7 +39,7 @@
                 <div class="hidden md:flex items-center gap-1">
                     @auth
                         @if(auth()->user()->isAdmin())
-                            <a href="{{ route('admin.dashboard') }}" class="nav-item {{ request()->routeIs('admin.*') ? 'nav-item-active' : '' }}">
+                            <a href="{{ route('admin.dashboard') }}" class="nav-item {{ request()->routeIs('admin.dashboard') ? 'nav-item-active' : '' }}">
                                 Dashboard
                             </a>
                             <a href="{{ route('admin.services.index') }}" class="nav-item {{ request()->routeIs('admin.services.*') ? 'nav-item-active' : '' }}">
@@ -48,12 +48,23 @@
                             <a href="{{ route('admin.users.index') }}" class="nav-item {{ request()->routeIs('admin.users.*') ? 'nav-item-active' : '' }}">
                                 Users
                             </a>
+                            <a href="{{ route('admin.settings.index') }}" class="nav-item {{ request()->routeIs('admin.settings.*') ? 'nav-item-active' : '' }}">
+                                Settings
+                            </a>
                             <a href="{{ route('admin.audit.index') }}" class="nav-item {{ request()->routeIs('admin.audit.*') ? 'nav-item-active' : '' }}">
                                 Audit
+                            </a>
+                            <a href="{{ route('display') }}" target="_blank" class="nav-item text-indigo-600 font-semibold flex items-center gap-1">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                TV Screen
                             </a>
                         @elseif(auth()->user()->isStaff())
                             <a href="{{ route('staff.dashboard') }}" class="nav-item {{ request()->routeIs('staff.*') ? 'nav-item-active' : '' }}">
                                 Queue Management
+                            </a>
+                            <a href="{{ route('display') }}" target="_blank" class="nav-item text-indigo-600 font-semibold flex items-center gap-1">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                TV Screen
                             </a>
                         @else
                             <a href="{{ route('patient.dashboard') }}" class="nav-item {{ request()->routeIs('patient.dashboard') ? 'nav-item-active' : '' }}">
@@ -64,6 +75,10 @@
                             </a>
                             <a href="{{ route('patient.history') }}" class="nav-item {{ request()->routeIs('patient.history') ? 'nav-item-active' : '' }}">
                                 History
+                            </a>
+                            <a href="{{ route('display') }}" target="_blank" class="nav-item text-indigo-600 font-semibold flex items-center gap-1">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                Live Board
                             </a>
                         @endif
                     @endauth

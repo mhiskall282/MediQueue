@@ -14,10 +14,14 @@
 
 ## 🌟 Key Features
 
+### 📺 Hospital Waiting Room TV Screen (`/display`)
+- **Public Departure-Board Display**: Dedicated TV waiting room screen featuring huge high-contrast "Now Calling" ticket numbers with animated glow, department-by-department status matrix, live clock, and automated 3-second background data synchronization.
+- **Kiosk Ready**: Single-click full-screen mode for wall-mounted TV monitors and waiting area tablets.
+
 ### 👤 Patient Self-Service Portal
 - **One-Click Queue Registration**: Select clinic service and receive an instant, atomic queue ticket (e.g. `GC-001`).
 - **Live Status Monitoring**: Real-time position tracking (`#1 in line`, `People ahead: 0`), estimated wait times, and department status via lightweight asynchronous polling.
-- **In-App Notifications**: Alerts when called, service started, completed, or skipped.
+- **In-App & Email Notifications**: Automated transactional emails and in-app alerts when tickets are issued, called, in-service, completed, or cancelled.
 - **Queue History**: Review past clinic visits with timestamps and consultation wait durations.
 - **Ticket Cancellation**: Option to cancel waiting tickets if plans change.
 
@@ -27,10 +31,12 @@
 - **Handling Edge Cases**: "Skip" no-show patients and "Recall" them back into the active queue.
 - **Live Department Analytics**: Waiting patient counts, completed volume today, and average wait time calculations.
 
-### 🔧 System Administration & Governance
+### 🔧 System Administration & Security Governance
+- **Administrative User Control & Password Resets**: Create and edit patient, staff, or admin accounts, with instant administrative password resets and email notices.
+- **System & Clinic Settings**: Configure healthcare facility name, contact info, operating hours, and notification rules (`/admin/settings`).
 - **Clinic Service Catalogue**: Configure departments, ticket prefixes (e.g. `GC`, `LAB`, `PH`), and estimated duration per patient without downtime.
-- **User & Role Management**: Create staff accounts, modify permissions (`patient`, `staff`, `admin`), and activate/deactivate accounts.
 - **Immutable Audit Trail**: Append-only, time-stamped log recording every administrative and operational action with actor, IP, and metadata context.
+- **Principle of Least Privilege & Rate Limiting**: Strict role-based middleware (`RoleMiddleware`), input throttling on authentication and queue join endpoints.
 
 ---
 

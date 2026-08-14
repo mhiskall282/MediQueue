@@ -412,7 +412,7 @@ class QueueService
     }
 
     /**
-     * Create an in-app notification for a user.
+     * Create an in-app notification and dispatch automated transactional email.
      */
     private function createNotification(
         User $user,
@@ -421,13 +421,32 @@ class QueueService
         string $body,
         array $data = []
     ): Notification {
-        return Notification::create([
+        $notification = Notification::create([
             'user_id' => $user->id,
             'type'    => $type,
             'title'   => $title,
             'body'    => $body,
             'data'    => $data,
         ]);
+
+        // Send transactional email (uses log mailer in dev/test, SMTP in prod)
+        try {
+            if ($user->email) {
+                \Illuminate\Support\Facades\Mail::to($user->email)->send(
+                    new \App\Mail\QueueNotificationMail(
+                        $user,
+                        $title,
+                        $title,
+                        $body,
+                        $data
+                    )
+                );
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning("Could not dispatch email to {$user->email}: " . $e->getMessage());
+        }
+
+        return $notification;
     }
 
     /**
