@@ -32,6 +32,7 @@ class User extends Authenticatable
         'role',
         'phone',
         'specialization',
+        'extended_privileges',
         'medical_license_number',
         'is_on_call',
         'on_call_shift',
@@ -56,12 +57,13 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
-            'password'          => 'hashed',
-            'is_active'         => 'boolean',
-            'is_approved'       => 'boolean',
-            'is_on_call'        => 'boolean',
-            'approved_at'       => 'datetime',
+            'email_verified_at'   => 'datetime',
+            'password'            => 'hashed',
+            'is_active'           => 'boolean',
+            'is_approved'         => 'boolean',
+            'is_on_call'          => 'boolean',
+            'approved_at'         => 'datetime',
+            'extended_privileges' => 'array',
         ];
     }
 
@@ -155,7 +157,29 @@ class User extends Authenticatable
     }
 
     /**
-     * Check if user is any staff role (doctor, nurse, pharmacist, lab_tech, or general staff).
+     * Check if user is a qualified clinical health professional.
+     */
+    public function isClinicalProfessional(): bool
+    {
+        return in_array($this->role, [
+            self::ROLE_DOCTOR,
+            self::ROLE_NURSE,
+            self::ROLE_PHARMACIST,
+            self::ROLE_LAB_TECH,
+            self::ROLE_ADMIN,
+        ], true);
+    }
+
+    /**
+     * Check if user is non-clinical hospital staff (Receptionist / Front Desk / HR / Help Desk).
+     */
+    public function isNonClinicalStaff(): bool
+    {
+        return $this->role === self::ROLE_STAFF;
+    }
+
+    /**
+     * Check if user is any staff role (clinical or non-clinical).
      */
     public function isStaff(): bool
     {
@@ -179,11 +203,32 @@ class User extends Authenticatable
     }
 
     /**
+     * Check if an admin has explicitly extended a custom privilege to this user.
+     */
+    public function hasPrivilege(string $privilege): bool
+    {
+        if ($this->isAdmin()) {
+            return true;
+        }
+
+        $extended = $this->extended_privileges ?? [];
+        return in_array($privilege, $extended, true);
+    }
+
+    /**
      * Can this user perform medical consultations & discharges?
      */
     public function canConsult(): bool
     {
-        return in_array($this->role, [self::ROLE_ADMIN, self::ROLE_DOCTOR, self::ROLE_STAFF], true);
+        return $this->isAdmin() || $this->isDoctor() || $this->hasPrivilege('can_consult');
+    }
+
+    /**
+     * Can this user perform 5-tier Manchester triage?
+     */
+    public function canTriage(): bool
+    {
+        return $this->isAdmin() || $this->isNurse() || $this->isDoctor() || $this->hasPrivilege('can_triage');
     }
 
     /**
@@ -191,7 +236,7 @@ class User extends Authenticatable
      */
     public function canExecuteLab(): bool
     {
-        return in_array($this->role, [self::ROLE_ADMIN, self::ROLE_LAB_TECH, self::ROLE_DOCTOR, self::ROLE_STAFF], true);
+        return $this->isAdmin() || $this->isLabTech() || $this->isDoctor() || $this->hasPrivilege('can_execute_lab');
     }
 
     /**
@@ -199,7 +244,7 @@ class User extends Authenticatable
      */
     public function canDispensePharmacy(): bool
     {
-        return in_array($this->role, [self::ROLE_ADMIN, self::ROLE_PHARMACIST, self::ROLE_STAFF], true);
+        return $this->isAdmin() || $this->isPharmacist() || $this->hasPrivilege('can_dispense_pharmacy');
     }
 
     /**
@@ -207,7 +252,7 @@ class User extends Authenticatable
      */
     public function canAssignBeds(): bool
     {
-        return in_array($this->role, [self::ROLE_ADMIN, self::ROLE_NURSE, self::ROLE_DOCTOR, self::ROLE_STAFF], true);
+        return $this->isAdmin() || $this->isNurse() || $this->isDoctor() || $this->hasPrivilege('can_assign_beds');
     }
 
     /**

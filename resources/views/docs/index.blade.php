@@ -366,6 +366,28 @@
                             <div class="flex items-start gap-4">
                                 <span class="w-7 h-7 rounded-full bg-amber-600 text-white flex items-center justify-center font-bold text-xs flex-shrink-0 mt-0.5">3</span>
                                 <div>
+                                    <h4 class="font-bold text-slate-900">Medical Staff Licensing Vetting & Privilege Extension</h4>
+                                    <p class="mt-1">
+                                        Under <strong>"System Users & Roles"</strong>, administrators inspect applicant medical licenses (e.g. <code>MMC-748921</code>), assign clinical roles (Doctor, Nurse, Pharmacist, Lab Tech, or Front Desk Staff), approve/revoke access, and dynamically extend custom capabilities via the <strong>Dynamic Privilege Extension</strong> matrix.
+                                    </p>
+                                </div>
+                            </div>
+
+                            {{-- Step 4 --}}
+                            <div class="flex items-start gap-4">
+                                <span class="w-7 h-7 rounded-full bg-amber-600 text-white flex items-center justify-center font-bold text-xs flex-shrink-0 mt-0.5">4</span>
+                                <div>
+                                    <h4 class="font-bold text-slate-900">🛡️ HIPAA & ISO 27001 Security Incident Telemetry</h4>
+                                    <p class="mt-1">
+                                        Inspect continuous anomaly detection telemetry under <strong>"Security & Compliance"</strong>. The engine tracks brute-force login attempts, unauthorized route access, privilege escalations, and client IP addresses, enabling one-click audit mitigation.
+                                    </p>
+                                </div>
+                            </div>
+
+                            {{-- Step 5 --}}
+                            <div class="flex items-start gap-4">
+                                <span class="w-7 h-7 rounded-full bg-amber-600 text-white flex items-center justify-center font-bold text-xs flex-shrink-0 mt-0.5">5</span>
+                                <div>
                                     <h4 class="font-bold text-slate-900">User Creation & Password Resets</h4>
                                     <p class="mt-1">
                                         Navigate to <strong>"Users"</strong>. Click <strong>"Create Account"</strong> to add doctors, nurses, or admins. Click <strong>"Edit"</strong> on any user row to update profile details or perform an <strong>Administrative Password Reset</strong> (which automatically emails the new credentials to the user).

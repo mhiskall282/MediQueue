@@ -202,6 +202,8 @@ class UserController extends Controller
             'role'                   => ['required', 'in:patient,staff,doctor,nurse,pharmacist,lab_tech,admin'],
             'specialization'         => ['nullable', 'string', 'max:150'],
             'medical_license_number' => ['nullable', 'string', 'max:100'],
+            'extended_privileges'    => ['nullable', 'array'],
+            'extended_privileges.*'  => ['string'],
         ]);
 
         if ($user->id === Auth::id() && $data['role'] !== 'admin') {
@@ -209,6 +211,7 @@ class UserController extends Controller
         }
 
         $oldRole = $user->role;
+        $data['extended_privileges'] = $request->input('extended_privileges', []);
         $user->update($data);
 
         AuditLog::create([
@@ -216,12 +219,17 @@ class UserController extends Controller
             'action'      => 'user.updated',
             'entity_type' => 'User',
             'entity_id'   => $user->id,
-            'metadata'    => ['name' => $user->name, 'from' => $oldRole, 'to' => $data['role']],
+            'metadata'    => [
+                'name'                => $user->name,
+                'from'                => $oldRole,
+                'to'                  => $data['role'],
+                'extended_privileges' => $data['extended_privileges'],
+            ],
             'ip_address'  => $request->ip(),
         ]);
 
         return redirect()->route('admin.users.index')
-            ->with('success', "User \"{$user->name}\" updated successfully.");
+            ->with('success', "User \"{$user->name}\" updated successfully with assigned privileges.");
     }
 
     /**
