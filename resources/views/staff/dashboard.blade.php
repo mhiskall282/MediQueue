@@ -1,19 +1,19 @@
 <x-layouts.app title="Staff Clinical Console — MediQueue">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {{-- Top Bar & Service Selector --}}
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs">
             <div>
-                <h1 class="text-3xl font-black text-slate-900 tracking-tight">Clinical Operations Console</h1>
-                <p class="text-sm text-slate-500 mt-1">Manage patient triage, lab investigations, doctor review loops, and bed allocations.</p>
+                <h1 class="text-2xl font-black text-slate-900 tracking-tight">Clinical Operations Console</h1>
+                <p class="text-xs text-slate-500 mt-0.5">Manage patient triage, lab investigations, doctor review loops, and bed allocations.</p>
             </div>
 
-            <div class="flex flex-wrap items-center gap-2.5">
-                <a href="{{ route('staff.emergency.index') }}" class="btn btn-secondary text-xs font-black flex items-center gap-1 border-rose-300 text-rose-700 bg-rose-50 hover:bg-rose-100 shadow-xs">
+            <div class="flex flex-wrap items-center gap-2">
+                <a href="{{ route('staff.emergency.index') }}" class="btn btn-secondary text-xs font-black flex items-center gap-1 border-rose-300 text-rose-700 bg-rose-50 hover:bg-rose-100 shadow-2xs">
                     <span class="w-2 h-2 rounded-full bg-rose-600 animate-ping"></span>
                     🚨 Emergency Trauma
                 </a>
                 <a href="{{ route('staff.oncall.index') }}" class="btn btn-secondary text-xs font-bold flex items-center gap-1 border-emerald-200 text-emerald-700 bg-emerald-50/50 hover:bg-emerald-100">
-                    <span>🩺</span> On-Call Doctors
+                    <span>🩺</span> On-Call
                 </a>
                 <a href="{{ route('staff.beds.index') }}" class="btn btn-secondary text-xs font-bold flex items-center gap-1 border-indigo-200 text-indigo-700 bg-indigo-50/50 hover:bg-indigo-100">
                     <span>🛏️</span> Beds & Bays
@@ -21,13 +21,16 @@
                 <a href="{{ route('staff.appointments.index') }}" class="btn btn-secondary text-xs font-bold flex items-center gap-1 border-blue-200 text-blue-700 bg-blue-50/50 hover:bg-blue-100">
                     <span>📅</span> Appointments
                 </a>
+                <a href="{{ route('staff.messages.index') }}" class="btn btn-secondary text-xs font-bold flex items-center gap-1 border-purple-200 text-purple-700 bg-purple-50/50 hover:bg-purple-100">
+                    <span>💬</span> Messages
+                </a>
 
                 {{-- Service Switcher --}}
-                <form method="GET" action="{{ route('staff.dashboard') }}" class="flex items-center gap-2">
-                    <select name="service_id" onchange="this.form.submit()" class="form-input text-xs py-2">
+                <form method="GET" action="{{ route('staff.dashboard') }}" class="flex items-center ml-1">
+                    <select name="service_id" onchange="this.form.submit()" class="form-input text-xs py-2 font-bold text-indigo-900 border-indigo-200 bg-indigo-50/30">
                         @foreach($services as $service)
                             <option value="{{ $service->id }}" {{ $selectedService && $selectedService->id === $service->id ? 'selected' : '' }}>
-                                {{ $service->name }} ({{ $service->prefix }})
+                                🏢 {{ $service->name }} ({{ $service->prefix }})
                             </option>
                         @endforeach
                     </select>
@@ -237,26 +240,26 @@
                                                     </span>
                                                 </td>
                                                 <td>
-                                                    {{-- Quick Triage Form --}}
+                                                    {{-- Quick Triage Form with High-Contrast Pill Select --}}
                                                     <form method="POST" action="{{ route('staff.queue.triage', $entry) }}" class="inline-block">
                                                         @csrf
-                                                        <select name="triage_level" onchange="this.form.submit()" class="text-[11px] font-bold rounded-lg border-0 py-1 px-2 cursor-pointer shadow-xs {{ $entry->triage_badge_class }}">
-                                                            <option value="RED" {{ $entry->triage_level === 'RED' ? 'selected' : '' }}>🔴 Red (P1)</option>
-                                                            <option value="ORANGE" {{ $entry->triage_level === 'ORANGE' ? 'selected' : '' }}>🟠 Orange (P2)</option>
-                                                            <option value="YELLOW" {{ $entry->triage_level === 'YELLOW' ? 'selected' : '' }}>🟡 Yellow (P3)</option>
-                                                            <option value="GREEN" {{ $entry->triage_level === 'GREEN' ? 'selected' : '' }}>🟢 Green (P4)</option>
-                                                            <option value="BLUE" {{ $entry->triage_level === 'BLUE' ? 'selected' : '' }}>🔵 Blue (P5)</option>
+                                                        <select name="triage_level" onchange="this.form.submit()" class="text-xs font-bold rounded-lg py-1 px-2.5 cursor-pointer border shadow-2xs transition-colors {{ $entry->triage_select_class }}">
+                                                            <option value="RED" class="text-red-900 bg-white font-bold" {{ $entry->triage_level === 'RED' ? 'selected' : '' }}>🔴 Red (P1 - Resus)</option>
+                                                            <option value="ORANGE" class="text-orange-900 bg-white font-bold" {{ $entry->triage_level === 'ORANGE' ? 'selected' : '' }}>🟠 Orange (P2 - Urgent)</option>
+                                                            <option value="YELLOW" class="text-amber-900 bg-white font-bold" {{ $entry->triage_level === 'YELLOW' ? 'selected' : '' }}>🟡 Yellow (P3 - Priority)</option>
+                                                            <option value="GREEN" class="text-emerald-900 bg-white font-bold" {{ $entry->triage_level === 'GREEN' ? 'selected' : '' }}>🟢 Green (P4 - Standard)</option>
+                                                            <option value="BLUE" class="text-sky-900 bg-white font-bold" {{ $entry->triage_level === 'BLUE' ? 'selected' : '' }}>🔵 Blue (P5 - Routine)</option>
                                                         </select>
                                                     </form>
                                                 </td>
                                                 <td>
                                                     @if($entry->allocatedBed)
-                                                        <span class="font-mono text-xs font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200">
+                                                        <span class="inline-flex items-center gap-1 font-mono text-xs font-bold text-indigo-800 bg-indigo-50 px-2 py-1 rounded-lg border border-indigo-200">
                                                             🛏️ {{ $entry->allocatedBed->bed_number }}
                                                         </span>
                                                     @else
-                                                        <a href="{{ route('staff.beds.index') }}" class="text-[11px] text-slate-400 hover:text-indigo-600 italic">
-                                                            + Assign Bay
+                                                        <a href="{{ route('staff.beds.index') }}" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 shadow-2xs">
+                                                            <span>🛏️</span> + Assign
                                                         </a>
                                                     @endif
                                                 </td>

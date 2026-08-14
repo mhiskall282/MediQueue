@@ -268,12 +268,24 @@ class QueueEntry extends Model
     public function getTriageBadgeClassAttribute(): string
     {
         return match($this->triage_level) {
-            self::TRIAGE_RED    => 'bg-red-500 text-white font-black animate-pulse border-red-600',
+            self::TRIAGE_RED    => 'bg-red-600 text-white font-black animate-pulse border-red-700',
             self::TRIAGE_ORANGE => 'bg-orange-500 text-white font-bold border-orange-600',
             self::TRIAGE_YELLOW => 'bg-amber-400 text-amber-950 font-bold border-amber-500',
-            self::TRIAGE_GREEN  => 'bg-emerald-500 text-white font-semibold border-emerald-600',
-            self::TRIAGE_BLUE   => 'bg-sky-500 text-white font-semibold border-sky-600',
-            default             => 'bg-emerald-500 text-white font-semibold border-emerald-600',
+            self::TRIAGE_GREEN  => 'bg-emerald-600 text-white font-semibold border-emerald-700',
+            self::TRIAGE_BLUE   => 'bg-sky-600 text-white font-semibold border-sky-700',
+            default             => 'bg-emerald-600 text-white font-semibold border-emerald-700',
+        };
+    }
+
+    public function getTriageSelectClassAttribute(): string
+    {
+        return match($this->triage_level) {
+            self::TRIAGE_RED    => 'bg-red-50 text-red-900 border-red-300 font-black focus:ring-red-500',
+            self::TRIAGE_ORANGE => 'bg-orange-50 text-orange-900 border-orange-300 font-bold focus:ring-orange-500',
+            self::TRIAGE_YELLOW => 'bg-amber-50 text-amber-900 border-amber-300 font-bold focus:ring-amber-500',
+            self::TRIAGE_GREEN  => 'bg-emerald-50 text-emerald-900 border-emerald-300 font-semibold focus:ring-emerald-500',
+            self::TRIAGE_BLUE   => 'bg-sky-50 text-sky-900 border-sky-300 font-semibold focus:ring-sky-500',
+            default             => 'bg-emerald-50 text-emerald-900 border-emerald-300 font-semibold',
         };
     }
 
