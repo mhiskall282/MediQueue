@@ -58,6 +58,9 @@
                                 <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                                 TV Screen
                             </a>
+                            <a href="{{ route('docs') }}" class="nav-item {{ request()->routeIs('docs') ? 'nav-item-active' : '' }}">
+                                Docs
+                            </a>
                         @elseif(auth()->user()->isStaff())
                             <a href="{{ route('staff.dashboard') }}" class="nav-item {{ request()->routeIs('staff.*') ? 'nav-item-active' : '' }}">
                                 Queue Management
@@ -65,6 +68,9 @@
                             <a href="{{ route('display') }}" target="_blank" class="nav-item text-indigo-600 font-semibold flex items-center gap-1">
                                 <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                                 TV Screen
+                            </a>
+                            <a href="{{ route('docs') }}" class="nav-item {{ request()->routeIs('docs') ? 'nav-item-active' : '' }}">
+                                Docs
                             </a>
                         @else
                             <a href="{{ route('patient.dashboard') }}" class="nav-item {{ request()->routeIs('patient.dashboard') ? 'nav-item-active' : '' }}">
@@ -80,7 +86,18 @@
                                 <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                                 Live Board
                             </a>
+                            <a href="{{ route('docs') }}" class="nav-item {{ request()->routeIs('docs') ? 'nav-item-active' : '' }}">
+                                Docs
+                            </a>
                         @endif
+                    @else
+                        <a href="{{ route('docs') }}" class="nav-item {{ request()->routeIs('docs') ? 'nav-item-active' : '' }}">
+                            Docs & Architecture
+                        </a>
+                        <a href="{{ route('display') }}" target="_blank" class="nav-item text-indigo-600 font-semibold flex items-center gap-1">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                            Live Screen
+                        </a>
                     @endauth
                 </div>
 
@@ -169,8 +186,13 @@
                     </div>
                     <span class="text-sm font-semibold text-slate-900">MediQueue</span>
                 </div>
-                <p class="text-xs text-slate-500">
-                    Smart Clinic Queue Management &mdash; Advanced Software Engineering Capstone &copy; {{ date('Y') }}
+                <div class="flex items-center gap-6 text-xs text-slate-500 font-medium">
+                    <a href="{{ route('docs') }}" class="hover:text-indigo-600">Documentation & Guides</a>
+                    <a href="{{ route('display') }}" target="_blank" class="hover:text-indigo-600">Hospital TV Screen</a>
+                    <a href="https://github.com/mhiskall282/ug-swe-exams" target="_blank" class="hover:text-indigo-600">GitHub Source</a>
+                </div>
+                <p class="text-xs text-slate-400">
+                    Advanced Software Engineering Capstone &copy; {{ date('Y') }}
                 </p>
             </div>
         </div>

@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\DisplayController;
+use App\Http\Controllers\DocsController;
 use App\Http\Controllers\Patient\DashboardController as PatientDashboardController;
 use App\Http\Controllers\Patient\QueueController as PatientQueueController;
 use App\Http\Controllers\Staff\QueueController as StaffQueueController;
@@ -19,7 +20,7 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 |
 | Route Groups:
-| 1. Public   — Landing page & Public Hospital Waiting Room Screen
+| 1. Public   — Landing page, /docs technical documentation, /display waiting screen
 | 2. Auth     — Login / Register / Logout (Throttle protected)
 | 3. Patient  — Queue joining, status monitoring, history
 | 4. Staff    — Queue operations (call, serve, complete, skip, recall)
@@ -34,6 +35,9 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('landing');
 })->name('home');
+
+// Interactive Documentation Hub
+Route::get('/docs', [DocsController::class, 'index'])->name('docs');
 
 // Hospital / Clinic Public Waiting Room Display TV Screen
 Route::get('/display',      [DisplayController::class, 'index'])->name('display');

@@ -17,6 +17,7 @@ class SmokeTest extends TestCase
         $this->get('/')->assertStatus(200)->assertSee('MediQueue');
         $this->get('/login')->assertStatus(200)->assertSee('Sign in to MediQueue');
         $this->get('/register')->assertStatus(200)->assertSee('Create your account');
+        $this->get('/docs')->assertStatus(200)->assertSeeText('MediQueue Technical Reference');
     }
 
     public function test_all_patient_screens_render_successfully(): void
