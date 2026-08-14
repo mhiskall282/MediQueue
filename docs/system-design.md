@@ -1,8 +1,9 @@
 # MediQueue — System Analysis & Design
 
 **Document ID**: SAD-001  
-**Version**: 1.1  
+**Version**: 1.2  
 **Date**: 2026-08-14  
+**Live Production URL**: [https://mediqueue-25vl.onrender.com](https://mediqueue-25vl.onrender.com)  
 
 ---
 
@@ -13,74 +14,71 @@ MediQueue operates as a standalone web application within a clinic's local/cloud
 - **Web Browser (Patient)**: Mobile and desktop HTTP clients
 - **Web Browser (Staff)**: Desktop and tablet HTTP clients
 - **Web Browser (Admin)**: Desktop HTTP clients
-- **Database**: Relational store (SQLite / MySQL)
+- **Database**: Relational store (PostgreSQL / SQLite / MySQL)
 
 ```mermaid
-flowchart TB
+graph TD
     subgraph External["External Actors"]
-        P["Patient (Mobile or Web Browser)"]
-        S["Staff (Desktop or Tablet Browser)"]
-        A["Admin (Desktop Browser)"]
+        P["Patient (Mobile or Web)"]
+        S["Staff (Desktop or Tablet)"]
+        A["Admin (Desktop)"]
     end
 
-    subgraph MediQueue["MediQueue Web Application"]
-        WEB["Web Layer (Laravel Routes and Controllers)"]
-        BIZ["Business Layer (QueueService and Actions)"]
+    subgraph CoreApp["MediQueue Web Application"]
+        WEB["Web Layer (Controllers & Routes)"]
+        BIZ["Domain Service (QueueService)"]
         DATA["Data Layer (Eloquent Models)"]
-        DB[("Database (SQLite or MySQL)")]
+        DB[("Database (PostgreSQL / SQLite)")]
     end
 
-    subgraph Future["Future Integrations"]
-        SMTP["SMTP Email Gateway"]
-        SMS["SMS Notification Gateway"]
+    subgraph Notifications["Notification & Audit Subsystems"]
+        MAIL["Transactional Email Service"]
+        AUDIT["Immutable Audit Trail"]
     end
 
-    P -->|HTTP/HTTPS| WEB
-    S -->|HTTP/HTTPS| WEB
-    A -->|HTTP/HTTPS| WEB
+    P -->|HTTPS| WEB
+    S -->|HTTPS| WEB
+    A -->|HTTPS| WEB
     WEB --> BIZ
     BIZ --> DATA
     DATA --> DB
-    BIZ -.->|Future| SMTP
-    BIZ -.->|Future| SMS
+    BIZ --> MAIL
+    BIZ --> AUDIT
 ```
 
 ---
 
-## 2. Use Case Diagram
+## 2. Use Case Architecture
 
 ```mermaid
-flowchart LR
-    subgraph Users["System Actors"]
+graph LR
+    subgraph Actors["System Actors"]
         PAT["Patient"]
-        STF["Staff"]
+        STF["Clinical Staff"]
         ADM["Administrator"]
     end
 
-    subgraph PatientCases["Patient Use Cases"]
-        UC1["UC-01: Register Account"]
-        UC2["UC-02: Login and Logout"]
-        UC3["UC-03: View Services"]
-        UC4["UC-04: Join Service Queue"]
-        UC5["UC-05: View Live Queue Position"]
-        UC6["UC-06: Cancel Queue Ticket"]
-        UC7["UC-07: View History"]
+    subgraph PatientScope["Patient Functions"]
+        UC1["UC-01: Register & Login"]
+        UC2["UC-02: View Services"]
+        UC3["UC-03: Join Queue & Get Ticket"]
+        UC4["UC-04: Monitor Live Position"]
+        UC5["UC-05: Cancel Ticket"]
+        UC6["UC-06: View Visit History"]
     end
 
-    subgraph StaffCases["Staff Operations"]
-        UC8["UC-08: View Queue Dashboard"]
-        UC9["UC-09: Call Next Patient"]
-        UC10["UC-10: Start Service"]
-        UC11["UC-11: Complete Service"]
-        UC12["UC-12: Skip Patient"]
-        UC13["UC-13: Recall Patient"]
+    subgraph StaffScope["Staff Operations"]
+        UC7["UC-07: Queue Operations Console"]
+        UC8["UC-08: Call Next Patient"]
+        UC9["UC-09: Start & Complete Consultation"]
+        UC10["UC-10: Skip & Recall Patient"]
     end
 
-    subgraph AdminCases["Administrative Control"]
-        UC14["UC-14: Manage Services"]
-        UC15["UC-15: Manage Users and Roles"]
-        UC16["UC-16: View System Dashboard"]
-        UC17["UC-17: View Immutable Audit Log"]
+    subgraph AdminScope["Administrative Governance"]
+        UC11["UC-11: Manage Service Catalogue"]
+        UC12["UC-12: Manage Users & Passwords"]
+        UC13["UC-13: System Settings & Hours"]
+        UC14["UC-14: Inspect Audit Trail"]
     end
 
     PAT --> UC1
@@ -89,22 +87,18 @@ flowchart LR
     PAT --> UC4
     PAT --> UC5
     PAT --> UC6
-    PAT --> UC7
 
-    STF --> UC2
+    STF --> UC1
+    STF --> UC7
     STF --> UC8
     STF --> UC9
     STF --> UC10
-    STF --> UC11
-    STF --> UC12
-    STF --> UC13
 
-    ADM --> UC2
+    ADM --> UC1
+    ADM --> UC11
+    ADM --> UC12
+    ADM --> UC13
     ADM --> UC14
-    ADM --> UC15
-    ADM --> UC16
-    ADM --> UC17
-    ADM --> UC8
 ```
 
 ---
@@ -147,7 +141,7 @@ stateDiagram-v2
 
 ```mermaid
 erDiagram
-    User ||--o{ QueueEntry : "places / serves"
+    User ||--o{ QueueEntry : "places or serves"
     User ||--o{ Notification : "receives"
     User ||--o{ AuditLog : "triggers"
     Service ||--o{ QueueEntry : "categorizes"
@@ -224,7 +218,7 @@ sequenceDiagram
     participant Browser as Web Browser
     participant Controller as PatientQueueController
     participant Service as QueueService
-    participant DB as SQLite Database
+    participant DB as Relational Database
 
     Patient->>Browser: Selects Service and clicks "Join Queue"
     Browser->>Controller: POST /patient/queue (service_id)
@@ -255,7 +249,7 @@ sequenceDiagram
     participant Browser as Staff Dashboard
     participant Controller as StaffQueueController
     participant Service as QueueService
-    participant DB as SQLite Database
+    participant DB as Relational Database
 
     Staff->>Browser: Clicks "Call Next Patient"
     Browser->>Controller: POST /staff/queue/call-next (service_id)
@@ -278,20 +272,20 @@ sequenceDiagram
 ## 7. Layered Architecture Overview
 
 ```mermaid
-flowchart TD
-    subgraph Client["Presentation Layer (Blade + Tailwind CSS)"]
-        UI_PUBLIC["Public Landing Page"]
-        UI_AUTH["Split-Screen Auth Forms"]
-        UI_PATIENT["Patient Portal & Live Polling Ticket"]
-        UI_STAFF["Staff Clinical Operations Console"]
-        UI_ADMIN["Admin Control Center & Audit Trail"]
+graph TD
+    subgraph Presentation["Presentation Layer (Blade & Tailwind CSS)"]
+        UI_PUBLIC["Public Landing & /docs"]
+        UI_PATIENT["Patient Portal & Ticket Live Polling"]
+        UI_STAFF["Staff Console & Actions"]
+        UI_ADMIN["Admin Control & Settings"]
+        UI_DISP["Hospital TV Screen (/display)"]
     end
 
     subgraph Routing["Routing & Middleware Layer"]
         ROUTES["routes/web.php"]
         AUTH_MID["auth Middleware"]
         ROLE_MID["RoleMiddleware (patient, staff, admin)"]
-        CSRF_MID["VerifyCsrfToken Middleware"]
+        THROTTLE["RateLimiter Throttling"]
     end
 
     subgraph Controllers["Controller Layer"]
@@ -299,18 +293,19 @@ flowchart TD
         C_PAT["Patient Controllers"]
         C_STF["Staff Controllers"]
         C_ADM["Admin Controllers"]
+        C_DISP["Display Controller"]
     end
 
-    subgraph ServiceLayer["Business Logic Layer"]
-        QS["QueueService (Transactions, Atomic Numbering, Validation)"]
+    subgraph ServiceLayer["Business Domain Layer"]
+        QS["QueueService (Pessimistic Locking & Transactions)"]
     end
 
-    subgraph DataLayer["Data & Persistence Layer"]
-        MODELS["Eloquent Models (User, Service, QueueEntry, Notification, AuditLog)"]
-        DB_STORE[("Relational Database (SQLite / MySQL)")]
+    subgraph DataLayer["Persistence Layer"]
+        MODELS["Eloquent Models (User, Service, QueueEntry, Setting, AuditLog)"]
+        DB_STORE[("PostgreSQL / SQLite Database")]
     end
 
-    Client --> Routing
+    Presentation --> Routing
     Routing --> Controllers
     Controllers --> ServiceLayer
     ServiceLayer --> DataLayer
