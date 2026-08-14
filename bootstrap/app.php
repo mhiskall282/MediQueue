@@ -22,7 +22,12 @@ return Application::configure(basePath: dirname(__DIR__))
         );
 
         $middleware->alias([
-            'role' => \App\Http\Middleware\RoleMiddleware::class,
+            'role'                 => \App\Http\Middleware\RoleMiddleware::class,
+            'force_password_change' => \App\Http\Middleware\EnsurePasswordIsChanged::class,
+        ]);
+
+        $middleware->web(append: [
+            \App\Http\Middleware\EnsurePasswordIsChanged::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

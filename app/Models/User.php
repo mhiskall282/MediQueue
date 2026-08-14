@@ -34,6 +34,10 @@ class User extends Authenticatable
         'specialization',
         'extended_privileges',
         'medical_license_number',
+        'must_change_password',
+        'last_login_ip',
+        'last_login_at',
+        'email_notifications_enabled',
         'is_on_call',
         'on_call_shift',
         'emergency_contact_phone',
@@ -57,13 +61,16 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            'email_verified_at'   => 'datetime',
-            'password'            => 'hashed',
-            'is_active'           => 'boolean',
-            'is_approved'         => 'boolean',
-            'is_on_call'          => 'boolean',
-            'approved_at'         => 'datetime',
-            'extended_privileges' => 'array',
+            'email_verified_at'           => 'datetime',
+            'password'                    => 'hashed',
+            'is_active'                   => 'boolean',
+            'is_approved'                 => 'boolean',
+            'is_on_call'                  => 'boolean',
+            'must_change_password'        => 'boolean',
+            'email_notifications_enabled' => 'boolean',
+            'last_login_at'               => 'datetime',
+            'approved_at'                 => 'datetime',
+            'extended_privileges'         => 'array',
         ];
     }
 

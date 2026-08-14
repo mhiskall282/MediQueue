@@ -72,6 +72,17 @@ Route::middleware('guest')->group(function () {
 
 Route::match(['get', 'post'], '/logout', [LoginController::class, 'destroy'])->name('logout');
 
+// Mandatory First-Time Password Change
+Route::middleware('auth')->group(function () {
+    Route::get('/force-password-change',  [LoginController::class, 'showForceChangePassword'])->name('password.force-change');
+    Route::post('/force-password-change', [LoginController::class, 'updateForceChangePassword'])->name('password.force-change.update');
+
+    // Personal User Settings (Available to all roles)
+    Route::get('/settings',          [\App\Http\Controllers\UserSettingsController::class, 'index'])->name('settings.index');
+    Route::put('/settings/profile',  [\App\Http\Controllers\UserSettingsController::class, 'updateProfile'])->name('settings.profile');
+    Route::put('/settings/password', [\App\Http\Controllers\UserSettingsController::class, 'updatePassword'])->name('settings.password');
+});
+
 // ============================================================
 // 3. Patient Routes
 // ============================================================

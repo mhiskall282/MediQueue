@@ -79,6 +79,7 @@ class UserController extends Controller
             'specialization'         => $data['specialization'] ?? null,
             'medical_license_number' => $data['medical_license_number'] ?? null,
             'password'               => Hash::make($data['password']),
+            'must_change_password'   => true,
             'is_active'              => true,
             'is_approved'            => true,
             'approved_at'            => now(),
@@ -242,7 +243,8 @@ class UserController extends Controller
         ]);
 
         $user->update([
-            'password' => Hash::make($data['password']),
+            'password'             => Hash::make($data['password']),
+            'must_change_password' => true,
         ]);
 
         AuditLog::create([

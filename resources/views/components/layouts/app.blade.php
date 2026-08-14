@@ -180,27 +180,36 @@
                     </div>
                 </nav>
 
-                {{-- Sidebar Footer: User Profile & Logout --}}
+                {{-- Sidebar Footer: User Profile, Settings & Logout --}}
                 <div class="p-4 border-t border-slate-800/80 bg-slate-950/60 flex-shrink-0">
-                    <div class="flex items-center justify-between gap-3">
-                        <div class="min-w-0 flex-1">
+                    <div class="flex items-center justify-between gap-2">
+                        <a href="{{ route('settings.index') }}" class="min-w-0 flex-1 group" title="Account Settings & Security">
                             <div class="flex items-center gap-1.5">
-                                <span class="font-bold text-xs text-white truncate block">{{ auth()->user()->name }}</span>
+                                <span class="font-bold text-xs text-white truncate block group-hover:text-indigo-300 transition-colors">{{ auth()->user()->name }}</span>
                                 <span class="badge text-[9px] px-1.5 py-0.2 {{ auth()->user()->isAdmin() ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' }}">
                                     {{ strtoupper(auth()->user()->role) }}
                                 </span>
                             </div>
-                            <span class="text-[10px] font-mono text-slate-400 truncate block">{{ auth()->user()->hospital_id ?? auth()->user()->email }}</span>
-                        </div>
+                            <span class="text-[10px] font-mono text-slate-400 truncate block group-hover:text-slate-300">{{ auth()->user()->hospital_id ?? auth()->user()->email }}</span>
+                        </a>
 
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <button type="submit" class="p-2 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-950/30 transition-colors" title="Sign Out">
+                        <div class="flex items-center gap-1">
+                            <a href="{{ route('settings.index') }}" class="p-1.5 rounded-lg text-slate-400 hover:text-indigo-300 hover:bg-indigo-950/40 transition-colors" title="My Account Settings">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                                 </svg>
-                            </button>
-                        </form>
+                            </a>
+
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-950/30 transition-colors" title="Sign Out">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                                    </svg>
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
