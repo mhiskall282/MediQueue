@@ -1,5 +1,6 @@
 # MediQueue — Smart Clinic Queue Management System
 
+[![Live Demo](https://img.shields.io/badge/Live_Demo-Render.com-00c7b7?style=for-the-badge&logo=render&logoColor=white)](https://mediqueue-25vl.onrender.com)
 [![CI/CD Pipeline](https://github.com/mhiskall282/ug-swe-exams/actions/workflows/ci.yml/badge.svg)](https://github.com/mhiskall282/ug-swe-exams/actions)
 ![PHP](https://img.shields.io/badge/PHP-8.2%2B-777BB4?style=flat&logo=php&logoColor=white)
 ![Laravel](https://img.shields.io/badge/Laravel-12.0-FF2D20?style=flat&logo=laravel&logoColor=white)
@@ -7,6 +8,10 @@
 ![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=flat&logo=docker&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green.svg)
 
+> **🌐 Live Production Deployment**: **[https://mediqueue-25vl.onrender.com](https://mediqueue-25vl.onrender.com)**  
+> **📺 Live Hospital TV Screen**: **[https://mediqueue-25vl.onrender.com/display](https://mediqueue-25vl.onrender.com/display)**  
+> **📚 Live In-App Documentation Hub**: **[https://mediqueue-25vl.onrender.com/docs](https://mediqueue-25vl.onrender.com/docs)**  
+>
 > **Advanced Software Engineering Capstone Examination Project**  
 > An enterprise-grade, accessible, responsive clinic queue management web application designed to eliminate physical waiting lines in healthcare outpatient clinics.
 

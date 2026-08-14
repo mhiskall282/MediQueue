@@ -4,6 +4,9 @@
 **Version**: 1.0  
 **Date**: 2026-08-14  
 **Target Environments**: Docker (Local/Self-hosted) & Render.com (Cloud PaaS)  
+**Live Production URL**: [https://mediqueue-25vl.onrender.com](https://mediqueue-25vl.onrender.com)  
+**Live Hospital Waiting Room Screen**: [https://mediqueue-25vl.onrender.com/display](https://mediqueue-25vl.onrender.com/display)  
+**Live Technical & User Docs**: [https://mediqueue-25vl.onrender.com/docs](https://mediqueue-25vl.onrender.com/docs)  
 
 ---
 

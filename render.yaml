@@ -23,7 +23,7 @@ services:
       - key: APP_KEY
         value: base64:kCkNSwihlFVDA97qozR5yDW83gBJlkiYC0DOJ3UP7Aw=
       - key: APP_URL
-        value: https://mediqueue.onrender.com
+        value: https://mediqueue-25vl.onrender.com/
       # Managed PostgreSQL Database Connections
       - key: DB_CONNECTION
         value: pgsql
