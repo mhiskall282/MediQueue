@@ -266,6 +266,57 @@
                             <div class="flex items-start gap-4">
                                 <span class="w-7 h-7 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-xs flex-shrink-0 mt-0.5">4</span>
                                 <div>
+                                    <h4 class="font-bold text-slate-900">5-Tier Manchester Emergency Triage Assessment</h4>
+                                    <p class="mt-1">
+                                        Staff can assess and update any waiting patient's triage severity with one click:
+                                    </p>
+                                    <ul class="list-disc pl-5 mt-2 space-y-1 text-xs">
+                                        <li><strong class="text-red-600">🔴 Red (P1):</strong> Resuscitation / Immediate Emergency (Auto-escalates to Urgent)</li>
+                                        <li><strong class="text-orange-600">🟠 Orange (P2):</strong> Very Urgent (10-minute target)</li>
+                                        <li><strong class="text-yellow-600">🟡 Yellow (P3):</strong> Urgent (60-minute target)</li>
+                                        <li><strong class="text-emerald-600">🟢 Green (P4):</strong> Standard Outpatient (120-minute target)</li>
+                                        <li><strong class="text-blue-600">🔵 Blue (P5):</strong> Non-Urgent (240-minute target)</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            {{-- Step 5 --}}
+                            <div class="flex items-start gap-4">
+                                <span class="w-7 h-7 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-xs flex-shrink-0 mt-0.5">5</span>
+                                <div>
+                                    <h4 class="font-bold text-slate-900">Diagnostic Laboratory Referral & Auto-Loopback</h4>
+                                    <p class="mt-1">
+                                        During consultation, expand <strong>"🧪 Order Lab Investigation & Transfer"</strong>. The patient transitions seamlessly to the Laboratory queue. When the lab technician inputs test findings, the ticket is <em>automatically returned</em> to the referring doctor with retained <strong>Orange / Urgent</strong> priority for immediate review!
+                                    </p>
+                                </div>
+                            </div>
+
+                            {{-- Step 6 --}}
+                            <div class="flex items-start gap-4">
+                                <span class="w-7 h-7 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-xs flex-shrink-0 mt-0.5">6</span>
+                                <div>
+                                    <h4 class="font-bold text-slate-900">🚨 Emergency Unconscious Trauma Protocol (Code Red)</h4>
+                                    <p class="mt-1">
+                                        When an unconscious, unidentified patient arrives without ID, click <strong>"Emergency Trauma"</strong> from the Left Sidebar. The system generates a temporary Trauma MRN (e.g. <code>EMG-DOE-4821</code>), allocates an Emergency Triage Bay, sets 🔴 <strong>Red Triage</strong>, and broadcasts a Code Red emergency page to all active on-call doctors. When identified, staff can link the trauma ticket to their permanent verified MRN.
+                                    </p>
+                                </div>
+                            </div>
+
+                            {{-- Step 7 --}}
+                            <div class="flex items-start gap-4">
+                                <span class="w-7 h-7 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-xs flex-shrink-0 mt-0.5">7</span>
+                                <div>
+                                    <h4 class="font-bold text-slate-900">Discharge, Care Summary & PDF Reporting</h4>
+                                    <p class="mt-1">
+                                        Concluding a consultation automatically releases the allocated bed, records final clinical notes, and dispatches a complete care summary email to the patient. Administrators can download streaming CSVs and formatted PDF operational summary reports from the <strong>Reports & Analytics</strong> portal.
+                                    </p>
+                                </div>
+                            </div>
+
+                            {{-- Previous Step 4 (Now 8) --}}
+                            <div class="flex items-start gap-4">
+                                <span class="w-7 h-7 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-xs flex-shrink-0 mt-0.5">8</span>
+                                <div>
                                     <h4 class="font-bold text-slate-900">Starting and Concluding Service</h4>
                                     <ul class="list-disc list-inside mt-2 space-y-1.5 text-xs text-slate-700 bg-slate-50 p-3 rounded-lg border border-slate-200">
                                         <li><strong>Start Service:</strong> When the patient enters the room, click "Start Service" to begin timing the consultation.</li>

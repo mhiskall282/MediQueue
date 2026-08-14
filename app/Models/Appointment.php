@@ -19,6 +19,7 @@ class Appointment extends Model
         'time_slot',
         'symptoms_notes',
         'status',
+        'doctor_instructions',
         'generated_queue_entry_id',
     ];
 

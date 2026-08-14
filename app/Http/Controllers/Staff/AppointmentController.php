@@ -93,4 +93,41 @@ class AppointmentController extends Controller
             return back()->with('error', $e->getMessage());
         }
     }
+
+    /**
+     * Send pre-consultation medical instructions or preparation requirements to the patient.
+     */
+    public function sendInstructions(Request $request, Appointment $appointment): RedirectResponse
+    {
+        $validated = $request->validate([
+            'doctor_instructions' => ['required', 'string', 'max:1000'],
+        ]);
+
+        $appointment->update([
+            'doctor_instructions' => $validated['doctor_instructions'],
+        ]);
+
+        \App\Models\Notification::create([
+            'user_id' => $appointment->patient_id,
+            'type'    => 'appointment_instructions',
+            'title'   => "Pre-Appointment Instructions for {$appointment->appointment_date->format('M d')}",
+            'body'    => "Clinical Team Note: {$validated['doctor_instructions']}",
+            'data'    => ['appointment_id' => $appointment->id],
+        ]);
+
+        AuditLog::create([
+            'user_id'     => auth()->id(),
+            'action'      => 'appointment.instructions_sent',
+            'entity_type' => 'Appointment',
+            'entity_id'   => $appointment->id,
+            'metadata'    => [
+                'patient_name' => $appointment->patient->name,
+                'instructions' => $validated['doctor_instructions'],
+                'staff_name'   => auth()->user()->name,
+            ],
+            'ip_address'  => $request->ip(),
+        ]);
+
+        return back()->with('success', "Pre-appointment medical instructions dispatched to {$appointment->patient->name}.");
+    }
 }

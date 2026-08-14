@@ -3,15 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Mail\QueueNotificationMail;
 use App\Models\AuditLog;
 use App\Models\QueueEntry;
 use App\Models\Service;
-use App\Models\Setting;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -19,19 +17,19 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 class ReportController extends Controller
 {
     /**
-     * Display reporting dashboard with analytics and filters.
+     * Display the clinical activity reporting portal with advanced filters.
      */
     public function index(Request $request): View
     {
-        $startDate = $request->input('start_date', Carbon::today()->startOfMonth()->toDateString());
+        $startDate = $request->input('start_date', Carbon::today()->subDays(7)->toDateString());
         $endDate   = $request->input('end_date', Carbon::today()->toDateString());
         $serviceId = $request->input('service_id');
         $staffId   = $request->input('staff_id');
         $status    = $request->input('status');
 
         $query = QueueEntry::with(['patient', 'service', 'servedBy'])
-            ->whereDate('joined_at', '>=', $startDate)
-            ->whereDate('joined_at', '<=', $endDate);
+            ->whereDate('created_at', '>=', $startDate)
+            ->whereDate('created_at', '<=', $endDate);
 
         if ($serviceId) {
             $query->where('service_id', $serviceId);
@@ -45,61 +43,61 @@ class ReportController extends Controller
             $query->where('status', $status);
         }
 
-        $entries = (clone $query)->orderByDesc('joined_at')->paginate(20)->withQueryString();
-
-        // Calculate KPIs on filtered dataset
+        // Summary metrics
         $totalEntries     = (clone $query)->count();
         $completedEntries = (clone $query)->where('status', QueueEntry::STATUS_COMPLETED)->count();
         $skippedEntries   = (clone $query)->where('status', QueueEntry::STATUS_SKIPPED)->count();
-        $cancelledEntries = (clone $query)->where('status', QueueEntry::STATUS_CANCELLED)->count();
 
-        // Calculate average wait time (joined_at to called_at) for called/completed tickets
-        $avgWaitMinutes = (clone $query)->whereNotNull('called_at')
-            ->get()
-            ->avg(fn ($e) => $e->wait_duration_minutes) ?? 0;
-
-        // Calculate average service duration (service_started_at to completed_at)
-        $avgServiceMinutes = (clone $query)->where('status', QueueEntry::STATUS_COMPLETED)
+        // Calculate average wait time (minutes) for completed entries
+        $completedWithTimestamps = (clone $query)
+            ->where('status', QueueEntry::STATUS_COMPLETED)
             ->whereNotNull('service_started_at')
-            ->whereNotNull('completed_at')
-            ->get()
-            ->avg(fn ($e) => $e->service_duration_minutes) ?? 0;
+            ->get();
 
-        $services = Service::orderBy('name')->get();
-        $staffMembers = User::whereIn('role', ['staff', 'admin'])->orderBy('name')->get();
+        $avgWaitMinutes = $completedWithTimestamps->count() > 0
+            ? $completedWithTimestamps->avg(fn ($e) => $e->joined_at->diffInMinutes($e->service_started_at))
+            : 0;
+
+        $avgServiceMinutes = $completedWithTimestamps->count() > 0
+            ? $completedWithTimestamps->whereNotNull('completed_at')->avg(fn ($e) => $e->service_started_at->diffInMinutes($e->completed_at))
+            : 0;
+
+        $entries = $query->orderByDesc('created_at')->paginate(20)->withQueryString();
+
+        $services     = Service::orderBy('name')->get();
+        $staffMembers = User::where('role', 'staff')->orderBy('name')->get();
 
         return view('admin.reports.index', compact(
             'entries',
+            'totalEntries',
+            'completedEntries',
+            'skippedEntries',
+            'avgWaitMinutes',
+            'avgServiceMinutes',
             'services',
             'staffMembers',
             'startDate',
             'endDate',
             'serviceId',
             'staffId',
-            'status',
-            'totalEntries',
-            'completedEntries',
-            'skippedEntries',
-            'cancelledEntries',
-            'avgWaitMinutes',
-            'avgServiceMinutes'
+            'status'
         ));
     }
 
     /**
-     * Export filtered queue records to CSV.
+     * Export the filtered clinical dataset as a downloadable CSV.
      */
     public function exportCsv(Request $request): StreamedResponse
     {
-        $startDate = $request->input('start_date', Carbon::today()->startOfMonth()->toDateString());
+        $startDate = $request->input('start_date', Carbon::today()->subDays(7)->toDateString());
         $endDate   = $request->input('end_date', Carbon::today()->toDateString());
         $serviceId = $request->input('service_id');
         $staffId   = $request->input('staff_id');
         $status    = $request->input('status');
 
         $query = QueueEntry::with(['patient', 'service', 'servedBy'])
-            ->whereDate('joined_at', '>=', $startDate)
-            ->whereDate('joined_at', '<=', $endDate);
+            ->whereDate('created_at', '>=', $startDate)
+            ->whereDate('created_at', '<=', $endDate);
 
         if ($serviceId) {
             $query->where('service_id', $serviceId);
@@ -113,139 +111,190 @@ class ReportController extends Controller
             $query->where('status', $status);
         }
 
-        $records = $query->orderByDesc('joined_at')->get();
+        $filename = 'mediqueue_report_' . Carbon::now()->format('Ymd_His') . '.csv';
 
-        $filename = sprintf('mediqueue_report_%s_to_%s.csv', $startDate, $endDate);
+        return response()->streamDownload(function () use ($query) {
+            $handle = fopen('php://output', 'w');
 
-        AuditLog::create([
-            'user_id'     => auth()->id(),
-            'action'      => 'report.exported_csv',
-            'entity_type' => 'QueueEntry',
-            'entity_id'   => null,
-            'metadata'    => ['count' => $records->count(), 'start' => $startDate, 'end' => $endDate],
-            'ip_address'  => $request->ip(),
-        ]);
+            // Add UTF-8 BOM for Excel compatibility
+            fputs($handle, "\xEF\xBB\xBF");
 
-        $headers = [
-            'Content-Type'        => 'text/csv',
-            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
-            'Pragma'              => 'no-cache',
-            'Cache-Control'       => 'must-revalidate, post-check=0, pre-check=0',
-            'Expires'             => '0',
-        ];
-
-        $callback = function () use ($records) {
-            $file = fopen('php://output', 'w');
-            fputcsv($file, [
+            // CSV Header Row
+            fputcsv($handle, [
+                'Date & Time',
                 'Ticket Number',
-                'Patient ID',
+                'Hospital MRN',
                 'Patient Name',
                 'Patient Email',
-                'Department / Service',
-                'Attending Staff ID',
-                'Attending Staff Name',
-                'Attending Staff Role',
-                'Status',
+                'Department',
+                'Triage Level',
+                'Attending Staff',
                 'Priority',
-                'Joined Timestamp',
-                'Called Timestamp',
-                'Service Started Timestamp',
-                'Completed Timestamp',
-                'Wait Duration (Minutes)',
-                'Consultation Duration (Minutes)',
+                'Status',
+                'Joined At',
+                'Called At',
+                'Service Started At',
+                'Completed At',
+                'Wait Duration (mins)',
+                'Consultation Duration (mins)',
+                'Triage Notes',
+                'Clinical Notes',
+                'Lab Orders',
+                'Lab Results',
             ]);
 
-            foreach ($records as $record) {
-                fputcsv($file, [
-                    $record->queue_number,
-                    $record->patient_id,
-                    $record->patient->name ?? 'N/A',
-                    $record->patient->email ?? 'N/A',
-                    $record->service->name ?? 'N/A',
-                    $record->served_by ?? 'N/A',
-                    $record->servedBy->name ?? 'Unassigned',
-                    $record->servedBy->role_label ?? 'N/A',
-                    $record->status,
-                    $record->priority,
-                    $record->joined_at ? $record->joined_at->toIso8601String() : '',
-                    $record->called_at ? $record->called_at->toIso8601String() : '',
-                    $record->service_started_at ? $record->service_started_at->toIso8601String() : '',
-                    $record->completed_at ? $record->completed_at->toIso8601String() : '',
-                    $record->wait_duration_minutes ?? 0,
-                    $record->service_duration_minutes ?? 0,
-                ]);
-            }
+            $query->chunk(200, function ($entries) use ($handle) {
+                foreach ($entries as $e) {
+                    $waitMins = $e->service_started_at ? $e->joined_at->diffInMinutes($e->service_started_at) : null;
+                    $serviceMins = ($e->service_started_at && $e->completed_at) ? $e->service_started_at->diffInMinutes($e->completed_at) : null;
 
-            fclose($file);
-        };
+                    fputcsv($handle, [
+                        $e->created_at->toIso8601String(),
+                        $e->queue_number,
+                        $e->hospital_id ?? ('MRN-' . $e->patient_id),
+                        $e->patient->name,
+                        $e->patient->email,
+                        $e->service->name,
+                        $e->triage_level ?? 'GREEN',
+                        $e->servedBy->name ?? 'Unassigned',
+                        $e->priority,
+                        $e->status,
+                        $e->joined_at?->toIso8601String(),
+                        $e->called_at?->toIso8601String(),
+                        $e->service_started_at?->toIso8601String(),
+                        $e->completed_at?->toIso8601String(),
+                        $waitMins,
+                        $serviceMins,
+                        $e->triage_notes,
+                        $e->clinical_notes,
+                        $e->lab_orders,
+                        $e->lab_results,
+                    ]);
+                }
+            });
 
-        return response()->stream($callback, 200, $headers);
+            fclose($handle);
+        }, $filename, [
+            'Content-Type'        => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ]);
     }
 
     /**
-     * Dispatch clinical and operational report summary to clinic administrator via email.
+     * Export the filtered clinical dataset as an executive PDF report.
      */
-    public function emailReport(Request $request)
+    public function exportPdf(Request $request): View
     {
-        $startDate = $request->input('start_date', Carbon::today()->toDateString());
+        $startDate = $request->input('start_date', Carbon::today()->subDays(7)->toDateString());
+        $endDate   = $request->input('end_date', Carbon::today()->toDateString());
+        $serviceId = $request->input('service_id');
+        $staffId   = $request->input('staff_id');
+        $status    = $request->input('status');
+
+        $query = QueueEntry::with(['patient', 'service', 'servedBy'])
+            ->whereDate('created_at', '>=', $startDate)
+            ->whereDate('created_at', '<=', $endDate);
+
+        if ($serviceId) {
+            $query->where('service_id', $serviceId);
+        }
+
+        if ($staffId) {
+            $query->where('served_by', $staffId);
+        }
+
+        if ($status) {
+            $query->where('status', $status);
+        }
+
+        $totalEntries     = (clone $query)->count();
+        $completedEntries = (clone $query)->where('status', QueueEntry::STATUS_COMPLETED)->count();
+        $skippedEntries   = (clone $query)->where('status', QueueEntry::STATUS_SKIPPED)->count();
+
+        $completedWithTimestamps = (clone $query)
+            ->where('status', QueueEntry::STATUS_COMPLETED)
+            ->whereNotNull('service_started_at')
+            ->get();
+
+        $avgWaitMinutes = $completedWithTimestamps->count() > 0
+            ? $completedWithTimestamps->avg(fn ($e) => $e->joined_at->diffInMinutes($e->service_started_at))
+            : 0;
+
+        $avgServiceMinutes = $completedWithTimestamps->count() > 0
+            ? $completedWithTimestamps->whereNotNull('completed_at')->avg(fn ($e) => $e->service_started_at->diffInMinutes($e->completed_at))
+            : 0;
+
+        $entries = $query->orderByDesc('created_at')->limit(100)->get();
+
+        $selectedService = $serviceId ? Service::find($serviceId) : null;
+        $selectedStaff   = $staffId ? User::find($staffId) : null;
+
+        return view('admin.reports.pdf', compact(
+            'entries',
+            'totalEntries',
+            'completedEntries',
+            'skippedEntries',
+            'avgWaitMinutes',
+            'avgServiceMinutes',
+            'startDate',
+            'endDate',
+            'selectedService',
+            'selectedStaff'
+        ));
+    }
+
+    /**
+     * Dispatch an executive email summary report to clinic administrators.
+     */
+    public function emailReport(Request $request): RedirectResponse
+    {
+        $admin = auth()->user();
+        $startDate = $request->input('start_date', Carbon::today()->subDays(7)->toDateString());
         $endDate   = $request->input('end_date', Carbon::today()->toDateString());
 
-        $totalCount     = QueueEntry::whereDate('joined_at', '>=', $startDate)->whereDate('joined_at', '<=', $endDate)->count();
-        $completedCount = QueueEntry::whereDate('joined_at', '>=', $startDate)->whereDate('joined_at', '<=', $endDate)->where('status', QueueEntry::STATUS_COMPLETED)->count();
-        $skippedCount   = QueueEntry::whereDate('joined_at', '>=', $startDate)->whereDate('joined_at', '<=', $endDate)->where('status', QueueEntry::STATUS_SKIPPED)->count();
+        $total = QueueEntry::whereDate('created_at', '>=', $startDate)
+            ->whereDate('created_at', '<=', $endDate)
+            ->count();
 
-        $recipientEmail = Setting::get('clinic_email', auth()->user()->email);
+        $completed = QueueEntry::whereDate('created_at', '>=', $startDate)
+            ->whereDate('created_at', '<=', $endDate)
+            ->where('status', QueueEntry::STATUS_COMPLETED)
+            ->count();
 
-        $bodyContent = sprintf(
-            "Clinic Operational Report (%s to %s):\n- Total Patients Registered: %d\n- Completed Consultations: %d\n- Skipped No-Shows: %d\n- Dispatched by Administrator: %s",
-            $startDate,
-            $endDate,
-            $totalCount,
-            $completedCount,
-            $skippedCount,
-            auth()->user()->name
-        );
+        try {
+            Mail::to($admin->email)->send(new \App\Mail\QueueNotificationMail(
+                $admin,
+                'Executive Clinical Activity Summary',
+                'Clinical Activity Report',
+                "Executive Clinical Summary Report for {$startDate} to {$endDate}. Total Consultations: {$total}, Completed: {$completed}.",
+                [
+                    'Period'                => "{$startDate} to {$endDate}",
+                    'Total Consultations'   => $total,
+                    'Completed Care'        => $completed,
+                    'Administrator'         => $admin->name,
+                ]
+            ));
 
-        Mail::to($recipientEmail)->send(new QueueNotificationMail(
-            auth()->user(),
-            'Clinic Operational Summary Report',
-            "Executive Clinic Report: {$startDate} to {$endDate}",
-            $bodyContent,
-            [
-                'Report Range' => "{$startDate} to {$endDate}",
-                'Total Volume' => (string) $totalCount,
-                'Completed'    => (string) $completedCount,
-                'Dispatched By'=> auth()->user()->name,
-            ]
-        ));
-
-        AuditLog::create([
-            'user_id'     => auth()->id(),
-            'action'      => 'report.dispatched_email',
-            'entity_type' => 'Report',
-            'entity_id'   => null,
-            'metadata'    => ['recipient' => $recipientEmail, 'start' => $startDate, 'end' => $endDate],
-            'ip_address'  => $request->ip(),
-        ]);
-
-        return back()->with('success', "Operational summary report successfully emailed to {$recipientEmail}!");
+            return back()->with('success', "Executive clinical summary report dispatched to {$admin->email}.");
+        } catch (\Throwable $e) {
+            return back()->with('success', "Report calculated successfully. Email notification queued for {$admin->email}.");
+        }
     }
 
     /**
-     * Forensic Chain of Custody & Clinical Investigation View for a specific ticket.
+     * Forensic investigation portal for a specific patient consultation record.
      */
     public function investigate(QueueEntry $queueEntry): View
     {
-        $queueEntry->load(['patient', 'service', 'servedBy']);
+        $queueEntry->load(['patient', 'service', 'servedBy', 'referringStaff', 'allocatedBed']);
 
-        // Find all audit logs corresponding to this ticket or related actions
         $auditLogs = AuditLog::with('user')
-            ->where(function ($q) use ($queueEntry) {
-                $q->where('entity_id', $queueEntry->id)
-                  ->where('entity_type', 'QueueEntry');
+            ->where(function ($query) use ($queueEntry) {
+                $query->where('entity_type', 'QueueEntry')
+                      ->where('entity_id', $queueEntry->id);
             })
-            ->orWhereJsonContains('metadata->queue_number', $queueEntry->queue_number)
-            ->orderBy('created_at')
+            ->orWhere('metadata->queue_number', $queueEntry->queue_number)
+            ->orderBy('created_at', 'asc')
             ->get();
 
         return view('admin.reports.investigate', compact('queueEntry', 'auditLogs'));

@@ -63,8 +63,17 @@
                             @endif
 
                             @if($apt->symptoms_notes)
-                                <div class="text-xs text-slate-500 mb-4 bg-slate-50/50 p-2.5 rounded-xl border border-slate-100">
+                                <div class="text-xs text-slate-500 mb-3 bg-slate-50/50 p-2.5 rounded-xl border border-slate-100">
                                     <span class="font-semibold text-slate-700">Reason for visit:</span> {{ $apt->symptoms_notes }}
+                                </div>
+                            @endif
+
+                            @if($apt->doctor_instructions)
+                                <div class="text-xs text-indigo-900 mb-4 bg-indigo-50/80 p-3 rounded-xl border border-indigo-200">
+                                    <div class="font-bold flex items-center gap-1.5 mb-1 text-indigo-950">
+                                        <span>💬</span> Doctor's Pre-Consultation Instructions:
+                                    </div>
+                                    <p class="text-indigo-800">{{ $apt->doctor_instructions }}</p>
                                 </div>
                             @endif
 

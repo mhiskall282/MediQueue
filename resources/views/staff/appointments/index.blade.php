@@ -109,22 +109,41 @@
                                     <td>
                                         {{ $apt->doctor->name ?? 'Any Specialist' }}
                                     </td>
-                                    <td class="text-xs text-slate-500 max-w-xs truncate">
-                                        {{ $apt->symptoms_notes ?? '-' }}
+                                    <td class="text-xs max-w-xs">
+                                        <div class="text-slate-700 font-medium">{{ $apt->symptoms_notes ?? 'Standard Consultation' }}</div>
+                                        @if($apt->doctor_instructions)
+                                            <div class="mt-1 p-1.5 bg-indigo-50 text-indigo-800 rounded text-[10px] border border-indigo-100">
+                                                <strong>Sent:</strong> {{ $apt->doctor_instructions }}
+                                            </div>
+                                        @endif
                                     </td>
                                     <td>
                                         <span class="badge {{ $apt->status_badge_class }}">
                                             {{ $apt->status }}
                                         </span>
                                     </td>
-                                    <td class="text-right">
+                                    <td class="text-right space-y-1">
                                         @if($apt->status === 'BOOKED')
                                             <form method="POST" action="{{ route('staff.appointments.check-in', $apt) }}" class="inline-block">
                                                 @csrf
                                                 <button type="submit" class="btn btn-primary btn-sm text-xs font-bold shadow-xs">
-                                                    🎟️ Check-In Patient
+                                                    🎟️ Check-In
                                                 </button>
                                             </form>
+
+                                            <details class="text-left text-xs inline-block ml-1">
+                                                <summary class="btn btn-secondary btn-sm text-[11px] cursor-pointer">
+                                                    💬 Message
+                                                </summary>
+                                                <form method="POST" action="{{ route('staff.appointments.instructions', $apt) }}" class="p-2.5 bg-white border border-slate-200 rounded-xl shadow-lg absolute right-4 z-20 w-64 mt-1 space-y-2">
+                                                    @csrf
+                                                    <label class="font-bold text-[11px] text-slate-800 block">Pre-Visit Instructions</label>
+                                                    <textarea name="doctor_instructions" rows="2" class="form-input text-xs" required placeholder="e.g. Fast 8 hours, bring ID..."></textarea>
+                                                    <button type="submit" class="btn btn-primary btn-sm text-[10px] w-full">
+                                                        Send to Patient
+                                                    </button>
+                                                </form>
+                                            </details>
                                         @elseif($apt->status === 'CHECKED_IN' && $apt->queueEntry)
                                             <span class="font-mono font-bold text-xs px-2.5 py-1 bg-emerald-100 text-emerald-800 rounded-lg">
                                                 Ticket: {{ $apt->queueEntry->queue_number }}

@@ -20,8 +20,13 @@
                 </form>
 
                 {{-- Export CSV Button --}}
-                <a href="{{ route('admin.reports.export', request()->all()) }}" class="btn btn-primary text-xs font-bold flex items-center gap-1.5 shadow-md">
-                    <span>📥</span> Export to CSV
+                <a href="{{ route('admin.reports.export', request()->all()) }}" class="btn btn-secondary text-xs font-bold flex items-center gap-1.5 border-slate-300">
+                    <span>📊</span> Export to CSV
+                </a>
+
+                {{-- Export PDF Button --}}
+                <a href="{{ route('admin.reports.export-pdf', request()->all()) }}" target="_blank" class="btn btn-primary text-xs font-bold flex items-center gap-1.5 shadow-md">
+                    <span>📄</span> Export to PDF
                 </a>
             </div>
         </div>

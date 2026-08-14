@@ -122,8 +122,9 @@ Route::prefix('staff')
         Route::get('/beds',                            [StaffTriageController::class, 'bedsIndex'])->name('beds.index');
 
         // Clinic Appointments Schedule & Check-In Desk
-        Route::get('/appointments',                    [StaffAppointmentController::class, 'index'])->name('appointments.index');
-        Route::post('/appointments/{appointment}/check-in', [StaffAppointmentController::class, 'checkIn'])->name('appointments.check-in');
+        Route::get('/appointments',                         [StaffAppointmentController::class, 'index'])->name('appointments.index');
+        Route::post('/appointments/{appointment}/check-in',    [StaffAppointmentController::class, 'checkIn'])->name('appointments.check-in');
+        Route::post('/appointments/{appointment}/instructions',[StaffAppointmentController::class, 'sendInstructions'])->name('appointments.instructions');
 
         // Clinical Referrals, Lab Investigation Transfer Loops & Patient Discharge
         Route::post('/referral/{queueEntry}/order-lab',    [ClinicalReferralController::class, 'orderLabAndTransfer'])->name('referral.order-lab');
@@ -173,9 +174,10 @@ Route::prefix('admin')
         Route::get('/settings',                           [SettingController::class, 'index'])->name('settings.index');
         Route::put('/settings',                           [SettingController::class, 'update'])->name('settings.update');
 
-        // Clinical Reports, CSV Export, Email Dispatch, and Forensic Investigation
+        // Clinical Reports, CSV & PDF Export, Email Dispatch, and Forensic Investigation
         Route::get('/reports',                             [ReportController::class, 'index'])->name('reports.index');
         Route::get('/reports/export',                      [ReportController::class, 'exportCsv'])->name('reports.export');
+        Route::get('/reports/export-pdf',                  [ReportController::class, 'exportPdf'])->name('reports.export-pdf');
         Route::post('/reports/email',                      [ReportController::class, 'emailReport'])->name('reports.email');
         Route::get('/reports/investigate/{queueEntry}',    [ReportController::class, 'investigate'])->name('reports.investigate');
 
