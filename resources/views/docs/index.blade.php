@@ -1,15 +1,15 @@
-<x-layouts.app title="Software Engineering Documentation & User Guides">
+<x-layouts.app title="Documentation Hub — Technical & Non-Technical Guides">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {{-- Docs Header Banner --}}
+        {{-- Hero Header Banner --}}
         <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-3xl p-6 sm:p-10 text-white mb-8 border border-slate-800 shadow-xl relative overflow-hidden">
             <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 mb-3">
-                        <span>📚</span> Engineering Documentation & User Guides
+                        <span>📖</span> Complete Technical & Non-Technical Guides
                     </div>
-                    <h1 class="text-3xl sm:text-4xl font-black tracking-tight text-white">MediQueue Technical Reference</h1>
+                    <h1 class="text-3xl sm:text-4xl font-black tracking-tight text-white">MediQueue Documentation & User Portal</h1>
                     <p class="text-indigo-200 mt-2 text-sm sm:text-base max-w-2xl">
-                        Comprehensive architecture specifications, SRS requirements, UCP effort estimations, deployment blueprints, and operational user guides.
+                        Step-by-step walkthroughs for patients, doctors, and administrators, alongside full software engineering architecture and deployment references.
                     </p>
                 </div>
                 <div class="flex flex-wrap items-center gap-3">
@@ -27,147 +27,403 @@
             </div>
         </div>
 
+        {{-- Guide Audience Switcher Tabs --}}
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+            <a href="#non-technical-track" class="card p-5 border-2 border-emerald-500/30 bg-emerald-50/20 hover:border-emerald-500 transition-all flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-2xl flex-shrink-0">
+                    🟢
+                </div>
+                <div>
+                    <span class="text-xs font-bold uppercase tracking-wider text-emerald-700 block">User Friendly Guide</span>
+                    <h3 class="font-extrabold text-slate-900 text-base">For Patients, Doctors & Admins</h3>
+                    <p class="text-xs text-slate-500 mt-0.5">Step-by-step instructions on using every feature.</p>
+                </div>
+            </a>
+
+            <a href="#technical-track" class="card p-5 border-2 border-indigo-500/30 bg-indigo-50/20 hover:border-indigo-500 transition-all flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-2xl flex-shrink-0">
+                    🔵
+                </div>
+                <div>
+                    <span class="text-xs font-bold uppercase tracking-wider text-indigo-700 block">Engineering Reference</span>
+                    <h3 class="font-extrabold text-slate-900 text-base">For Developers & Evaluators</h3>
+                    <p class="text-xs text-slate-500 mt-0.5">Architecture, SRS, UCP estimation, Docker, security & tests.</p>
+                </div>
+            </a>
+        </div>
+
         {{-- Mobile Section Selector --}}
         <div class="lg:hidden mb-6 card p-3">
-            <label for="mobile-docs-nav" class="text-xs font-bold text-slate-500 uppercase block mb-1">Jump to Document Section:</label>
+            <label for="mobile-docs-nav" class="text-xs font-bold text-slate-500 uppercase block mb-1">Jump to Guide Section:</label>
             <select id="mobile-docs-nav" onchange="window.location.hash = this.value" class="form-input text-sm">
-                <option value="#overview">1. Project Overview & Scope</option>
-                <option value="#architecture">2. Architecture & Tech Stack</option>
-                <option value="#state-machine">3. Queue State Machine</option>
-                <option value="#srs">4. Requirements (SRS & Matrix)</option>
-                <option value="#estimation">5. Effort Estimation (UCP)</option>
-                <option value="#guides">6. User Guides & Credentials</option>
-                <option value="#devops">7. Deployment & Docker</option>
-                <option value="#security">8. Security & Governance</option>
+                <optgroup label="🟢 Non-Technical User Guides">
+                    <option value="#patient-guide">Patient: How to Join & Track Queue</option>
+                    <option value="#staff-guide">Doctor / Staff: Managing Queue & Consultations</option>
+                    <option value="#admin-guide">Admin: Users, Passwords & Clinic Settings</option>
+                    <option value="#tv-guide">Waiting Room: Launching Hospital TV Screen</option>
+                </optgroup>
+                <optgroup label="🔵 Technical Engineering References">
+                    <option value="#architecture">System Architecture & Layered Monolith</option>
+                    <option value="#state-machine">Queue State Machine & Transaction Rules</option>
+                    <option value="#srs">SRS & Requirements Traceability Matrix</option>
+                    <option value="#estimation">Software Effort Estimation (UCP)</option>
+                    <option value="#devops">Docker & Cloud Deployment</option>
+                    <option value="#security">Security & Least Privilege RBAC</option>
+                </optgroup>
             </select>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
             {{-- Desktop Sidebar Navigation --}}
             <aside class="hidden lg:block lg:col-span-3">
-                <div class="sticky top-24 card p-5 space-y-1">
-                    <span class="text-xs font-bold uppercase tracking-wider text-slate-400 block px-3 py-1">Table of Contents</span>
-                    <a href="#overview" class="nav-item text-xs font-semibold py-2">
-                        1. Project Overview
-                    </a>
-                    <a href="#architecture" class="nav-item text-xs font-semibold py-2">
-                        2. System Architecture
-                    </a>
-                    <a href="#state-machine" class="nav-item text-xs font-semibold py-2">
-                        3. Queue State Machine
-                    </a>
-                    <a href="#srs" class="nav-item text-xs font-semibold py-2">
-                        4. Requirements Specification
-                    </a>
-                    <a href="#estimation" class="nav-item text-xs font-semibold py-2">
-                        5. Effort Estimation (UCP)
-                    </a>
-                    <a href="#guides" class="nav-item text-xs font-semibold py-2">
-                        6. User Guides & Accounts
-                    </a>
-                    <a href="#devops" class="nav-item text-xs font-semibold py-2">
-                        7. Deployment & Docker
-                    </a>
-                    <a href="#security" class="nav-item text-xs font-semibold py-2">
-                        8. Security & Least Privilege
-                    </a>
+                <div class="sticky top-24 card p-5 space-y-3">
+                    <div>
+                        <span class="text-[11px] font-black uppercase tracking-wider text-emerald-700 block px-3 py-1 bg-emerald-50 rounded-md mb-1">
+                            🟢 Non-Technical Guides
+                        </span>
+                        <div class="space-y-0.5 mt-1">
+                            <a href="#patient-guide" class="nav-item text-xs font-medium py-1.5">
+                                👤 Patient User Guide
+                            </a>
+                            <a href="#staff-guide" class="nav-item text-xs font-medium py-1.5">
+                                👨‍⚕️ Clinical Staff Guide
+                            </a>
+                            <a href="#admin-guide" class="nav-item text-xs font-medium py-1.5">
+                                🔧 Administrator Guide
+                            </a>
+                            <a href="#tv-guide" class="nav-item text-xs font-medium py-1.5">
+                                📺 Hospital TV Screen Guide
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="pt-3 border-t border-slate-100">
+                        <span class="text-[11px] font-black uppercase tracking-wider text-indigo-700 block px-3 py-1 bg-indigo-50 rounded-md mb-1">
+                            🔵 Technical Reference
+                        </span>
+                        <div class="space-y-0.5 mt-1">
+                            <a href="#architecture" class="nav-item text-xs font-medium py-1.5">
+                                🏗️ System Architecture
+                            </a>
+                            <a href="#state-machine" class="nav-item text-xs font-medium py-1.5">
+                                🔄 Queue State Machine
+                            </a>
+                            <a href="#srs" class="nav-item text-xs font-medium py-1.5">
+                                📋 Requirements Matrix (RTM)
+                            </a>
+                            <a href="#estimation" class="nav-item text-xs font-medium py-1.5">
+                                ⏱️ Effort Estimation (UCP)
+                            </a>
+                            <a href="#devops" class="nav-item text-xs font-medium py-1.5">
+                                🚢 Docker & Deployment
+                            </a>
+                            <a href="#security" class="nav-item text-xs font-medium py-1.5">
+                                🛡️ Security & Least Privilege
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </aside>
 
-            {{-- Main Content Area --}}
+            {{-- Main Content Column --}}
             <div class="lg:col-span-9 space-y-12">
 
-                {{-- SECTION 1: OVERVIEW --}}
-                <section id="overview" class="card p-6 sm:p-10 scroll-mt-24">
-                    <div class="border-b border-slate-100 pb-4 mb-6">
-                        <span class="text-xs font-bold text-indigo-600 uppercase tracking-widest block mb-1">Section 01</span>
-                        <h2 class="text-2xl font-black text-slate-900 tracking-tight">1. Project Overview & Purpose</h2>
+                {{-- ========================================================================= --}}
+                {{-- TRACK 1: NON-TECHNICAL STEP-BY-STEP USER GUIDES --}}
+                {{-- ========================================================================= --}}
+
+                <div id="non-technical-track" class="space-y-8 scroll-mt-24">
+                    <div class="border-b-2 border-emerald-500 pb-3">
+                        <span class="text-xs font-black uppercase tracking-widest text-emerald-600 block">Part One</span>
+                        <h2 class="text-3xl font-black text-slate-900 tracking-tight">🟢 Step-by-Step User Guides</h2>
+                        <p class="text-slate-500 text-sm mt-1">Non-technical walkthroughs for everyday clinic operation.</p>
                     </div>
 
-                    <div class="prose prose-slate max-w-none text-sm leading-relaxed space-y-4 text-slate-600">
-                        <p>
-                            <strong>MediQueue</strong> is a modern, responsive, web-based clinic queue management platform built for outpatient healthcare facilities. It replaces stressful physical waiting lines and verbal callouts with digital queue ticketing, real-time position countdowns, and synchronized public hospital departure screens.
-                        </p>
-
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 my-6 not-prose">
-                            <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
-                                <span class="text-xs font-bold text-slate-500 uppercase block">Examination Scope</span>
-                                <p class="text-base font-bold text-slate-900 mt-1">48-Hour Capstone</p>
-                                <p class="text-xs text-slate-500 mt-0.5">Advanced Software Engineering</p>
-                            </div>
-                            <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
-                                <span class="text-xs font-bold text-slate-500 uppercase block">Core Framework</span>
-                                <p class="text-base font-bold text-slate-900 mt-1">Laravel 12 + Blade</p>
-                                <p class="text-xs text-slate-500 mt-0.5">PHP 8.2 + Tailwind CSS v4</p>
-                            </div>
-                            <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
-                                <span class="text-xs font-bold text-slate-500 uppercase block">Test Verification</span>
-                                <p class="text-base font-bold text-emerald-600 mt-1">43 Tests / 158 Assertions</p>
-                                <p class="text-xs text-slate-500 mt-0.5">100% Automated Test Pass</p>
+                    {{-- 1. PATIENT GUIDE --}}
+                    <section id="patient-guide" class="card p-6 sm:p-8 scroll-mt-24 border-l-4 border-emerald-500">
+                        <div class="flex items-center gap-3 mb-6">
+                            <span class="w-10 h-10 bg-emerald-100 text-emerald-700 rounded-xl flex items-center justify-center text-xl font-bold">👤</span>
+                            <div>
+                                <h3 class="text-xl font-extrabold text-slate-900">Patient Guide: How to Join & Track Your Queue</h3>
+                                <p class="text-xs text-slate-500">No more waiting in physical lines at the clinic reception.</p>
                             </div>
                         </div>
 
-                        <h3 class="text-base font-bold text-slate-900 pt-2">Scope & Boundary Governance (ADR-001)</h3>
-                        <p>
-                            To maintain engineering rigor within the university examination constraints, MediQueue is strictly scoped to <strong>administrative clinic flow and queue coordination</strong>. It explicitly excludes electronic medical health records (EHR/EMR), clinical diagnostic algorithms, pharmaceutical billing, and insurance claims.
-                        </p>
+                        <div class="space-y-6 text-sm text-slate-600">
+                            {{-- Step 1 --}}
+                            <div class="flex items-start gap-4">
+                                <span class="w-7 h-7 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-xs flex-shrink-0 mt-0.5">1</span>
+                                <div>
+                                    <h4 class="font-bold text-slate-900">Create an Account or Sign In</h4>
+                                    <p class="mt-1">
+                                        Click <strong>"Get Started"</strong> on the homepage. Enter your Name, Email, and Password. If you already have an account, click <strong>"Sign In"</strong>.
+                                    </p>
+                                    <p class="text-xs text-slate-400 mt-1">Demo Patient Account: <code>john.doe@example.com</code> / <code>password</code></p>
+                                </div>
+                            </div>
+
+                            {{-- Step 2 --}}
+                            <div class="flex items-start gap-4">
+                                <span class="w-7 h-7 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-xs flex-shrink-0 mt-0.5">2</span>
+                                <div>
+                                    <h4 class="font-bold text-slate-900">Choose a Clinic Service</h4>
+                                    <p class="mt-1">
+                                        Go to <strong>"Join Queue"</strong> in the top menu. You will see all available departments (e.g. <em>General Consultation</em>, <em>Nursing</em>, <em>Pharmacy</em>) with their average wait times and current queue lengths.
+                                    </p>
+                                </div>
+                            </div>
+
+                            {{-- Step 3 --}}
+                            <div class="flex items-start gap-4">
+                                <span class="w-7 h-7 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-xs flex-shrink-0 mt-0.5">3</span>
+                                <div>
+                                    <h4 class="font-bold text-slate-900">Take Your Digital Queue Ticket</h4>
+                                    <p class="mt-1">
+                                        Click <strong>"Select & Join Queue"</strong>, review the estimated wait, and click <strong>"Confirm & Issue Queue Ticket"</strong>. You will immediately be assigned a unique ticket number (e.g. <strong>GC-005</strong>).
+                                    </p>
+                                </div>
+                            </div>
+
+                            {{-- Step 4 --}}
+                            <div class="flex items-start gap-4">
+                                <span class="w-7 h-7 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-xs flex-shrink-0 mt-0.5">4</span>
+                                <div>
+                                    <h4 class="font-bold text-slate-900">Track Your Real-Time Position from Anywhere</h4>
+                                    <p class="mt-1">
+                                        Your screen automatically refreshes every 4 seconds. You will see:
+                                    </p>
+                                    <ul class="list-disc list-inside mt-2 space-y-1 text-xs text-slate-700 bg-slate-50 p-3 rounded-lg border border-slate-200">
+                                        <li><strong>Your exact Position:</strong> (e.g. <em>#1 in line</em>)</li>
+                                        <li><strong>People Ahead of You:</strong> (e.g. <em>0 people ahead</em>)</li>
+                                        <li><strong>Estimated Wait:</strong> (e.g. <em>~0 minutes</em>)</li>
+                                        <li><strong>Currently Serving:</strong> Shows who is in consultation right now.</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            {{-- Step 5 --}}
+                            <div class="flex items-start gap-4">
+                                <span class="w-7 h-7 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-xs flex-shrink-0 mt-0.5">5</span>
+                                <div>
+                                    <h4 class="font-bold text-slate-900">When Called: "It's Your Turn!"</h4>
+                                    <p class="mt-1">
+                                        When the doctor calls your number, your screen will turn bright indigo with an animated <strong>"It is Your Turn!"</strong> banner. You will also receive an automated email alert and in-app notification. Proceed immediately to the consultation room!
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {{-- 2. CLINICAL STAFF GUIDE --}}
+                    <section id="staff-guide" class="card p-6 sm:p-8 scroll-mt-24 border-l-4 border-indigo-500">
+                        <div class="flex items-center gap-3 mb-6">
+                            <span class="w-10 h-10 bg-indigo-100 text-indigo-700 rounded-xl flex items-center justify-center text-xl font-bold">👨‍⚕️</span>
+                            <div>
+                                <h3 class="text-xl font-extrabold text-slate-900">Clinical Staff Guide: Doctor & Nurse Console</h3>
+                                <p class="text-xs text-slate-500">How to call patients, manage consultations, and handle no-shows.</p>
+                            </div>
+                        </div>
+
+                        <div class="space-y-6 text-sm text-slate-600">
+                            {{-- Step 1 --}}
+                            <div class="flex items-start gap-4">
+                                <span class="w-7 h-7 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-xs flex-shrink-0 mt-0.5">1</span>
+                                <div>
+                                    <h4 class="font-bold text-slate-900">Sign in with Staff Credentials</h4>
+                                    <p class="mt-1">
+                                        Sign in with your staff account (e.g. <code>dr.sarah@mediqueue.test</code> / <code>password</code>). You will be redirected straight to the <strong>Staff Queue Console</strong>.
+                                    </p>
+                                </div>
+                            </div>
+
+                            {{-- Step 2 --}}
+                            <div class="flex items-start gap-4">
+                                <span class="w-7 h-7 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-xs flex-shrink-0 mt-0.5">2</span>
+                                <div>
+                                    <h4 class="font-bold text-slate-900">Select Your Department</h4>
+                                    <p class="mt-1">
+                                        Use the top-right department dropdown to choose which queue you are serving (e.g. <em>General Consultation</em>, <em>Lab</em>, or <em>Nursing</em>).
+                                    </p>
+                                </div>
+                            </div>
+
+                            {{-- Step 3 --}}
+                            <div class="flex items-start gap-4">
+                                <span class="w-7 h-7 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-xs flex-shrink-0 mt-0.5">3</span>
+                                <div>
+                                    <h4 class="font-bold text-slate-900">Calling the Next Patient</h4>
+                                    <p class="mt-1">
+                                        Click the big green button: <strong>"Call Next Patient"</strong>. The system selects the next eligible patient according to priority and sequence. This instantly updates the patient's phone and broadcasts their number to the waiting room TV screen!
+                                    </p>
+                                </div>
+                            </div>
+
+                            {{-- Step 4 --}}
+                            <div class="flex items-start gap-4">
+                                <span class="w-7 h-7 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-xs flex-shrink-0 mt-0.5">4</span>
+                                <div>
+                                    <h4 class="font-bold text-slate-900">Starting and Concluding Service</h4>
+                                    <ul class="list-disc list-inside mt-2 space-y-1.5 text-xs text-slate-700 bg-slate-50 p-3 rounded-lg border border-slate-200">
+                                        <li><strong>Start Service:</strong> When the patient enters the room, click "Start Service" to begin timing the consultation.</li>
+                                        <li><strong>Complete Service:</strong> When done, click "Complete Service" to archive the ticket and compute accurate average wait times.</li>
+                                        <li><strong>Skip Patient:</strong> If the patient did not enter the room after multiple calls, click "Skip".</li>
+                                        <li><strong>Recall Patient:</strong> If a skipped patient returns to the desk, you can click "Recall" to put them back into consultation status.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {{-- 3. ADMINISTRATOR GUIDE --}}
+                    <section id="admin-guide" class="card p-6 sm:p-8 scroll-mt-24 border-l-4 border-amber-500">
+                        <div class="flex items-center gap-3 mb-6">
+                            <span class="w-10 h-10 bg-amber-100 text-amber-700 rounded-xl flex items-center justify-center text-xl font-bold">🔧</span>
+                            <div>
+                                <h3 class="text-xl font-extrabold text-slate-900">Administrator Guide: Governance, Users & Settings</h3>
+                                <p class="text-xs text-slate-500">Managing clinic departments, resetting passwords, and system audits.</p>
+                            </div>
+                        </div>
+
+                        <div class="space-y-6 text-sm text-slate-600">
+                            {{-- Step 1 --}}
+                            <div class="flex items-start gap-4">
+                                <span class="w-7 h-7 rounded-full bg-amber-600 text-white flex items-center justify-center font-bold text-xs flex-shrink-0 mt-0.5">1</span>
+                                <div>
+                                    <h4 class="font-bold text-slate-900">Access Admin Dashboard</h4>
+                                    <p class="mt-1">
+                                        Log in with <code>admin@mediqueue.test</code> / <code>password</code>. View clinic KPIs: total patients, active services, waiting count, and average wait time.
+                                    </p>
+                                </div>
+                            </div>
+
+                            {{-- Step 2 --}}
+                            <div class="flex items-start gap-4">
+                                <span class="w-7 h-7 rounded-full bg-amber-600 text-white flex items-center justify-center font-bold text-xs flex-shrink-0 mt-0.5">2</span>
+                                <div>
+                                    <h4 class="font-bold text-slate-900">Managing Clinic Services</h4>
+                                    <p class="mt-1">
+                                        Navigate to <strong>"Services"</strong>. You can create new departments (e.g. <em>Dental</em>, <em>Pediatrics</em>), edit prefixes (e.g. <code>DEN</code>), adjust consultation durations, or activate/deactivate departments without downtime.
+                                    </p>
+                                </div>
+                            </div>
+
+                            {{-- Step 3 --}}
+                            <div class="flex items-start gap-4">
+                                <span class="w-7 h-7 rounded-full bg-amber-600 text-white flex items-center justify-center font-bold text-xs flex-shrink-0 mt-0.5">3</span>
+                                <div>
+                                    <h4 class="font-bold text-slate-900">User Creation & Password Resets</h4>
+                                    <p class="mt-1">
+                                        Navigate to <strong>"Users"</strong>. Click <strong>"Create Account"</strong> to add doctors, nurses, or admins. Click <strong>"Edit"</strong> on any user row to update profile details or perform an <strong>Administrative Password Reset</strong> (which automatically emails the new credentials to the user).
+                                    </p>
+                                </div>
+                            </div>
+
+                            {{-- Step 4 --}}
+                            <div class="flex items-start gap-4">
+                                <span class="w-7 h-7 rounded-full bg-amber-600 text-white flex items-center justify-center font-bold text-xs flex-shrink-0 mt-0.5">4</span>
+                                <div>
+                                    <h4 class="font-bold text-slate-900">Configuring Clinic Information & Settings</h4>
+                                    <p class="mt-1">
+                                        Navigate to <strong>"Settings"</strong>. Change the clinic name, contact phone, physical address, operating hours, and toggle automated email alerts.
+                                    </p>
+                                </div>
+                            </div>
+
+                            {{-- Step 5 --}}
+                            <div class="flex items-start gap-4">
+                                <span class="w-7 h-7 rounded-full bg-amber-600 text-white flex items-center justify-center font-bold text-xs flex-shrink-0 mt-0.5">5</span>
+                                <div>
+                                    <h4 class="font-bold text-slate-900">Security Audit Trail</h4>
+                                    <p class="mt-1">
+                                        Navigate to <strong>"Audit"</strong>. Review the immutable, timestamped record of every action taken in the system, complete with actor names, target records, JSON metadata, and client IP addresses.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {{-- 4. HOSPITAL TV DISPLAY GUIDE --}}
+                    <section id="tv-guide" class="card p-6 sm:p-8 scroll-mt-24 border-l-4 border-slate-700 bg-slate-900 text-white">
+                        <div class="flex items-center gap-3 mb-6">
+                            <span class="w-10 h-10 bg-indigo-600 text-white rounded-xl flex items-center justify-center text-xl font-bold">📺</span>
+                            <div>
+                                <h3 class="text-xl font-extrabold text-white">Hospital Waiting Room TV Display Guide</h3>
+                                <p class="text-xs text-slate-400">How to set up the public departure board screen on waiting area TVs or tablets.</p>
+                            </div>
+                        </div>
+
+                        <div class="space-y-4 text-sm text-slate-300">
+                            <p>
+                                Open <strong><code>/display</code></strong> on any Smart TV browser or tablet in the clinic waiting room:
+                            </p>
+                            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 font-mono text-xs text-emerald-400">
+                                https://your-domain.com/display
+                            </div>
+                            <ul class="list-disc list-inside space-y-2 text-xs text-slate-400">
+                                <li><strong>Fullscreen Mode:</strong> Click the expand icon in the top right to make the display fill the entire TV screen with zero browser chrome.</li>
+                                <li><strong>Automatic Refresh:</strong> The screen polls the server every 3 seconds — no manual refresh required.</li>
+                                <li><strong>Audio & Visual Chime:</strong> When a new patient is called, the number flashes in bold white and indigo on the left panel.</li>
+                            </ul>
+                        </div>
+                    </section>
+                </div>
+
+                {{-- ========================================================================= --}}
+                {{-- TRACK 2: TECHNICAL & SOFTWARE ENGINEERING SPECIFICATIONS --}}
+                {{-- ========================================================================= --}}
+
+                <div id="technical-track" class="space-y-8 scroll-mt-24 pt-8 border-t-2 border-slate-200">
+                    <div class="border-b-2 border-indigo-500 pb-3">
+                        <span class="text-xs font-black uppercase tracking-widest text-indigo-600 block">Part Two</span>
+                        <h2 class="text-3xl font-black text-slate-900 tracking-tight">🔵 Software Engineering & Technical Reference</h2>
+                        <p class="text-slate-500 text-sm mt-1">Architectural specifications, algorithms, estimation models, and deployment configurations.</p>
                     </div>
-                </section>
 
-                {{-- SECTION 2: ARCHITECTURE --}}
-                <section id="architecture" class="card p-6 sm:p-10 scroll-mt-24">
-                    <div class="border-b border-slate-100 pb-4 mb-6">
-                        <span class="text-xs font-bold text-indigo-600 uppercase tracking-widest block mb-1">Section 02</span>
-                        <h2 class="text-2xl font-black text-slate-900 tracking-tight">2. System Architecture & Tech Stack</h2>
-                    </div>
-
-                    <div class="text-sm text-slate-600 space-y-4 leading-relaxed">
-                        <p>
-                            MediQueue is architected as a <strong>Modular Layered Monolith</strong>. All queue business operations, state transitions, atomic numbering, and notification dispatches are centralized in <code>App\Services\QueueService</code>.
+                    {{-- 1. SYSTEM ARCHITECTURE --}}
+                    <section id="architecture" class="card p-6 sm:p-8 scroll-mt-24">
+                        <h3 class="text-xl font-extrabold text-slate-900 mb-4">1. System Architecture (ADR-002)</h3>
+                        <p class="text-sm text-slate-600 leading-relaxed mb-4">
+                            MediQueue follows a <strong>Modular Layered Monolith</strong> architecture using Laravel 12 on PHP 8.2 with Blade templates and Tailwind CSS v4. Database queries on active queues employ pessimistic locking (<code>lockForUpdate</code>) inside atomic transactions to eliminate race conditions.
                         </p>
 
-                        <div class="bg-slate-900 text-slate-100 rounded-2xl p-5 my-6 font-mono text-xs overflow-x-auto">
+                        <div class="bg-slate-900 text-slate-100 rounded-2xl p-5 font-mono text-xs overflow-x-auto">
                             <pre class="leading-loose">
-[ Web Presentation Layer ] ── Blade Components + Tailwind CSS v4
+[ Client Tier ]      ── Web Browsers / Mobile Clients / Hospital TV Kiosks
        │
        ▼
-[ Routing & Middleware ]   ── RoleMiddleware (patient/staff/admin) + Throttle Guards
+[ Web Presentation ] ── Laravel Blade Layouts (x-layouts.app) + Tailwind v4 Design Tokens
        │
        ▼
-[ Controller Layer ]       ── Patient, Staff, Admin & Display Controllers
+[ Security Guard ]   ── RoleMiddleware (patient | staff | admin) + RateLimiter Throttling
        │
        ▼
-[ Business Domain Service] ── QueueService (DB Transactions + Pessimistic Row Locking)
+[ Controllers ]      ── Patient, Staff, Admin & Display Controllers
        │
        ▼
-[ Data Persistence ]       ── Eloquent Models (User, Service, QueueEntry, Notification, Setting, AuditLog)
+[ Domain Service ]   ── QueueService (Atomic transactions, sequence generation, state transitions)
        │
        ▼
-[ Relational Store ]       ── SQLite / MySQL Relational Database</pre>
+[ Persistence Tier]  ── Eloquent Models (User, Service, QueueEntry, Notification, Setting, AuditLog)
+       │
+       ▼
+[ Storage Tier ]     ── Relational DB (SQLite for dev/testing; MySQL/Postgres for production)</pre>
                         </div>
-                    </div>
-                </section>
+                    </section>
 
-                {{-- SECTION 3: STATE MACHINE --}}
-                <section id="state-machine" class="card p-6 sm:p-10 scroll-mt-24">
-                    <div class="border-b border-slate-100 pb-4 mb-6">
-                        <span class="text-xs font-bold text-indigo-600 uppercase tracking-widest block mb-1">Section 03</span>
-                        <h2 class="text-2xl font-black text-slate-900 tracking-tight">3. Queue State Machine</h2>
-                    </div>
-
-                    <div class="text-sm text-slate-600 space-y-4 leading-relaxed">
-                        <p>
-                            Queue tickets strictly transition through an enforced state machine. Invalid state mutations (e.g. attempting to complete an uncalled ticket) throw validation exceptions.
+                    {{-- 2. STATE MACHINE --}}
+                    <section id="state-machine" class="card p-6 sm:p-8 scroll-mt-24">
+                        <h3 class="text-xl font-extrabold text-slate-900 mb-4">2. Queue State Machine Specification</h3>
+                        <p class="text-sm text-slate-600 mb-4">
+                            Every ticket follows a formal finite state machine enforced by <code>QueueEntry::canTransitionTo()</code>:
                         </p>
-
-                        <div class="overflow-x-auto my-4">
+                        <div class="overflow-x-auto">
                             <table class="data-table">
                                 <thead>
                                     <tr>
-                                        <th>Current State</th>
-                                        <th>Target State</th>
-                                        <th>Triggering Actor</th>
-                                        <th>Business Meaning</th>
+                                        <th>From Status</th>
+                                        <th>To Status</th>
+                                        <th>Actor</th>
+                                        <th>Trigger / Guard Condition</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -175,244 +431,156 @@
                                         <td><span class="badge badge-waiting">WAITING</span></td>
                                         <td><span class="badge badge-called">CALLED</span></td>
                                         <td>Staff</td>
-                                        <td>Staff calls next patient by priority & sequence.</td>
+                                        <td>"Call Next" CTA; selects highest priority FIFO ticket.</td>
                                     </tr>
                                     <tr>
                                         <td><span class="badge badge-waiting">WAITING</span></td>
                                         <td><span class="badge badge-cancelled">CANCELLED</span></td>
                                         <td>Patient / Admin</td>
-                                        <td>Patient withdraws ticket before consultation.</td>
+                                        <td>Patient cancels queue place before being called.</td>
                                     </tr>
                                     <tr>
                                         <td><span class="badge badge-called">CALLED</span></td>
                                         <td><span class="badge badge-in-service">IN_SERVICE</span></td>
                                         <td>Staff</td>
-                                        <td>Patient arrives and medical consultation begins.</td>
+                                        <td>Patient enters room; consultation starts.</td>
                                     </tr>
                                     <tr>
                                         <td><span class="badge badge-called">CALLED</span></td>
                                         <td><span class="badge badge-skipped">SKIPPED</span></td>
                                         <td>Staff</td>
-                                        <td>Patient does not respond to callout.</td>
+                                        <td>No-show response; moves to skipped pool.</td>
                                     </tr>
                                     <tr>
                                         <td><span class="badge badge-skipped">SKIPPED</span></td>
                                         <td><span class="badge badge-called">CALLED</span></td>
                                         <td>Staff</td>
-                                        <td>Patient reports to desk and is recalled to queue.</td>
+                                        <td>Patient returns to desk; recalled to active call.</td>
                                     </tr>
                                     <tr>
                                         <td><span class="badge badge-in-service">IN_SERVICE</span></td>
                                         <td><span class="badge badge-completed">COMPLETED</span></td>
                                         <td>Staff</td>
-                                        <td>Consultation concluded (Terminal State).</td>
+                                        <td>Consultation concluded (Terminal state).</td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
-                    </div>
-                </section>
+                    </section>
 
-                {{-- SECTION 4: SRS --}}
-                <section id="srs" class="card p-6 sm:p-10 scroll-mt-24">
-                    <div class="border-b border-slate-100 pb-4 mb-6">
-                        <span class="text-xs font-bold text-indigo-600 uppercase tracking-widest block mb-1">Section 04</span>
-                        <h2 class="text-2xl font-black text-slate-900 tracking-tight">4. Requirements Traceability Matrix (RTM)</h2>
-                    </div>
-
-                    <div class="text-sm text-slate-600 space-y-4">
-                        <p>
-                            All requirements from <a href="file:///c:/Users/user/Desktop/ug-swe-exams/docs/SRS.md" class="text-indigo-600 font-semibold hover:underline">docs/SRS.md</a> are mapped directly to implementation components and automated verification tests.
-                        </p>
-
+                    {{-- 3. SRS TRACEABILITY MATRIX --}}
+                    <section id="srs" class="card p-6 sm:p-8 scroll-mt-24">
+                        <h3 class="text-xl font-extrabold text-slate-900 mb-4">3. Requirements Traceability Matrix (RTM)</h3>
                         <div class="overflow-x-auto">
                             <table class="data-table">
                                 <thead>
                                     <tr>
-                                        <th>Req ID</th>
-                                        <th>Feature Requirement</th>
-                                        <th>Implementing Component</th>
-                                        <th>Verification Test</th>
+                                        <th>Req Code</th>
+                                        <th>Specification</th>
+                                        <th>Priority</th>
+                                        <th>Verification Method</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td class="font-mono text-xs font-bold">REQ-AUTH-001</td>
-                                        <td>Patient Registration & Hashing</td>
-                                        <td><code>RegisterController</code></td>
+                                        <td class="font-mono font-bold text-xs">REQ-AUTH-001</td>
+                                        <td>User Registration & Bcrypt Hashing</td>
+                                        <td><span class="badge badge-called">MUST</span></td>
                                         <td><code>AuthTest::test_patient_can_register</code></td>
                                     </tr>
                                     <tr>
-                                        <td class="font-mono text-xs font-bold">REQ-AUTH-006</td>
+                                        <td class="font-mono font-bold text-xs">REQ-AUTH-006</td>
                                         <td>Role-Based Access Control (RBAC)</td>
-                                        <td><code>RoleMiddleware</code></td>
-                                        <td><code>AuthorizationTest</code></td>
+                                        <td><span class="badge badge-called">MUST</span></td>
+                                        <td><code>AuthorizationTest</code> (8 test cases)</td>
                                     </tr>
                                     <tr>
-                                        <td class="font-mono text-xs font-bold">REQ-QUEUE-001</td>
-                                        <td>Atomic Ticket Numbering</td>
-                                        <td><code>QueueService::join</code></td>
-                                        <td><code>QueueLifecycleTest::test_patient_can_join_active_queue</code></td>
+                                        <td class="font-mono font-bold text-xs">REQ-QUEUE-001</td>
+                                        <td>Sequential Atomic Ticket Issuing</td>
+                                        <td><span class="badge badge-called">MUST</span></td>
+                                        <td><code>QueueLifecycleTest::test_sequential_ticket_numbers</code></td>
                                     </tr>
                                     <tr>
-                                        <td class="font-mono text-xs font-bold">REQ-QUEUE-004</td>
-                                        <td>Duplicate Ticket Prevention</td>
-                                        <td><code>QueueService::join</code></td>
+                                        <td class="font-mono font-bold text-xs">REQ-QUEUE-004</td>
+                                        <td>Duplicate Active Ticket Prevention</td>
+                                        <td><span class="badge badge-called">MUST</span></td>
                                         <td><code>QueueLifecycleTest::test_duplicate_prevented</code></td>
                                     </tr>
                                     <tr>
-                                        <td class="font-mono text-xs font-bold">REQ-QUEUE-008</td>
-                                        <td>Staff Call Next Operation</td>
-                                        <td><code>Staff\QueueController</code></td>
-                                        <td><code>QueueLifecycleTest::test_staff_can_call_next</code></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="font-mono text-xs font-bold">REQ-DISP-001</td>
+                                        <td class="font-mono font-bold text-xs">REQ-DISP-001</td>
                                         <td>Hospital Screen TV Display</td>
-                                        <td><code>DisplayController</code></td>
+                                        <td><span class="badge badge-in-service">SHOULD</span></td>
                                         <td><code>AdminEnhancementsTest::test_hospital_display</code></td>
                                     </tr>
                                     <tr>
-                                        <td class="font-mono text-xs font-bold">REQ-NOTIF-001</td>
-                                        <td>Transactional Email & Alerts</td>
-                                        <td><code>QueueNotificationMail</code></td>
+                                        <td class="font-mono font-bold text-xs">REQ-NOTIF-001</td>
+                                        <td>Transactional Email Dispatch</td>
+                                        <td><span class="badge badge-in-service">SHOULD</span></td>
                                         <td><code>AdminEnhancementsTest::test_email_dispatch</code></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="font-mono text-xs font-bold">REQ-AUDIT-001</td>
-                                        <td>Immutable Security Audit Trail</td>
-                                        <td><code>AuditLog Model</code></td>
-                                        <td><code>SmokeTest & LifecycleTests</code></td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
-                    </div>
-                </section>
+                    </section>
 
-                {{-- SECTION 5: ESTIMATION --}}
-                <section id="estimation" class="card p-6 sm:p-10 scroll-mt-24">
-                    <div class="border-b border-slate-100 pb-4 mb-6">
-                        <span class="text-xs font-bold text-indigo-600 uppercase tracking-widest block mb-1">Section 05</span>
-                        <h2 class="text-2xl font-black text-slate-900 tracking-tight">5. Software Effort Estimation (Use Case Points)</h2>
-                    </div>
-
-                    <div class="text-sm text-slate-600 space-y-4">
-                        <p>
-                            Conducted in accordance with Karner's algorithmic <strong>Use Case Points (UCP)</strong> method before implementation began.
+                    {{-- 4. ESTIMATION (UCP) --}}
+                    <section id="estimation" class="card p-6 sm:p-8 scroll-mt-24">
+                        <h3 class="text-xl font-extrabold text-slate-900 mb-4">4. Software Effort Estimation (Use Case Points)</h3>
+                        <p class="text-sm text-slate-600 mb-4">
+                            Calculated using Gustav Karner's algorithmic Use Case Points formula:
                         </p>
-
-                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200 text-center">
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200 text-center mb-4">
                             <div>
                                 <span class="text-xs text-slate-500 font-medium block">Unadjusted UCP</span>
-                                <span class="text-xl font-bold text-slate-900">164 UCP</span>
+                                <span class="text-xl font-black text-slate-900">164</span>
                             </div>
                             <div>
-                                <span class="text-xs text-slate-500 font-medium block">Tech Factor (TCF)</span>
-                                <span class="text-xl font-bold text-slate-900">0.935</span>
+                                <span class="text-xs text-slate-500 font-medium block">TCF Factor</span>
+                                <span class="text-xl font-black text-slate-900">0.935</span>
                             </div>
                             <div>
-                                <span class="text-xs text-slate-500 font-medium block">Env Factor (ECF)</span>
-                                <span class="text-xl font-bold text-slate-900">0.590</span>
+                                <span class="text-xs text-slate-500 font-medium block">ECF Factor</span>
+                                <span class="text-xl font-black text-slate-900">0.590</span>
                             </div>
                             <div>
                                 <span class="text-xs text-slate-500 font-medium block">Adjusted UCP</span>
-                                <span class="text-xl font-bold text-indigo-600">~90 UCP</span>
+                                <span class="text-xl font-black text-indigo-600">~90 UCP</span>
                             </div>
                         </div>
-
                         <p class="text-xs text-slate-500">
-                            Total effort calculated: <strong>46 person-hours</strong> (utilizing a 10% contingency buffer to comfortably fit within the 48-hour individual examination window).
+                            Total effort: <strong>46 person-hours</strong> (fits within the individual 48-hour examination scope).
                         </p>
-                    </div>
-                </section>
+                    </section>
 
-                {{-- SECTION 6: USER GUIDES & CREDENTIALS --}}
-                <section id="guides" class="card p-6 sm:p-10 scroll-mt-24">
-                    <div class="border-b border-slate-100 pb-4 mb-6">
-                        <span class="text-xs font-bold text-indigo-600 uppercase tracking-widest block mb-1">Section 06</span>
-                        <h2 class="text-2xl font-black text-slate-900 tracking-tight">6. User Guides & Seeded Demo Accounts</h2>
-                    </div>
-
-                    <div class="space-y-6 text-sm text-slate-600">
-                        <div class="overflow-x-auto">
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>Role Type</th>
-                                        <th>Email Address</th>
-                                        <th>Password</th>
-                                        <th>Accessible Features</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td><span class="badge badge-called">Administrator</span></td>
-                                        <td class="font-mono text-xs font-bold text-slate-900">admin@mediqueue.test</td>
-                                        <td class="font-mono text-xs">password</td>
-                                        <td>Full system control, services CRUD, user password resets, clinic settings, audit trail.</td>
-                                    </tr>
-                                    <tr>
-                                        <td><span class="badge badge-in-service">Doctor / Staff</span></td>
-                                        <td class="font-mono text-xs font-bold text-slate-900">dr.sarah@mediqueue.test</td>
-                                        <td class="font-mono text-xs">password</td>
-                                        <td>Department queue console, Call Next CTA, start/complete consultation, skip & recall.</td>
-                                    </tr>
-                                    <tr>
-                                        <td><span class="badge badge-in-service">Nurse / Staff</span></td>
-                                        <td class="font-mono text-xs font-bold text-slate-900">nurse.james@mediqueue.test</td>
-                                        <td class="font-mono text-xs">password</td>
-                                        <td>Nursing queue management and triage flow.</td>
-                                    </tr>
-                                    <tr>
-                                        <td><span class="badge badge-waiting">Patient</span></td>
-                                        <td class="font-mono text-xs font-bold text-slate-900">john.doe@example.com</td>
-                                        <td class="font-mono text-xs">password</td>
-                                        <td>Queue ticket selection, live position monitor with 4s polling, cancellation, history.</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                    {{-- 5. DEVOPS & DOCKER --}}
+                    <section id="devops" class="card p-6 sm:p-8 scroll-mt-24">
+                        <h3 class="text-xl font-extrabold text-slate-900 mb-4">5. Production Deployment & DevOps</h3>
+                        <div class="space-y-4 text-sm text-slate-600">
+                            <p>
+                                MediQueue includes a multi-stage production Dockerfile and Render.com blueprint (<code>render.yaml</code>).
+                            </p>
+                            <div class="bg-slate-900 text-slate-100 rounded-xl p-4 font-mono text-xs overflow-x-auto space-y-2">
+                                <p class="text-slate-400"># 1. Local execution with Docker</p>
+                                <p class="text-emerald-400">docker compose up -d --build</p>
+                                <p class="text-slate-400"># 2. Execute automated test suite</p>
+                                <p class="text-emerald-400">php vendor/bin/phpunit</p>
+                            </div>
                         </div>
-                    </div>
-                </section>
+                    </section>
 
-                {{-- SECTION 7: DEVOPS --}}
-                <section id="devops" class="card p-6 sm:p-10 scroll-mt-24">
-                    <div class="border-b border-slate-100 pb-4 mb-6">
-                        <span class="text-xs font-bold text-indigo-600 uppercase tracking-widest block mb-1">Section 07</span>
-                        <h2 class="text-2xl font-black text-slate-900 tracking-tight">7. Production Deployment & Docker</h2>
-                    </div>
-
-                    <div class="text-sm text-slate-600 space-y-4">
-                        <p>
-                            MediQueue features a multi-stage Docker container packaging Node 22 for asset compilation, PHP 8.2-FPM for backend processing, and Nginx managed by Supervisor.
-                        </p>
-
-                        <div class="bg-slate-900 text-slate-100 rounded-xl p-4 font-mono text-xs overflow-x-auto space-y-2">
-                            <p class="text-slate-400"># Run with Docker Compose</p>
-                            <p class="text-emerald-400">docker compose up -d --build</p>
-                            <p class="text-slate-400"># Access in browser</p>
-                            <p class="text-emerald-400">http://localhost:8000</p>
+                    {{-- 6. SECURITY --}}
+                    <section id="security" class="card p-6 sm:p-8 scroll-mt-24">
+                        <h3 class="text-xl font-extrabold text-slate-900 mb-4">6. Security First & Principle of Least Privilege</h3>
+                        <div class="text-sm text-slate-600 space-y-2">
+                            <ul class="list-disc list-inside space-y-1.5">
+                                <li><strong>Bcrypt Password Hashing</strong>: Strong cryptographic password storage.</li>
+                                <li><strong>Role-Based Access Control</strong>: <code>RoleMiddleware</code> isolates patient, staff, and admin surfaces.</li>
+                                <li><strong>Rate Limiting</strong>: 10 req/min for authentication, 30 req/min for queue ticketing.</li>
+                                <li><strong>Immutable Audit Logging</strong>: Append-only ledger recording every state mutation.</li>
+                            </ul>
                         </div>
-                    </div>
-                </section>
-
-                {{-- SECTION 8: SECURITY --}}
-                <section id="security" class="card p-6 sm:p-10 scroll-mt-24">
-                    <div class="border-b border-slate-100 pb-4 mb-6">
-                        <span class="text-xs font-bold text-indigo-600 uppercase tracking-widest block mb-1">Section 08</span>
-                        <h2 class="text-2xl font-black text-slate-900 tracking-tight">8. Security First & Principle of Least Privilege</h2>
-                    </div>
-
-                    <div class="text-sm text-slate-600 space-y-3">
-                        <ul class="list-disc list-inside space-y-2">
-                            <li><strong>Bcrypt Password Hashing</strong>: Cost factor 12 in production, cost factor 4 in testing.</li>
-                            <li><strong>Strict Role Middleware</strong>: Zero vertical privilege escalation. Non-admins cannot access admin APIs.</li>
-                            <li><strong>Rate Limiting</strong>: 10 req/min on authentication; 30 req/min on queue join endpoints.</li>
-                            <li><strong>Immutable Event Logs</strong>: Append-only audit table records actor ID, action name, entity ID, metadata JSON, and client IP.</li>
-                        </ul>
-                    </div>
-                </section>
+                    </section>
+                </div>
             </div>
         </div>
     </div>
