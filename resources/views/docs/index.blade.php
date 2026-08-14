@@ -648,14 +648,16 @@
                     </section>
 
                     {{-- 6. SECURITY --}}
-                    <section id="security" class="card p-6 sm:p-8 scroll-mt-24">
-                        <h3 class="text-xl font-extrabold text-slate-900 mb-4">6. Security First & Principle of Least Privilege</h3>
-                        <div class="text-sm text-slate-600 space-y-2">
-                            <ul class="list-disc list-inside space-y-1.5">
-                                <li><strong>Bcrypt Password Hashing</strong>: Strong cryptographic password storage.</li>
-                                <li><strong>Role-Based Access Control</strong>: <code>RoleMiddleware</code> isolates patient, staff, and admin surfaces.</li>
-                                <li><strong>Rate Limiting</strong>: 10 req/min for authentication, 30 req/min for queue ticketing.</li>
-                                <li><strong>Immutable Audit Logging</strong>: Append-only ledger recording every state mutation.</li>
+                    <section id="security" class="card p-6 sm:p-8 scroll-mt-24 border-l-4 border-indigo-600">
+                        <h3 class="text-xl font-extrabold text-slate-900 mb-4">6. Security Architecture, HIPAA & ISO 27001 Compliance</h3>
+                        <div class="text-sm text-slate-600 space-y-3">
+                            <ul class="list-disc list-inside space-y-2">
+                                <li><strong>Granular Least-Privilege Clinical Roles</strong>: Strict isolation between Doctors, Nurses, Pharmacists, Lab Techs, Receptionists, and Admins.</li>
+                                <li><strong>Medical Staff Licensing Gate</strong>: Mandatory practicing license submission (`/staff/onboarding`) and Administrator verification before clinical data access.</li>
+                                <li><strong>Mandatory First-Time Password Change</strong>: Forced password reset on administrator creation or reset (`/force-password-change`).</li>
+                                <li><strong>Real-Time Anomaly & Sign-In Telemetry</strong>: Automated detection of brute-force login attempts and unrecognized IP address changes with instant transactional email alerts.</li>
+                                <li><strong>Live UGMC Zoho SMTP Gateway</strong>: Secure encrypted transactional notifications delivered via SSL port 465 with hospital branding.</li>
+                                <li><strong>Immutable Forensic Audit Trail</strong>: Append-only ledger recording every state mutation with SHA-256 integrity metadata.</li>
                             </ul>
                         </div>
                     </section>
