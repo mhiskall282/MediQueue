@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use App\Models\SecurityAlert;
 
 class LoginRequest extends FormRequest
 {
@@ -47,11 +48,21 @@ class LoginRequest extends FormRequest
             ]);
         }
 
+        $user = Auth::user();
+
         // Check if account is active
-        if (!Auth::user()->is_active) {
+        if (!$user->is_active) {
             Auth::logout();
             throw ValidationException::withMessages([
-                'email' => 'Your account has been deactivated. Please contact the clinic.',
+                'email' => 'Your account has been deactivated. Please contact hospital administration.',
+            ]);
+        }
+
+        // Check if clinical staff account is approved
+        if ($user->isStaff() && !$user->is_approved) {
+            Auth::logout();
+            throw ValidationException::withMessages([
+                'email' => 'Your clinical staff credentials are currently under administrative review. Access will be activated once verified by hospital administration.',
             ]);
         }
 
@@ -70,6 +81,22 @@ class LoginRequest extends FormRequest
         }
 
         event(new Lockout($this));
+
+        // HIPAA / ISO 27001 Security Telemetry
+        try {
+            SecurityAlert::create([
+                'event_type'  => 'BRUTE_FORCE_LOGIN_ATTEMPT',
+                'severity'    => SecurityAlert::SEVERITY_HIGH,
+                'description' => "Multiple failed login attempts detected for identity: {$this->email}",
+                'ip_address'  => $this->ip(),
+                'context_data'=> [
+                    'email'      => $this->email,
+                    'user_agent' => $this->userAgent(),
+                ],
+            ]);
+        } catch (\Throwable $e) {
+            // Fail gracefully
+        }
 
         $seconds = RateLimiter::availableIn($this->throttleKey());
 

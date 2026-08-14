@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AuditController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\ReportController;
+use App\Http\Controllers\Admin\SecurityAlertController;
 use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\UserController;
@@ -14,6 +15,7 @@ use App\Http\Controllers\Patient\AppointmentController as PatientAppointmentCont
 use App\Http\Controllers\Patient\DashboardController as PatientDashboardController;
 use App\Http\Controllers\Patient\QueueController as PatientQueueController;
 use App\Http\Controllers\Staff\AppointmentController as StaffAppointmentController;
+use App\Http\Controllers\Staff\ClinicalMessageController;
 use App\Http\Controllers\Staff\ClinicalReferralController;
 use App\Http\Controllers\Staff\EmergencyIntakeController;
 use App\Http\Controllers\Staff\OnCallController;
@@ -137,9 +139,15 @@ Route::prefix('staff')
         Route::post('/emergency/{queueEntry}/link-permanent-id',     [EmergencyIntakeController::class, 'linkPermanentId'])->name('emergency.link-permanent-id');
 
         // Doctor On-Call Duty Rostering & Paging
+        // Doctor On-Call Duty Rostering & Paging
         Route::get('/on-call',                         [OnCallController::class, 'index'])->name('oncall.index');
         Route::post('/on-call/{doctor}/toggle',        [OnCallController::class, 'toggleOnCall'])->name('oncall.toggle');
         Route::post('/on-call/{doctor}/page',          [OnCallController::class, 'pageDoctor'])->name('oncall.page');
+
+        // Inter-Staff Clinical Messaging & Consultation Notes
+        Route::get('/messages',                        [ClinicalMessageController::class, 'index'])->name('messages.index');
+        Route::post('/messages',                       [ClinicalMessageController::class, 'store'])->name('messages.store');
+        Route::post('/messages/{message}/read',        [ClinicalMessageController::class, 'markAsRead'])->name('messages.read');
 
         // JSON live status polling for staff dashboard
         Route::get('/queue/live-status',               [StaffQueueController::class, 'liveStatus'])->name('queue.live-status');
@@ -160,15 +168,21 @@ Route::prefix('admin')
         Route::resource('services', ServiceController::class)->only(['index', 'create', 'store', 'edit', 'update']);
         Route::post('/services/{service}/toggle', [ServiceController::class, 'toggle'])->name('services.toggle');
 
-        // User management & administrative password resets
+        // User management, license vetting & administrative password resets
         Route::get('/users',                              [UserController::class, 'index'])->name('users.index');
         Route::get('/users/create',                       [UserController::class, 'create'])->name('users.create');
         Route::post('/users',                             [UserController::class, 'store'])->name('users.store');
+        Route::post('/users/{user}/approve',              [UserController::class, 'approve'])->name('users.approve');
+        Route::post('/users/{user}/revoke',               [UserController::class, 'revoke'])->name('users.revoke');
         Route::get('/users/{user}/edit',                  [UserController::class, 'edit'])->name('users.edit');
         Route::put('/users/{user}',                       [UserController::class, 'update'])->name('users.update');
         Route::post('/users/{user}/toggle',               [UserController::class, 'toggle'])->name('users.toggle');
         Route::post('/users/{user}/role',                 [UserController::class, 'updateRole'])->name('users.role');
         Route::post('/users/{user}/reset-password',       [UserController::class, 'resetPassword'])->name('users.reset-password');
+
+        // HIPAA & ISO 27001 Security Incident & Vulnerability Alert Center
+        Route::get('/security-alerts',                     [SecurityAlertController::class, 'index'])->name('security.index');
+        Route::post('/security-alerts/{alert}/resolve',    [SecurityAlertController::class, 'resolve'])->name('security.resolve');
 
         // Clinic & System Settings
         Route::get('/settings',                           [SettingController::class, 'index'])->name('settings.index');

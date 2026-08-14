@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Mail\QueueNotificationMail;
 use App\Models\AuditLog;
 use App\Models\Notification;
+use App\Models\SecurityAlert;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -18,11 +19,15 @@ use Illuminate\View\View;
 class UserController extends Controller
 {
     /**
-     * List all users with filtering.
+     * List all users with filtering and pending verification tabs.
      */
     public function index(Request $request): View
     {
         $query = User::query();
+
+        if ($request->filled('status') && $request->status === 'pending') {
+            $query->where('is_approved', false);
+        }
 
         if ($request->filled('role')) {
             $query->where('role', $request->role);
@@ -31,13 +36,16 @@ class UserController extends Controller
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
                 $q->where('name', 'like', '%'.$request->search.'%')
-                  ->orWhere('email', 'like', '%'.$request->search.'%');
+                  ->orWhere('email', 'like', '%'.$request->search.'%')
+                  ->orWhere('hospital_id', 'like', '%'.$request->search.'%')
+                  ->orWhere('medical_license_number', 'like', '%'.$request->search.'%');
             });
         }
 
+        $pendingCount = User::where('is_approved', false)->count();
         $users = $query->orderBy('created_at', 'desc')->paginate(20)->withQueryString();
 
-        return view('admin.users.index', compact('users'));
+        return view('admin.users.index', compact('users', 'pendingCount'));
     }
 
     /**
@@ -49,25 +57,32 @@ class UserController extends Controller
     }
 
     /**
-     * Create a new user account (patient, staff, or admin).
+     * Create a new user account with least-privilege role assignment.
      */
     public function store(Request $request): RedirectResponse
     {
         $data = $request->validate([
-            'name'     => ['required', 'string', 'max:100'],
-            'email'    => ['required', 'email', 'max:255', 'unique:users,email'],
-            'phone'    => ['nullable', 'string', 'max:20'],
-            'role'     => ['required', 'in:patient,staff,admin'],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'name'                   => ['required', 'string', 'max:100'],
+            'email'                  => ['required', 'email', 'max:255', 'unique:users,email'],
+            'phone'                  => ['nullable', 'string', 'max:20'],
+            'role'                   => ['required', 'in:patient,staff,doctor,nurse,pharmacist,lab_tech,admin'],
+            'medical_license_number' => ['nullable', 'string', 'max:100'],
+            'specialization'         => ['nullable', 'string', 'max:150'],
+            'password'               => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
         $user = User::create([
-            'name'      => $data['name'],
-            'email'     => $data['email'],
-            'phone'     => $data['phone'] ?? null,
-            'role'      => $data['role'],
-            'password'  => Hash::make($data['password']),
-            'is_active' => true,
+            'name'                   => $data['name'],
+            'email'                  => $data['email'],
+            'phone'                  => $data['phone'] ?? null,
+            'role'                   => $data['role'],
+            'specialization'         => $data['specialization'] ?? null,
+            'medical_license_number' => $data['medical_license_number'] ?? null,
+            'password'               => Hash::make($data['password']),
+            'is_active'              => true,
+            'is_approved'            => true,
+            'approved_at'            => now(),
+            'approved_by'            => Auth::id(),
         ]);
 
         AuditLog::create([
@@ -79,27 +94,92 @@ class UserController extends Controller
             'ip_address'  => $request->ip(),
         ]);
 
-        // Send welcome notification & email
-        Notification::create([
-            'user_id' => $user->id,
-            'type'    => 'account.created',
-            'title'   => 'Account Created',
-            'body'    => "Your MediQueue account has been created with the role of {$user->role_label}.",
+        try {
+            Mail::to($user->email)->send(
+                new QueueNotificationMail(
+                    $user,
+                    'Welcome to MediQueue Clinical Portal',
+                    'Your Account is Verified and Ready',
+                    "An administrator has provisioned your MediQueue account with the clinical role of {$user->role_title}."
+                )
+            );
+        } catch (\Throwable $e) {}
+
+        return redirect()->route('admin.users.index')
+            ->with('success', "User \"{$user->name}\" provisioned with role: {$user->role_title}.");
+    }
+
+    /**
+     * Approve a pending medical staff applicant.
+     */
+    public function approve(Request $request, User $user): RedirectResponse
+    {
+        $user->update([
+            'is_approved' => true,
+            'is_active'   => true,
+            'approved_at' => now(),
+            'approved_by' => Auth::id(),
+        ]);
+
+        AuditLog::create([
+            'user_id'     => Auth::id(),
+            'action'      => 'user.staff_approved',
+            'entity_type' => 'User',
+            'entity_id'   => $user->id,
+            'metadata'    => [
+                'name'    => $user->name,
+                'role'    => $user->role,
+                'license' => $user->medical_license_number,
+            ],
+            'ip_address'  => $request->ip(),
         ]);
 
         try {
             Mail::to($user->email)->send(
                 new QueueNotificationMail(
                     $user,
-                    'Welcome to MediQueue',
-                    'Your Account is Ready',
-                    "An administrator has created your MediQueue account with the role of {$user->role_label}. You can now log in using your email address."
+                    'Medical Staff Access Approved',
+                    'Credentials Verified by Hospital Administration',
+                    "Your practicing credentials (License: {$user->medical_license_number}) have been verified and approved by the Hospital Administrator. You may now access the Clinical Operations Console with your role: {$user->role_title}."
                 )
             );
         } catch (\Throwable $e) {}
 
-        return redirect()->route('admin.users.index')
-            ->with('success', "User \"{$user->name}\" created with role: {$user->role_label}.");
+        return back()->with('success', "Medical staff account for \"{$user->name}\" ({$user->role_title}) has been verified and activated.");
+    }
+
+    /**
+     * Revoke access for a clinical staff member or patient.
+     */
+    public function revoke(Request $request, User $user): RedirectResponse
+    {
+        if ($user->id === Auth::id()) {
+            return back()->withErrors(['user' => 'You cannot revoke your own administrator account.']);
+        }
+
+        $user->update([
+            'is_approved' => false,
+            'is_active'   => false,
+        ]);
+
+        AuditLog::create([
+            'user_id'     => Auth::id(),
+            'action'      => 'user.access_revoked',
+            'entity_type' => 'User',
+            'entity_id'   => $user->id,
+            'metadata'    => ['name' => $user->name, 'role' => $user->role],
+            'ip_address'  => $request->ip(),
+        ]);
+
+        SecurityAlert::create([
+            'user_id'     => $user->id,
+            'event_type'  => 'STAFF_ACCESS_REVOKED',
+            'severity'    => SecurityAlert::SEVERITY_MEDIUM,
+            'description' => "Clinical privileges and account access revoked for: {$user->name} ({$user->role_title}) by Admin ".Auth::user()->name,
+            'ip_address'  => $request->ip(),
+        ]);
+
+        return back()->with('success', "Access privileges for \"{$user->name}\" have been revoked.");
     }
 
     /**
@@ -111,15 +191,17 @@ class UserController extends Controller
     }
 
     /**
-     * Update user details.
+     * Update user details and role.
      */
     public function update(Request $request, User $user): RedirectResponse
     {
         $data = $request->validate([
-            'name'  => ['required', 'string', 'max:100'],
-            'email' => ['required', 'email', 'max:255', "unique:users,email,{$user->id}"],
-            'phone' => ['nullable', 'string', 'max:20'],
-            'role'  => ['required', 'in:patient,staff,admin'],
+            'name'                   => ['required', 'string', 'max:100'],
+            'email'                  => ['required', 'email', 'max:255', "unique:users,email,{$user->id}"],
+            'phone'                  => ['nullable', 'string', 'max:20'],
+            'role'                   => ['required', 'in:patient,staff,doctor,nurse,pharmacist,lab_tech,admin'],
+            'specialization'         => ['nullable', 'string', 'max:150'],
+            'medical_license_number' => ['nullable', 'string', 'max:100'],
         ]);
 
         if ($user->id === Auth::id() && $data['role'] !== 'admin') {
@@ -134,7 +216,7 @@ class UserController extends Controller
             'action'      => 'user.updated',
             'entity_type' => 'User',
             'entity_id'   => $user->id,
-            'metadata'    => ['name' => $user->name, 'role' => $user->role, 'email' => $user->email],
+            'metadata'    => ['name' => $user->name, 'from' => $oldRole, 'to' => $data['role']],
             'ip_address'  => $request->ip(),
         ]);
 
@@ -218,7 +300,7 @@ class UserController extends Controller
     public function updateRole(Request $request, User $user): RedirectResponse
     {
         $data = $request->validate([
-            'role' => ['required', 'in:staff,admin,patient'],
+            'role' => ['required', 'in:staff,doctor,nurse,pharmacist,lab_tech,admin,patient'],
         ]);
 
         if ($user->id === Auth::id() && $data['role'] !== 'admin') {

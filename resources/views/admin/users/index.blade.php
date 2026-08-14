@@ -1,39 +1,67 @@
-<x-layouts.app title="User Account Management">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+<x-layouts.app title="User Account & Medical License Management">
+    <div class="space-y-6">
+        {{-- Header --}}
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-                <h1 class="text-2xl font-bold text-slate-900 tracking-tight">System Users & Roles</h1>
-                <p class="text-slate-500 text-sm mt-1">Manage patient, clinical staff, and administrator accounts.</p>
+                <div class="flex items-center gap-2">
+                    <h1 class="text-2xl font-black text-slate-900 tracking-tight">System Users & Roles &mdash; Clinical Personnel</h1>
+                    @if($pendingCount > 0)
+                        <span class="badge bg-amber-100 text-amber-800 font-bold text-xs animate-pulse">
+                            ⚠️ {{ $pendingCount }} Pending Verification
+                        </span>
+                    @endif
+                </div>
+                <p class="text-slate-500 text-xs mt-1">Vetting medical licenses, least-privilege role assignments, and HIPAA / ISO 27001 access control.</p>
             </div>
-            <a href="{{ route('admin.users.create') }}" class="btn btn-primary btn-sm">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                </svg>
-                Create Staff / Admin Account
+            <a href="{{ route('admin.users.create') }}" class="btn btn-primary btn-sm text-xs font-bold flex items-center gap-1.5 shadow-sm">
+                <span>➕</span> Provision Staff Account
+            </a>
+        </div>
+
+        {{-- Verification Status Tabs --}}
+        <div class="flex border-b border-slate-200 gap-6 text-xs font-bold">
+            <a href="{{ route('admin.users.index') }}" class="pb-3 border-b-2 {{ !request('status') ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-900' }}">
+                All Active Accounts ({{ $users->total() }})
+            </a>
+            <a href="{{ route('admin.users.index', ['status' => 'pending']) }}" class="pb-3 border-b-2 flex items-center gap-2 {{ request('status') === 'pending' ? 'border-amber-600 text-amber-700' : 'border-transparent text-slate-500 hover:text-slate-900' }}">
+                <span>🛡️ Pending Staff Approvals</span>
+                @if($pendingCount > 0)
+                    <span class="bg-amber-600 text-white rounded-full px-2 py-0.2 text-[10px]">{{ $pendingCount }}</span>
+                @endif
             </a>
         </div>
 
         {{-- Filters --}}
-        <div class="card p-4 mb-6">
-            <form method="GET" action="{{ route('admin.users.index') }}" class="flex flex-col sm:flex-row gap-3">
-                <div class="flex-1">
+        <div class="card p-4">
+            <form method="GET" action="{{ route('admin.users.index') }}" class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                @if(request('status'))
+                    <input type="hidden" name="status" value="{{ request('status') }}">
+                @endif
+                <div class="sm:col-span-2">
                     <input
                         type="text"
                         name="search"
                         value="{{ request('search') }}"
-                        placeholder="Search by name or email..."
-                        class="form-input text-sm"
+                        placeholder="Search by name, email, MRN or Medical License..."
+                        class="form-input text-xs"
                     >
                 </div>
-                <div class="w-full sm:w-48">
-                    <select name="role" onchange="this.form.submit()" class="form-input text-sm">
+                <div>
+                    <select name="role" onchange="this.form.submit()" class="form-input text-xs">
                         <option value="">All Roles</option>
-                        <option value="patient" {{ request('role') === 'patient' ? 'selected' : '' }}>Patient</option>
-                        <option value="staff" {{ request('role') === 'staff' ? 'selected' : '' }}>Staff</option>
-                        <option value="admin" {{ request('role') === 'admin' ? 'selected' : '' }}>Admin</option>
+                        <option value="doctor" {{ request('role') === 'doctor' ? 'selected' : '' }}>🩺 Medical Doctor</option>
+                        <option value="nurse" {{ request('role') === 'nurse' ? 'selected' : '' }}>🩹 Staff Nurse</option>
+                        <option value="pharmacist" {{ request('role') === 'pharmacist' ? 'selected' : '' }}>💊 Pharmacist</option>
+                        <option value="lab_tech" {{ request('role') === 'lab_tech' ? 'selected' : '' }}>🧪 Lab Tech</option>
+                        <option value="staff" {{ request('role') === 'staff' ? 'selected' : '' }}>🏢 Operations Staff</option>
+                        <option value="admin" {{ request('role') === 'admin' ? 'selected' : '' }}>👑 Administrator</option>
+                        <option value="patient" {{ request('role') === 'patient' ? 'selected' : '' }}>👤 Patient</option>
                     </select>
                 </div>
-                <button type="submit" class="btn btn-secondary text-sm">Filter</button>
+                <div class="flex gap-2">
+                    <button type="submit" class="btn btn-secondary text-xs font-bold w-full justify-center">Filter</button>
+                    <a href="{{ route('admin.users.index') }}" class="btn btn-ghost text-xs">Reset</a>
+                </div>
             </form>
         </div>
 
@@ -43,51 +71,90 @@
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th>User Name</th>
-                            <th>Email Address</th>
-                            <th>Current Role</th>
-                            <th>Account Status</th>
+                            <th>Clinician / User</th>
+                            <th>Hospital ID / MRN</th>
+                            <th>Medical License</th>
+                            <th>Clinical Role</th>
+                            <th>Approval & Access</th>
                             <th>Registered</th>
-                            <th class="text-right">Manage</th>
+                            <th class="text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($users as $user)
-                            <tr>
-                                <td class="font-bold text-slate-900">{{ $user->name }}</td>
-                                <td class="text-slate-600 text-xs">{{ $user->email }}</td>
+                            <tr class="{{ !$user->is_approved ? 'bg-amber-50/40' : '' }}">
+                                <td>
+                                    <div class="font-bold text-slate-900 text-xs">{{ $user->name }}</div>
+                                    <div class="text-slate-500 text-[11px]">{{ $user->email }}</div>
+                                </td>
+                                <td>
+                                    <span class="font-mono text-xs font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">
+                                        {{ $user->hospital_id ?? '—' }}
+                                    </span>
+                                </td>
+                                <td>
+                                    @if($user->medical_license_number)
+                                        <span class="font-mono text-xs text-slate-800 font-semibold">
+                                            {{ $user->medical_license_number }}
+                                        </span>
+                                        @if($user->specialization)
+                                            <span class="text-[10px] text-slate-400 block">{{ $user->specialization }}</span>
+                                        @endif
+                                    @else
+                                        <span class="text-xs text-slate-400">N/A (Patient)</span>
+                                    @endif
+                                </td>
                                 <td>
                                     <form method="POST" action="{{ route('admin.users.role', $user) }}" class="inline-block">
                                         @csrf
-                                        <select name="role" onchange="if(confirm('Change role for this user?')) this.form.submit()" class="text-xs font-semibold py-1 px-2 rounded border border-slate-200 bg-slate-50 text-slate-800">
-                                            <option value="patient" {{ $user->role === 'patient' ? 'selected' : '' }}>Patient</option>
-                                            <option value="staff" {{ $user->role === 'staff' ? 'selected' : '' }}>Staff</option>
-                                            <option value="admin" {{ $user->role === 'admin' ? 'selected' : '' }}>Admin</option>
+                                        <select name="role" onchange="if(confirm('Update clinical role for {{ $user->name }}?')) this.form.submit()" class="text-[11px] font-bold py-1 px-2 rounded border border-slate-200 bg-slate-50 text-slate-800">
+                                            <option value="doctor" {{ $user->role === 'doctor' ? 'selected' : '' }}>🩺 Doctor</option>
+                                            <option value="nurse" {{ $user->role === 'nurse' ? 'selected' : '' }}>🩹 Nurse</option>
+                                            <option value="pharmacist" {{ $user->role === 'pharmacist' ? 'selected' : '' }}>💊 Pharmacist</option>
+                                            <option value="lab_tech" {{ $user->role === 'lab_tech' ? 'selected' : '' }}>🧪 Lab Tech</option>
+                                            <option value="staff" {{ $user->role === 'staff' ? 'selected' : '' }}>🏢 Staff</option>
+                                            <option value="admin" {{ $user->role === 'admin' ? 'selected' : '' }}>👑 Admin</option>
+                                            <option value="patient" {{ $user->role === 'patient' ? 'selected' : '' }}>👤 Patient</option>
                                         </select>
                                     </form>
                                 </td>
                                 <td>
-                                    @if($user->is_active)
-                                        <span class="badge badge-in-service">Active</span>
+                                    @if(!$user->is_approved)
+                                        <span class="badge bg-amber-100 text-amber-800 text-[10px] font-bold animate-pulse">
+                                            ⚠️ Pending Vetting
+                                        </span>
+                                    @elseif($user->is_active)
+                                        <span class="badge bg-emerald-100 text-emerald-800 text-[10px] font-semibold">
+                                            ✓ Active & Approved
+                                        </span>
                                     @else
-                                        <span class="badge badge-cancelled">Deactivated</span>
+                                        <span class="badge bg-rose-100 text-rose-800 text-[10px] font-semibold">
+                                            ✕ Revoked
+                                        </span>
                                     @endif
                                 </td>
                                 <td class="text-xs text-slate-500">{{ $user->created_at->format('M d, Y') }}</td>
-                                <td class="text-right space-x-2">
-                                    <a href="{{ route('admin.users.edit', $user) }}" class="btn btn-secondary btn-sm">
-                                        Edit
-                                    </a>
-                                    @if($user->id !== auth()->id())
-                                        <form method="POST" action="{{ route('admin.users.toggle', $user) }}" class="inline-block" onsubmit="return confirm('Toggle status for this user?');">
+                                <td class="text-right space-x-1">
+                                    {{-- Approval & Revocation Controls --}}
+                                    @if(!$user->is_approved)
+                                        <form method="POST" action="{{ route('admin.users.approve', $user) }}" class="inline-block">
                                             @csrf
-                                            <button type="submit" class="btn btn-ghost btn-sm {{ $user->is_active ? 'text-rose-600' : 'text-emerald-600' }}">
-                                                {{ $user->is_active ? 'Deactivate' : 'Activate' }}
+                                            <button type="submit" class="btn btn-primary btn-xs text-[10px] font-bold bg-emerald-600 hover:bg-emerald-500">
+                                                ✓ Verify & Approve
                                             </button>
                                         </form>
-                                    @else
-                                        <span class="text-xs text-slate-400 italic">Current User</span>
+                                    @elseif($user->id !== auth()->id())
+                                        <form method="POST" action="{{ route('admin.users.revoke', $user) }}" class="inline-block" onsubmit="return confirm('Revoke clinical privileges for this user?');">
+                                            @csrf
+                                            <button type="submit" class="btn btn-secondary btn-xs text-[10px] text-rose-600 hover:bg-rose-50 font-bold">
+                                                Revoke
+                                            </button>
+                                        </form>
                                     @endif
+
+                                    <a href="{{ route('admin.users.edit', $user) }}" class="btn btn-secondary btn-xs text-[10px]">
+                                        Edit
+                                    </a>
                                 </td>
                             </tr>
                         @endforeach

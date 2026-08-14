@@ -6,11 +6,20 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
+
+    // Granular Clinical & Administrative Roles
+    public const ROLE_ADMIN      = 'admin';
+    public const ROLE_DOCTOR     = 'doctor';
+    public const ROLE_NURSE      = 'nurse';
+    public const ROLE_PHARMACIST = 'pharmacist';
+    public const ROLE_LAB_TECH   = 'lab_tech';
+    public const ROLE_STAFF      = 'staff'; // General Clinical Receptionist / Assistant
+    public const ROLE_PATIENT    = 'patient';
 
     /**
      * The attributes that are mass assignable.
@@ -23,10 +32,14 @@ class User extends Authenticatable
         'role',
         'phone',
         'specialization',
+        'medical_license_number',
         'is_on_call',
         'on_call_shift',
         'emergency_contact_phone',
         'is_active',
+        'is_approved',
+        'approved_at',
+        'approved_by',
     ];
 
     /**
@@ -44,9 +57,11 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-            'is_active' => 'boolean',
-            'is_on_call' => 'boolean',
+            'password'          => 'hashed',
+            'is_active'         => 'boolean',
+            'is_approved'       => 'boolean',
+            'is_on_call'        => 'boolean',
+            'approved_at'       => 'datetime',
         ];
     }
 
@@ -55,9 +70,34 @@ class User extends Authenticatable
         return $this->hasMany(DoctorRoster::class, 'doctor_id');
     }
 
+    public function approver(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    public function messagesSent(): HasMany
+    {
+        return $this->hasMany(ClinicalMessage::class, 'sender_id');
+    }
+
+    public function messagesReceived(): HasMany
+    {
+        return $this->hasMany(ClinicalMessage::class, 'recipient_id');
+    }
+
+    public function securityAlerts(): HasMany
+    {
+        return $this->hasMany(SecurityAlert::class, 'user_id');
+    }
+
     public function scopeOnCall($query)
     {
-        return $query->where('role', 'staff')->where('is_on_call', true);
+        return $query->whereIn('role', [self::ROLE_STAFF, self::ROLE_DOCTOR])->where('is_on_call', true);
+    }
+
+    public function scopePendingApproval($query)
+    {
+        return $query->where('is_approved', false);
     }
 
     public static function boot(): void
@@ -67,9 +107,13 @@ class User extends Authenticatable
         static::creating(function (User $user) {
             if (empty($user->hospital_id)) {
                 $prefix = match ($user->role) {
-                    'admin' => 'MED-ADM',
-                    'staff' => 'MED-DOC',
-                    default => 'MRN-2026',
+                    self::ROLE_ADMIN      => 'MED-ADM',
+                    self::ROLE_DOCTOR     => 'MED-DOC',
+                    self::ROLE_NURSE      => 'MED-NUR',
+                    self::ROLE_PHARMACIST => 'MED-PHM',
+                    self::ROLE_LAB_TECH   => 'MED-LAB',
+                    self::ROLE_STAFF      => 'MED-STF',
+                    default               => 'MRN-2026',
                 };
                 $user->hospital_id = sprintf('%s-%05d', $prefix, rand(10000, 99999));
             }
@@ -77,115 +121,173 @@ class User extends Authenticatable
     }
 
     // ================================================================
-    // Role Helper Methods
+    // Granular Role & Least Privilege Checkers
     // ================================================================
 
-    /**
-     * Check if user is a clinic administrator.
-     */
     public function isAdmin(): bool
     {
-        return $this->role === 'admin';
+        return $this->role === self::ROLE_ADMIN;
+    }
+
+    public function isDoctor(): bool
+    {
+        return $this->role === self::ROLE_DOCTOR;
+    }
+
+    public function isNurse(): bool
+    {
+        return $this->role === self::ROLE_NURSE;
+    }
+
+    public function isPharmacist(): bool
+    {
+        return $this->role === self::ROLE_PHARMACIST;
+    }
+
+    public function isLabTech(): bool
+    {
+        return $this->role === self::ROLE_LAB_TECH;
+    }
+
+    public function isPatient(): bool
+    {
+        return $this->role === self::ROLE_PATIENT;
     }
 
     /**
-     * Check if user is clinic staff (doctor/nurse/assistant).
+     * Check if user is any staff role (doctor, nurse, pharmacist, lab_tech, or general staff).
      */
     public function isStaff(): bool
     {
-        return $this->role === 'staff';
+        return in_array($this->role, [
+            self::ROLE_STAFF,
+            self::ROLE_DOCTOR,
+            self::ROLE_NURSE,
+            self::ROLE_PHARMACIST,
+            self::ROLE_LAB_TECH,
+        ], true);
     }
 
-    /**
-     * Check if user is a patient.
-     */
-    public function isPatient(): bool
-    {
-        return $this->role === 'patient';
-    }
-
-    /**
-     * Check if user has staff or admin access.
-     */
     public function isStaffOrAdmin(): bool
     {
-        return in_array($this->role, ['staff', 'admin']);
+        return $this->isStaff() || $this->isAdmin();
+    }
+
+    public function isApproved(): bool
+    {
+        return (bool) $this->is_approved;
+    }
+
+    /**
+     * Can this user perform medical consultations & discharges?
+     */
+    public function canConsult(): bool
+    {
+        return in_array($this->role, [self::ROLE_ADMIN, self::ROLE_DOCTOR, self::ROLE_STAFF], true);
+    }
+
+    /**
+     * Can this user execute lab diagnostics?
+     */
+    public function canExecuteLab(): bool
+    {
+        return in_array($this->role, [self::ROLE_ADMIN, self::ROLE_LAB_TECH, self::ROLE_DOCTOR, self::ROLE_STAFF], true);
+    }
+
+    /**
+     * Can this user dispense pharmacy orders?
+     */
+    public function canDispensePharmacy(): bool
+    {
+        return in_array($this->role, [self::ROLE_ADMIN, self::ROLE_PHARMACIST, self::ROLE_STAFF], true);
+    }
+
+    /**
+     * Can this user assign hospital beds?
+     */
+    public function canAssignBeds(): bool
+    {
+        return in_array($this->role, [self::ROLE_ADMIN, self::ROLE_NURSE, self::ROLE_DOCTOR, self::ROLE_STAFF], true);
+    }
+
+    /**
+     * Human-readable formatted role label.
+     */
+    public function getRoleTitleAttribute(): string
+    {
+        return match($this->role) {
+            self::ROLE_ADMIN      => 'Hospital Administrator',
+            self::ROLE_DOCTOR     => 'Medical Doctor / Physician',
+            self::ROLE_NURSE      => 'Staff Nurse / Triage Specialist',
+            self::ROLE_PHARMACIST => 'Clinical Pharmacist',
+            self::ROLE_LAB_TECH   => 'Laboratory Technologist',
+            self::ROLE_STAFF      => 'Clinical Operations Staff',
+            default               => 'Registered Patient',
+        };
+    }
+
+    public function getRoleBadgeClassAttribute(): string
+    {
+        return match($this->role) {
+            self::ROLE_ADMIN      => 'bg-purple-100 text-purple-800 border-purple-300',
+            self::ROLE_DOCTOR     => 'bg-indigo-100 text-indigo-800 border-indigo-300',
+            self::ROLE_NURSE      => 'bg-emerald-100 text-emerald-800 border-emerald-300',
+            self::ROLE_PHARMACIST => 'bg-amber-100 text-amber-800 border-amber-300',
+            self::ROLE_LAB_TECH   => 'bg-teal-100 text-teal-800 border-teal-300',
+            self::ROLE_STAFF      => 'bg-slate-100 text-slate-800 border-slate-300',
+            default               => 'bg-blue-100 text-blue-800 border-blue-300',
+        };
     }
 
     // ================================================================
-    // Relationships
+    // Queue & Service Relationships
     // ================================================================
 
-    /**
-     * Queue entries where this user is the patient.
-     */
     public function queueEntries(): HasMany
     {
-        return $this->hasMany(QueueEntry::class, 'patient_id');
+        return $this->hasMany(QueueEntry::class, 'user_id');
     }
 
-    /**
-     * Queue entries this staff member has served.
-     */
     public function servedEntries(): HasMany
     {
         return $this->hasMany(QueueEntry::class, 'served_by');
     }
 
-    /**
-     * In-app notifications for this user.
-     */
-    public function appNotifications(): HasMany
+    public function appointments(): HasMany
     {
-        return $this->hasMany(Notification::class);
+        return $this->hasMany(Appointment::class, 'user_id');
     }
 
-    /**
-     * Audit log entries generated by this user.
-     */
-    public function auditLogs(): HasMany
-    {
-        return $this->hasMany(AuditLog::class);
-    }
-
-    // ================================================================
-    // Query Scopes
-    // ================================================================
-
-    /**
-     * Scope to filter by role.
-     */
-    public function scopeWithRole($query, string $role)
-    {
-        return $query->where('role', $role);
-    }
-
-    /**
-     * Scope to return only active users.
-     */
-    public function scopeActive($query)
-    {
-        return $query->where('is_active', true);
-    }
-
-    /**
-     * Get the user's unread notification count.
-     */
     public function unreadNotificationsCount(): int
     {
-        return $this->appNotifications()->whereNull('read_at')->count();
+        return $this->notifications()->where('is_read', false)->count();
     }
 
-    /**
-     * Get the role display label.
-     */
     public function getRoleLabelAttribute(): string
     {
-        return match($this->role) {
-            'admin'   => 'Administrator',
-            'staff'   => 'Clinical Staff',
-            'patient' => 'Patient',
-            default   => ucfirst($this->role),
+        return match ($this->role) {
+            self::ROLE_ADMIN      => 'Administrator',
+            self::ROLE_DOCTOR     => 'Doctor',
+            self::ROLE_NURSE      => 'Nurse',
+            self::ROLE_PHARMACIST => 'Pharmacist',
+            self::ROLE_LAB_TECH   => 'Lab Tech',
+            self::ROLE_STAFF      => 'Staff',
+            default               => 'Patient',
         };
+    }
+
+    public function notifications(): HasMany
+    {
+        return $this->hasMany(Notification::class, 'user_id');
+    }
+
+    public function appNotifications(): HasMany
+    {
+        return $this->hasMany(Notification::class, 'user_id');
+    }
+
+    public function auditLogs(): HasMany
+    {
+        return $this->hasMany(AuditLog::class, 'user_id');
     }
 }
