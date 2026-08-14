@@ -1,27 +1,22 @@
 # Next Tasks Backlog
 
-This backlog lists the prioritized next actions for upcoming development sprints.
+This backlog lists optional future enhancements and post-deployment roadmap items.
 
 ---
 
-## High Priority Next Tasks
+## All Examination & Clinical Milestones Completed ✅
 
-1. **[TASK-001] Initialize Laravel Application Scaffolding**:
-   - Initialize fresh Laravel application in current repository root using PHP 8.2 and Composer.
-   - Configure SQLite database in `.env` and `config/database.php`.
+All core and advanced examination requirements, including 5-Tier Triage, Bed Management, On-Call Rostering, Lab Loopback, Trauma Intake, PDF Reporting, Visual Analytics, and Left Sidebar UI, are **100% complete, tested, and deployed**.
 
-2. **[TASK-002] Create Core Database Migrations & Models**:
-   - Create migrations and Eloquent models for `User`, `Service`, `Room`, `Patient`, `QueueTicket`, and `AuditLog`.
-   - Implement `DatabaseSeeder` with default admin/staff accounts and demo services.
+---
 
-3. **[TASK-003] Implement Atomic Queue Ticket Generation Service**:
-   - Create `app/Services/QueueTicketService.php` with `DB::transaction()` and pessimistic locking (`lockForUpdate()`).
-   - Write unit tests for ticket sequence generation (`GC-001`, `GC-002`).
+## Optional Post-Examination Roadmap (Future Sprints)
 
-4. **[TASK-004] Build Patient Kiosk & Digital Ticket View**:
-   - Create `KioskController`, Form Request validation, and Blade kiosk templates (`resources/views/kiosk/`).
-   - Implement patient queue status monitor page.
+1. **[OPT-001] Native Twilio SMS Integration**:
+   - Add native SMS gateway fallback for clinic notifications when patients do not have internet access.
 
-5. **[TASK-005] Build Staff Queue Dashboard & TV Display**:
-   - Implement `StaffQueueController` for calling next patient, marking completed, or recording no-show.
-   - Build live TV waiting room display page (`/display`).
+2. **[OPT-002] Multi-Language Localization (i18n)**:
+   - Add language switcher (English, Bahasa Malaysia, Chinese, Tamil) for hospital waiting room screens.
+
+3. **[OPT-003] HL7 / FHIR Clinical Interoperability**:
+   - Add FHIR REST API endpoints for seamless integration with legacy Electronic Medical Records (EMR).
