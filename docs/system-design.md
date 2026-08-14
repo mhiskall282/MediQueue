@@ -1,7 +1,7 @@
 # MediQueue — System Analysis & Design
 
 **Document ID**: SAD-001  
-**Version**: 1.0  
+**Version**: 1.1  
 **Date**: 2026-08-14  
 
 ---
@@ -10,41 +10,39 @@
 
 MediQueue operates as a standalone web application within a clinic's local/cloud network. It interfaces with:
 
-- **Web Browser (Patient)**: Mobile/desktop HTTP clients
-- **Web Browser (Staff)**: Desktop/tablet HTTP clients
+- **Web Browser (Patient)**: Mobile and desktop HTTP clients
+- **Web Browser (Staff)**: Desktop and tablet HTTP clients
 - **Web Browser (Admin)**: Desktop HTTP clients
-- **SMTP Server** (future): Email notification delivery
-- **Database**: Relational store (SQLite/MySQL)
+- **Database**: Relational store (SQLite / MySQL)
 
 ```mermaid
-graph TB
+flowchart TB
     subgraph External["External Actors"]
-        P["👤 Patient\n(Mobile/Web Browser)"]
-        S["👨‍⚕️ Staff\n(Desktop/Tablet Browser)"]
-        A["🔧 Admin\n(Desktop Browser)"]
+        P["Patient (Mobile or Web Browser)"]
+        S["Staff (Desktop or Tablet Browser)"]
+        A["Admin (Desktop Browser)"]
     end
 
     subgraph MediQueue["MediQueue Web Application"]
-        direction TB
-        WEB["Web Layer\n(Laravel Routes + Controllers)"]
-        BIZ["Business Layer\n(QueueService + Actions)"]
-        DATA["Data Layer\n(Eloquent Models)"]
-        DB[("SQLite / MySQL\nDatabase")]
+        WEB["Web Layer (Laravel Routes and Controllers)"]
+        BIZ["Business Layer (QueueService and Actions)"]
+        DATA["Data Layer (Eloquent Models)"]
+        DB[("Database (SQLite or MySQL)")]
     end
 
     subgraph Future["Future Integrations"]
-        SMTP["📧 SMTP Email Server"]
-        SMS["📱 SMS Gateway"]
+        SMTP["SMTP Email Gateway"]
+        SMS["SMS Notification Gateway"]
     end
 
-    P -- "HTTP/HTTPS" --> WEB
-    S -- "HTTP/HTTPS" --> WEB
-    A -- "HTTP/HTTPS" --> WEB
+    P -->|HTTP/HTTPS| WEB
+    S -->|HTTP/HTTPS| WEB
+    A -->|HTTP/HTTPS| WEB
     WEB --> BIZ
     BIZ --> DATA
     DATA --> DB
-    BIZ -.->|"Future"| SMTP
-    BIZ -.->|"Future"| SMS
+    BIZ -.->|Future| SMTP
+    BIZ -.->|Future| SMS
 ```
 
 ---
@@ -52,30 +50,38 @@ graph TB
 ## 2. Use Case Diagram
 
 ```mermaid
-graph LR
-    subgraph System["MediQueue System Boundary"]
-        UC1["UC-01: Register"]
-        UC2["UC-02: Login/Logout"]
+flowchart LR
+    subgraph Users["System Actors"]
+        PAT["Patient"]
+        STF["Staff"]
+        ADM["Administrator"]
+    end
+
+    subgraph PatientCases["Patient Use Cases"]
+        UC1["UC-01: Register Account"]
+        UC2["UC-02: Login and Logout"]
         UC3["UC-03: View Services"]
-        UC4["UC-04: Join Queue"]
-        UC5["UC-05: View Queue Position"]
-        UC6["UC-06: Cancel Queue"]
+        UC4["UC-04: Join Service Queue"]
+        UC5["UC-05: View Live Queue Position"]
+        UC6["UC-06: Cancel Queue Ticket"]
         UC7["UC-07: View History"]
+    end
+
+    subgraph StaffCases["Staff Operations"]
         UC8["UC-08: View Queue Dashboard"]
         UC9["UC-09: Call Next Patient"]
         UC10["UC-10: Start Service"]
         UC11["UC-11: Complete Service"]
         UC12["UC-12: Skip Patient"]
         UC13["UC-13: Recall Patient"]
-        UC14["UC-14: Manage Services"]
-        UC15["UC-15: Manage Users"]
-        UC16["UC-16: System Dashboard"]
-        UC17["UC-17: View Audit Log"]
     end
 
-    PAT["👤 Patient"]
-    STF["👨‍⚕️ Staff"]
-    ADM["🔧 Admin"]
+    subgraph AdminCases["Administrative Control"]
+        UC14["UC-14: Manage Services"]
+        UC15["UC-15: Manage Users and Roles"]
+        UC16["UC-16: View System Dashboard"]
+        UC17["UC-17: View Immutable Audit Log"]
+    end
 
     PAT --> UC1
     PAT --> UC2
@@ -107,109 +113,104 @@ graph LR
 
 ```mermaid
 stateDiagram-v2
-    [*] --> WAITING : Patient joins queue
-    WAITING --> CALLED : Staff calls next
-    WAITING --> CANCELLED : Patient cancels
-    CALLED --> IN_SERVICE : Staff starts service
-    CALLED --> SKIPPED : Staff skips patient
-    SKIPPED --> CALLED : Staff recalls patient
-    IN_SERVICE --> COMPLETED : Staff completes service
+    [*] --> WAITING: Patient joins queue
+    WAITING --> CALLED: Staff calls next
+    WAITING --> CANCELLED: Patient cancels
+    CALLED --> IN_SERVICE: Staff starts service
+    CALLED --> SKIPPED: Staff skips patient
+    SKIPPED --> CALLED: Staff recalls patient
+    IN_SERVICE --> COMPLETED: Staff completes service
     COMPLETED --> [*]
     CANCELLED --> [*]
 ```
 
 ### Valid Transitions Table
 
-| From | To | Actor | Trigger |
+| From State | To State | Trigger Actor | Action Event |
 |---|---|---|---|
-| WAITING | CALLED | Staff | "Call Next" action |
-| WAITING | CANCELLED | Patient / Staff | Patient cancels or reception overrides |
-| CALLED | IN_SERVICE | Staff | "Start Service" action |
-| CALLED | SKIPPED | Staff | "Skip" action (no response) |
-| SKIPPED | CALLED | Staff | "Recall" action |
-| IN_SERVICE | COMPLETED | Staff | "Complete" action |
+| `WAITING` | `CALLED` | Staff | Call Next button |
+| `WAITING` | `CANCELLED` | Patient / Admin | Cancel ticket |
+| `CALLED` | `IN_SERVICE` | Staff | Start Service button |
+| `CALLED` | `SKIPPED` | Staff | Skip button (patient not present) |
+| `SKIPPED` | `CALLED` | Staff | Recall button |
+| `IN_SERVICE` | `COMPLETED` | Staff | Complete Service button |
 
-**Invalid Transitions** (backend enforced):
-- COMPLETED → any (terminal state)
-- CANCELLED → any (terminal state)  
-- IN_SERVICE → WAITING/CANCELLED
-- COMPLETED → WAITING
+**Invalid Transitions (Enforced by `QueueService`):**
+- `COMPLETED` cannot transition to any other status (terminal state).
+- `CANCELLED` cannot transition to any other status (terminal state).
+- `IN_SERVICE` cannot transition directly to `WAITING` or `CANCELLED`.
+- `COMPLETED` cannot transition to `WAITING`.
 
 ---
 
-## 4. Entity-Relationship Diagram
+## 4. Entity-Relationship Diagram (ERD)
 
 ```mermaid
 erDiagram
-    USERS {
+    User ||--o{ QueueEntry : "places / serves"
+    User ||--o{ Notification : "receives"
+    User ||--o{ AuditLog : "triggers"
+    Service ||--o{ QueueEntry : "categorizes"
+
+    User {
         bigint id PK
         string name
         string email UK
-        string password
-        enum role "admin|staff|patient"
+        string phone
+        string role
         boolean is_active
-        timestamps created_at
-        timestamps updated_at
+        timestamp created_at
+        timestamp updated_at
     }
 
-    SERVICES {
+    Service {
         bigint id PK
         string name
         string description
         string prefix UK
         int avg_duration_minutes
         boolean is_active
-        timestamps created_at
-        timestamps updated_at
+        timestamp created_at
+        timestamp updated_at
     }
 
-    QUEUE_ENTRIES {
+    QueueEntry {
         bigint id PK
         bigint patient_id FK
         bigint service_id FK
-        bigint served_by FK "nullable"
+        bigint served_by FK
         string queue_number
         int sequence_number
-        enum status "WAITING|CALLED|IN_SERVICE|COMPLETED|CANCELLED|SKIPPED"
-        enum priority "NORMAL|URGENT"
+        string status
+        string priority
         timestamp joined_at
-        timestamp called_at "nullable"
-        timestamp service_started_at "nullable"
-        timestamp completed_at "nullable"
-        timestamp cancelled_at "nullable"
-        timestamp skipped_at "nullable"
-        timestamps created_at
-        timestamps updated_at
+        timestamp called_at
+        timestamp service_started_at
+        timestamp completed_at
+        timestamp cancelled_at
+        timestamp skipped_at
     }
 
-    NOTIFICATIONS {
+    Notification {
         bigint id PK
         bigint user_id FK
         string type
         string title
-        text body
-        json data "nullable"
-        timestamp read_at "nullable"
-        timestamps created_at
-        timestamps updated_at
+        string body
+        json data
+        timestamp read_at
     }
 
-    AUDIT_LOGS {
+    AuditLog {
         bigint id PK
-        bigint user_id FK "nullable"
+        bigint user_id FK
         string action
         string entity_type
-        bigint entity_id "nullable"
-        json metadata "nullable"
-        string ip_address "nullable"
+        bigint entity_id
+        json metadata
+        string ip_address
         timestamp created_at
     }
-
-    USERS ||--o{ QUEUE_ENTRIES : "patient has"
-    USERS ||--o{ QUEUE_ENTRIES : "staff serves"
-    SERVICES ||--o{ QUEUE_ENTRIES : "categorizes"
-    USERS ||--o{ NOTIFICATIONS : "receives"
-    USERS ||--o{ AUDIT_LOGS : "generates"
 ```
 
 ---
@@ -219,41 +220,28 @@ erDiagram
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Patient
-    participant Browser as Browser
+    actor Patient as Patient
+    participant Browser as Web Browser
     participant Controller as PatientQueueController
-    participant FormReq as StoreQueueEntryRequest
     participant Service as QueueService
-    participant DB as Database
+    participant DB as SQLite Database
 
-    Patient->>Browser: Navigate to /patient/services
-    Browser->>Controller: GET /patient/services
-    Controller->>DB: SELECT active services
-    DB-->>Controller: Service list
-    Controller-->>Browser: Render service selection page
-
-    Patient->>Browser: Select service, click "Join Queue"
-    Browser->>Controller: POST /patient/queue {service_id}
-    Controller->>FormReq: validate(service_id)
-    FormReq->>DB: Check service is active
-    DB-->>FormReq: Service OK
-    FormReq-->>Controller: Validated data
-
+    Patient->>Browser: Selects Service and clicks "Join Queue"
+    Browser->>Controller: POST /patient/queue (service_id)
     Controller->>Service: join(patient, service)
     Service->>DB: BEGIN TRANSACTION
-    Service->>DB: SELECT queue_entries WHERE patient=X AND service=Y AND status IN (WAITING,CALLED,IN_SERVICE) FOR UPDATE
-    DB-->>Service: No duplicates found
-    Service->>DB: SELECT MAX(sequence) for service today FOR UPDATE
-    DB-->>Service: Max sequence = 4
-    Service->>DB: INSERT queue_entry (queue_number="GC-005", sequence=5, status=WAITING)
-    Service->>DB: INSERT notification (patient, "Queue joined")
-    Service->>DB: INSERT audit_log (action=queue.joined)
-    Service->>DB: COMMIT
-    DB-->>Service: Queue entry created
-    Service-->>Controller: QueueEntry entity
-
-    Controller-->>Browser: Redirect to /patient/queue/{id}
-    Browser-->>Patient: Display ticket screen (GC-005, Position: 5, Est. wait: 20 mins)
+    Service->>DB: Check for duplicate active entry (lockForUpdate)
+    DB-->>Service: No duplicate found
+    Service->>DB: Query MAX sequence_number for today (lockForUpdate)
+    DB-->>Service: Current MAX = 4
+    Service->>DB: INSERT queue_entry (queue_number='GC-005', sequence=5, status='WAITING')
+    Service->>DB: INSERT notification (patient_id, title, body)
+    Service->>DB: INSERT audit_log (action='queue.joined')
+    Service->>DB: COMMIT TRANSACTION
+    DB-->>Service: Entry GC-005 created
+    Service-->>Controller: QueueEntry Object
+    Controller-->>Browser: Redirect to /patient/queue/{id}/status
+    Browser-->>Patient: Display Live Ticket GC-005 with real-time countdown
 ```
 
 ---
@@ -263,73 +251,68 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Staff
-    participant Browser as Staff Browser
+    actor Staff as Clinical Staff
+    participant Browser as Staff Dashboard
     participant Controller as StaffQueueController
     participant Service as QueueService
-    participant DB as Database
+    participant DB as SQLite Database
 
-    Staff->>Browser: Click "Call Next Patient"
-    Browser->>Controller: POST /staff/queue/call-next {service_id}
-    Controller->>Service: callNext(staff, service)
+    Staff->>Browser: Clicks "Call Next Patient"
+    Browser->>Controller: POST /staff/queue/call-next (service_id)
+    Controller->>Service: callNext(service, staff)
     Service->>DB: BEGIN TRANSACTION
-    Service->>DB: SELECT queue_entries WHERE service=X AND status=WAITING ORDER BY priority DESC, sequence ASC LIMIT 1 FOR UPDATE
-    DB-->>Service: Next ticket (GC-005)
-    Service->>DB: UPDATE queue_entry SET status=CALLED, called_at=NOW(), served_by=staffId
-    Service->>DB: INSERT notification (patient, "You have been called")
-    Service->>DB: INSERT audit_log (action=queue.called)
-    Service->>DB: COMMIT
-    DB-->>Service: Updated entry
-    Service-->>Controller: QueueEntry
-    Controller-->>Browser: JSON {success, entry}
-    Browser-->>Staff: Dashboard updates to show GC-005 as CALLED
+    Service->>DB: SELECT next WAITING ticket by priority then sequence (lockForUpdate)
+    DB-->>Service: Next ticket found (GC-005)
+    Service->>DB: UPDATE queue_entry SET status='CALLED', called_at=NOW(), served_by=staff_id
+    Service->>DB: INSERT notification for patient ('You have been called')
+    Service->>DB: INSERT audit_log (action='queue.called')
+    Service->>DB: COMMIT TRANSACTION
+    DB-->>Service: Updated record
+    Service-->>Controller: QueueEntry (GC-005)
+    Controller-->>Browser: Redirect / Flash Success
+    Browser-->>Staff: Console displays GC-005 as Active Consultation
 ```
 
 ---
 
-## 7. Application Architecture
+## 7. Layered Architecture Overview
 
 ```mermaid
-graph TB
-    subgraph Routes["routes/web.php"]
-        R1["Public Routes\n/ (landing)"]
-        R2["Auth Routes\n/login /register"]
-        R3["Patient Routes\n/patient/*"]
-        R4["Staff Routes\n/staff/*"]
-        R5["Admin Routes\n/admin/*"]
-        R6["API Routes\n/api/* (polling)"]
+flowchart TD
+    subgraph Client["Presentation Layer (Blade + Tailwind CSS)"]
+        UI_PUBLIC["Public Landing Page"]
+        UI_AUTH["Split-Screen Auth Forms"]
+        UI_PATIENT["Patient Portal & Live Polling Ticket"]
+        UI_STAFF["Staff Clinical Operations Console"]
+        UI_ADMIN["Admin Control Center & Audit Trail"]
     end
 
-    subgraph Middleware["Middleware Stack"]
-        M1["Auth (authenticate)"]
-        M2["RoleMiddleware\n(patient|staff|admin)"]
-        M3["CSRF Protection"]
+    subgraph Routing["Routing & Middleware Layer"]
+        ROUTES["routes/web.php"]
+        AUTH_MID["auth Middleware"]
+        ROLE_MID["RoleMiddleware (patient, staff, admin)"]
+        CSRF_MID["VerifyCsrfToken Middleware"]
     end
 
-    subgraph Controllers["Controllers (app/Http/Controllers)"]
-        C1["Auth/* Controllers"]
-        C2["Patient/DashboardController\nPatient/QueueController"]
-        C3["Staff/DashboardController\nStaff/QueueController"]
-        C4["Admin/DashboardController\nAdmin/ServiceController\nAdmin/UserController\nAdmin/AuditController"]
-        C5["Api/QueueStatusController"]
+    subgraph Controllers["Controller Layer"]
+        C_AUTH["Auth Controllers"]
+        C_PAT["Patient Controllers"]
+        C_STF["Staff Controllers"]
+        C_ADM["Admin Controllers"]
     end
 
-    subgraph Services["Services (app/Services)"]
-        S1["QueueService\n- join()\n- callNext()\n- startService()\n- complete()\n- skip()\n- recall()\n- cancel()"]
-        S2["NotificationService\n- notify()"]
-        S3["AuditService\n- record()"]
+    subgraph ServiceLayer["Business Logic Layer"]
+        QS["QueueService (Transactions, Atomic Numbering, Validation)"]
     end
 
-    subgraph Models["Eloquent Models (app/Models)"]
-        MOD1["User"]
-        MOD2["Service"]
-        MOD3["QueueEntry"]
-        MOD4["Notification"]
-        MOD5["AuditLog"]
+    subgraph DataLayer["Data & Persistence Layer"]
+        MODELS["Eloquent Models (User, Service, QueueEntry, Notification, AuditLog)"]
+        DB_STORE[("Relational Database (SQLite / MySQL)")]
     end
 
-    Routes --> Middleware
-    Middleware --> Controllers
-    Controllers --> Services
-    Services --> Models
+    Client --> Routing
+    Routing --> Controllers
+    Controllers --> ServiceLayer
+    ServiceLayer --> DataLayer
+    DataLayer --> DB_STORE
 ```
