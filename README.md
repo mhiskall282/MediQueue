@@ -1,6 +1,7 @@
 # MediQueue — Smart Hospital Queue & Clinical Care Platform
 
-[![Live Production](https://img.shields.io/badge/Live_Production-Render.com-00c7b7?style=for-the-badge&logo=render&logoColor=white)](https://mediqueue-25vl.onrender.com)
+[![Live Production Vercel](https://img.shields.io/badge/Live_Production-Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://medi-queue-pmdd.vercel.app)
+[![Live Production Render](https://img.shields.io/badge/Live_Production-Render.com-00c7b7?style=for-the-badge&logo=render&logoColor=white)](https://mediqueue-25vl.onrender.com)
 [![GitHub Repository](https://img.shields.io/badge/GitHub-MediQueue-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/mhiskall282/MediQueue)
 [![PHP](https://img.shields.io/badge/PHP-8.2%2B-777BB4?style=flat&logo=php&logoColor=white)](https://php.net)
 [![Laravel](https://img.shields.io/badge/Laravel-12.0-FF2D20?style=flat&logo=laravel&logoColor=white)](https://laravel.com)
@@ -9,9 +10,10 @@
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 > **🏥 University of Ghana Medical Centre (UGMC)** — Smart Clinic Telemetry & Queue Care Platform  
-> **🌐 Live Production Deployment**: **[https://mediqueue-25vl.onrender.com](https://mediqueue-25vl.onrender.com)**  
-> **📺 Public TV Waiting Display**: **[https://mediqueue-25vl.onrender.com/display](https://mediqueue-25vl.onrender.com/display)**  
-> **📚 In-App Documentation Hub**: **[https://mediqueue-25vl.onrender.com/docs](https://mediqueue-25vl.onrender.com/docs)**  
+> **⚡ Live Vercel Production (Zero-Cost)**: **[https://medi-queue-pmdd.vercel.app](https://medi-queue-pmdd.vercel.app)**  
+> **🌐 Live Render Production**: **[https://mediqueue-25vl.onrender.com](https://mediqueue-25vl.onrender.com)**  
+> **📺 Public TV Waiting Display**: **[https://medi-queue-pmdd.vercel.app/display](https://medi-queue-pmdd.vercel.app/display)**  
+> **📚 In-App Documentation Hub**: **[https://medi-queue-pmdd.vercel.app/docs](https://medi-queue-pmdd.vercel.app/docs)**  
 > **📑 Final Capstone Examination Report**: [`MediQueue_Capstone_Final_Report.pdf`](MediQueue_Capstone_Final_Report.pdf)
 >
 > **Advanced Software Engineering Capstone Examination Project**  

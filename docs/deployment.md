@@ -1,12 +1,13 @@
 # MediQueue — Production Deployment Guide
 
 **Document ID**: DEP-001  
-**Version**: 1.0  
-**Date**: 2026-08-14  
-**Target Environments**: Docker (Local/Self-hosted) & Render.com (Cloud PaaS)  
-**Live Production URL**: [https://mediqueue-25vl.onrender.com](https://mediqueue-25vl.onrender.com)  
-**Live Hospital Waiting Room Screen**: [https://mediqueue-25vl.onrender.com/display](https://mediqueue-25vl.onrender.com/display)  
-**Live Technical & User Docs**: [https://mediqueue-25vl.onrender.com/docs](https://mediqueue-25vl.onrender.com/docs)  
+**Version**: 2.0  
+**Date**: 2026-08-15  
+**Target Environments**: Vercel Serverless (Zero-Cost Free Tier) & Render.com (Cloud PaaS)  
+**Live Production URL (Vercel)**: [https://medi-queue-pmdd.vercel.app](https://medi-queue-pmdd.vercel.app)  
+**Live Production URL (Render)**: [https://mediqueue-25vl.onrender.com](https://mediqueue-25vl.onrender.com)  
+**Live Hospital Waiting Room Screen**: [https://medi-queue-pmdd.vercel.app/display](https://medi-queue-pmdd.vercel.app/display)  
+**Live Technical & User Docs**: [https://medi-queue-pmdd.vercel.app/docs](https://medi-queue-pmdd.vercel.app/docs)  
 
 ---
 
