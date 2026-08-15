@@ -128,21 +128,20 @@ Under **Environment Variables** in the Vercel project settings, add the followin
 
 ### Step 5: Run Database Migrations & Initial Data Seeding
 
-To run your initial database migrations and seed default credentials (Admin, Doctors, Patients) into your Neon/Supabase database:
+Since you are deploying serverless and may not have PHP installed locally on Windows, MediQueue includes a secure built-in migration endpoint.
 
-**Option A — Run locally against your cloud DB (Recommended)**:
-In your local `.env`, temporarily set the Neon `DB_*` connection parameters and run:
-```bash
-php artisan migrate --force
-php artisan db:seed --force
-```
+Once your Vercel deployment completes:
+1. Open this URL in your web browser:
+   ```
+   https://<your-project-name>.vercel.app/setup/migrate?secret=<YOUR_APP_KEY>&seed=1
+   ```
+   *(Replace `<YOUR_APP_KEY>` with your `APP_KEY` environment variable, e.g. `base64:kCkNSwihlFVDA97qozR5yDW83gBJlkiYC0DOJ3UP7Aw=`)*
 
-**Option B — Using a one-time migration route or Artisan runner**:
-You can also run migrations directly using a secured temporary admin route or standard CLI connection.
+2. The endpoint will securely run all migrations (`php artisan migrate --force`) and seed default doctors/patients (`php artisan db:seed --force`) directly against your cloud database and display a success status screen in your browser!
 
 ---
 
-### Step 6: Click Deploy
+### Step 6: Verify Live Site
 
 1. Click **Deploy** in the Vercel dashboard.
 2. Vercel will compile the Vite assets and deploy the serverless runtime.

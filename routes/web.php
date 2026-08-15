@@ -211,3 +211,44 @@ Route::prefix('admin')
         // Audit log
         Route::get('/audit', [AuditController::class, 'index'])->name('audit.index');
     });
+
+// ============================================================
+// 6. Serverless Database Migration & Seeding Runner
+// ============================================================
+Route::get('/setup/migrate', function (\Illuminate\Http\Request $request) {
+    $secret = $request->query('secret');
+    $appKey = config('app.key');
+
+    if (!$appKey || $secret !== $appKey) {
+        abort(403, 'Unauthorized. Access denied. Please provide ?secret=YOUR_APP_KEY in the URL query parameter.');
+    }
+
+    try {
+        \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+        $migrateOutput = \Illuminate\Support\Facades\Artisan::output();
+
+        $seedOutput = 'Seeding skipped. Add &seed=1 to the URL to seed default accounts.';
+        if ($request->query('seed') === '1' || $request->query('seed') === 'true') {
+            \Illuminate\Support\Facades\Artisan::call('db:seed', ['--force' => true]);
+            $seedOutput = \Illuminate\Support\Facades\Artisan::output();
+        }
+
+        return response(
+            "<!DOCTYPE html><html><head><title>Database Migration</title></head><body style='background:#0f172a;color:#38bdf8;font-family:monospace;padding:32px;'>" .
+            "<h2 style='color:#4ade80;'> MediQueue Database Setup Finished</h2>" .
+            "<h3>Migration Output:</h3><pre style='background:#1e293b;padding:16px;border-radius:6px;color:#f8fafc;'>" . htmlentities($migrateOutput) . "</pre>" .
+            "<h3>Seeder Output:</h3><pre style='background:#1e293b;padding:16px;border-radius:6px;color:#f8fafc;'>" . htmlentities($seedOutput) . "</pre>" .
+            "<br><a href='/' style='display:inline-block;background:#3b82f6;color:white;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:bold;'>Go to MediQueue Home</a>" .
+            "</body></html>",
+            200,
+            ['Content-Type' => 'text/html']
+        );
+    } catch (\Throwable $e) {
+        return response(
+            "<!DOCTYPE html><html><body style='background:#0f172a;color:#ef4444;font-family:monospace;padding:32px;'>" .
+            "<h2>❌ Database Migration Failed</h2><pre>" . htmlentities($e->getMessage()) . "</pre></body></html>",
+            500,
+            ['Content-Type' => 'text/html']
+        );
+    }
+});
