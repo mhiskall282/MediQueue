@@ -98,14 +98,20 @@ git push origin main
 
 ### Step 4: Configure Environment Variables in Vercel
 
-Under **Environment Variables** in the Vercel project settings, add the following variables:
+You can upload or copy & paste the dedicated [`.env.vercel`](file:///c:/Users/user/Desktop/ug-swe-exams/.env.vercel) file directly:
+
+1. In your Vercel Project Dashboard, go to **Settings** → **Environment Variables**.
+2. Click **Add New** or use the **Paste `.env`** button.
+3. Paste the contents of [`.env.vercel`](file:///c:/Users/user/Desktop/ug-swe-exams/.env.vercel) (update your `DB_HOST`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`, and `APP_URL`).
+
+Here is the complete reference of what is pre-configured in `.env.vercel`:
 
 | Variable | Value / Notes |
 |---|---|
 | `APP_NAME` | `MediQueue` |
 | `APP_ENV` | `production` |
 | `APP_DEBUG` | `false` |
-| `APP_KEY` | `base64:kCkNSwihlFVDA97qozR5yDW83gBJlkiYC0DOJ3UP7Aw=` *(or generate new with `php artisan key:generate --show`)* |
+| `APP_KEY` | `base64:kCkNSwihlFVDA97qozR5yDW83gBJlkiYC0DOJ3UP7Aw=` |
 | `APP_URL` | `https://your-mediqueue-app.vercel.app` |
 | `DB_CONNECTION` | `pgsql` |
 | `DB_HOST` | `<your-neon-or-supabase-host>` |
@@ -114,7 +120,7 @@ Under **Environment Variables** in the Vercel project settings, add the followin
 | `DB_USERNAME` | `<your-neon-username>` |
 | `DB_PASSWORD` | `<your-neon-password>` |
 | `DB_SSLMODE` | `require` |
-| `SESSION_DRIVER` | `cookie` *(recommended for serverless)* |
+| `SESSION_DRIVER` | `cookie` *(avoids read-only disk issues on lambda)* |
 | `CACHE_STORE` | `array` |
 | `QUEUE_CONNECTION` | `sync` |
 | `LOG_CHANNEL` | `stderr` |
@@ -129,11 +135,11 @@ Since you are deploying serverless and may not have PHP installed locally on Win
 Once your Vercel deployment completes:
 1. Open this URL in your web browser:
    ```
-   https://<your-project-name>.vercel.app/setup/migrate?secret=<YOUR_APP_KEY>&seed=1
+   https://<your-project-name>.vercel.app/setup/migrate?secret=<YOUR_APP_KEY>&fresh=1&seed=1
    ```
    *(Replace `<YOUR_APP_KEY>` with your `APP_KEY` environment variable, e.g. `base64:kCkNSwihlFVDA97qozR5yDW83gBJlkiYC0DOJ3UP7Aw=`)*
 
-2. The endpoint will securely run all migrations (`php artisan migrate --force`) and seed default doctors/patients (`php artisan db:seed --force`) directly against your cloud database and display a success status screen in your browser!
+2. The endpoint will run `php artisan migrate:fresh --force` to cleanly create all tables and seed default doctors/patients (`php artisan db:seed --force`) directly against your Neon database and display a success status screen in your browser!
 
 ---
 

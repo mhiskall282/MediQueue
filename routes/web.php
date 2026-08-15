@@ -224,7 +224,10 @@ Route::get('/setup/migrate', function (\Illuminate\Http\Request $request) {
     }
 
     try {
-        \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+        $isFresh = $request->query('fresh') === '1' || $request->query('fresh') === 'true';
+        $command = $isFresh ? 'migrate:fresh' : 'migrate';
+
+        \Illuminate\Support\Facades\Artisan::call($command, ['--force' => true]);
         $migrateOutput = \Illuminate\Support\Facades\Artisan::output();
 
         $seedOutput = 'Seeding skipped. Add &seed=1 to the URL to seed default accounts.';
@@ -235,7 +238,8 @@ Route::get('/setup/migrate', function (\Illuminate\Http\Request $request) {
 
         return response(
             "<!DOCTYPE html><html><head><title>Database Migration</title></head><body style='background:#0f172a;color:#38bdf8;font-family:monospace;padding:32px;'>" .
-            "<h2 style='color:#4ade80;'> MediQueue Database Setup Finished</h2>" .
+            "<h2 style='color:#4ade80;'>✅ MediQueue Database Setup Finished</h2>" .
+            "<p style='color:#94a3b8;'>Command executed: <strong>php artisan " . $command . " --force</strong></p>" .
             "<h3>Migration Output:</h3><pre style='background:#1e293b;padding:16px;border-radius:6px;color:#f8fafc;'>" . htmlentities($migrateOutput) . "</pre>" .
             "<h3>Seeder Output:</h3><pre style='background:#1e293b;padding:16px;border-radius:6px;color:#f8fafc;'>" . htmlentities($seedOutput) . "</pre>" .
             "<br><a href='/' style='display:inline-block;background:#3b82f6;color:white;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:bold;'>Go to MediQueue Home</a>" .
@@ -246,7 +250,9 @@ Route::get('/setup/migrate', function (\Illuminate\Http\Request $request) {
     } catch (\Throwable $e) {
         return response(
             "<!DOCTYPE html><html><body style='background:#0f172a;color:#ef4444;font-family:monospace;padding:32px;'>" .
-            "<h2>❌ Database Migration Failed</h2><pre>" . htmlentities($e->getMessage()) . "</pre></body></html>",
+            "<h2>❌ Database Migration Failed</h2><pre>" . htmlentities($e->getMessage()) . "</pre>" .
+            "<p style='color:#cbd5e1;'>💡 Tip: If existing aborted tables or constraints exist in PostgreSQL, run with <a href='?secret=" . urlencode($secret) . "&fresh=1&seed=1' style='color:#38bdf8;font-weight:bold;'>&fresh=1&seed=1</a> to cleanly reset and re-migrate all tables.</p>" .
+            "</body></html>",
             500,
             ['Content-Type' => 'text/html']
         );
