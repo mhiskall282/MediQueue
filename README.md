@@ -262,10 +262,11 @@ OK (68 tests, 276 assertions)
 docker compose up -d --build
 ```
 
-### Render.com Cloud Blueprint
-1. Connect **[https://github.com/mhiskall282/MediQueue](https://github.com/mhiskall282/MediQueue)** on Render.
-2. Select **Blueprint** (`render.yaml`).
-3. Click **Apply** to automatically provision PostgreSQL and deploy the web service.
+### Vercel Serverless (Zero-Cost / Free Tier)
+1. Import repository to **[Vercel Dashboard](https://vercel.com)**.
+2. Set Build Command: `npm run build` and Output Directory: `public`.
+3. Link free PostgreSQL database (e.g., [Neon.tech](https://neon.tech) / [Supabase](https://supabase.com)) and set environment variables.
+4. Full guide available at: [**Vercel Serverless Deployment Guide**](docs/vercel-deployment.md).
 
 ---
 
@@ -276,7 +277,8 @@ Comprehensive engineering artifacts and documentation are available in `docs/`:
 - 📋 [**Software Requirements Specification (SRS)**](docs/SRS.md) — Complete functional, non-functional, clinical, and security specifications.
 - 📐 [**System Analysis & Design (SAD)**](docs/system-design.md) — Architectural diagrams, ERD, Use Case diagrams, and Sequence models.
 - ⏱️ [**Software Effort Estimation**](docs/estimation/estimation.md) — Algorithmic Use Case Points (UCP) estimation calculation.
-- 🚢 [**Production Deployment Guide**](docs/deployment.md) — Docker, Nginx, and Render cloud deployment architecture.
+- 🚢 [**Render Production Deployment Guide**](docs/deployment.md) — Docker, Nginx, and Render cloud deployment architecture.
+- ⚡ [**Vercel Zero-Cost Serverless Guide**](docs/vercel-deployment.md) — 100% Free deployment with Vercel and Neon PostgreSQL.
 - 📑 [**Academic Capstone Final Report**](MediQueue_Capstone_Final_Report.pdf) — Complete academic examination capstone document.
 
 ---

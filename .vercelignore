@@ -1,0 +1,17 @@
+.git
+.github
+.ai
+.editorconfig
+.phpunit.result.cache
+phpunit.xml
+tests/
+docker/
+Dockerfile
+docker-compose.yml
+render.yaml
+node_modules/
+storage/logs/*
+!storage/logs/.gitkeep
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
