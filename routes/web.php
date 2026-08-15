@@ -224,6 +224,14 @@ Route::get('/setup/migrate', function (\Illuminate\Http\Request $request) {
     }
 
     try {
+        // Automatically switch from Neon PgBouncer pooled host to Direct Unpooled host for DDL transactions
+        $currentHost = config('database.connections.pgsql.host');
+        if (is_string($currentHost) && str_contains($currentHost, '-pooler')) {
+            $directHost = str_replace('-pooler', '', $currentHost);
+            config(['database.connections.pgsql.host' => $directHost]);
+            \Illuminate\Support\Facades\DB::purge('pgsql');
+        }
+
         $wipeOutput = '';
         if ($request->query('wipe') === '1' || $request->query('fresh') === '1') {
             \Illuminate\Support\Facades\DB::statement('DROP SCHEMA IF EXISTS public CASCADE');
