@@ -88,15 +88,11 @@ git push origin main
 1. Log in to your **[Vercel Dashboard](https://vercel.com/dashboard)**.
 2. Click **Add New...** → **Project**.
 3. Select and import your `ug-swe-exams` / `MediQueue` GitHub repository.
-4. Keep the Framework Preset as **Other** (configured via `vercel.json`).
-5. Set the **Build Command** to:
-   ```bash
-   npm run build
-   ```
-6. Set the **Output Directory** to:
-   ```bash
-   public
-   ```
+4. Keep the Framework Preset as **Other**.
+5. **Build & Development Settings**:
+   - **Build Command**: Leave as Default or `npm run build`
+   - **Output Directory**: **Leave OFF / Default (DO NOT type `public`)** — `vercel.json` manages function and asset routing automatically.
+   - **Install Command**: Leave as Default (`npm install`)
 
 ---
 
