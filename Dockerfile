@@ -10,9 +10,13 @@ COPY public/ ./public/
 RUN npm run build
 
 # Production Stage: PHP 8.2 + Nginx
-FROM php:8.2-fpm-alpine
+FROM php:8.2.35-fpm-alpine
 
 # Install system dependencies & Nginx
+# PHP2Shell (CVE-2026-109618 & CVE-2026-109619) Core Mitigation
+RUN echo session.upload_progress.enabled = 0 > $PHP_INI_DIR/conf.d/security.ini \
+    && echo session.upload_progress.cleanup = 1 >> $PHP_INI_DIR/conf.d/security.ini
+
 RUN apk add --no-cache \
     nginx \
     supervisor \
